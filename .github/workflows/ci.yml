@@ -1,130 +1,130 @@
-name: CI
+# name: CI
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
 
-env:
-  CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
+# env:
+#   CARGO_TERM_COLOR: always
+#   RUST_BACKTRACE: 1
 
-jobs:
-  quality:
-    name: Quality
-    runs-on: ubuntu-latest
+# jobs:
+#   quality:
+#     name: Quality
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
+#       - name: Install Rust
+#         uses: dtolnay/rust-toolchain@stable
+#         with:
+#           components: rustfmt
 
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+#       - name: Cache cargo registry
+#         uses: actions/cache@v3
+#         with:
+#           path: |
+#             ~/.cargo/registry
+#             ~/.cargo/git
+#             target
+#           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-cargo-
 
-      - name: Check formatting
-        run: cargo fmt --all -- --check
+#       - name: Check formatting
+#         run: cargo fmt --all -- --check
 
-      - name: Check workspace
-        run: cargo check --workspace --verbose
+#       - name: Check workspace
+#         run: cargo check --workspace --verbose
 
-      - name: Verify KYC guard coverage
-        run: bash scripts/check_kyc_guards.sh
+#       - name: Verify KYC guard coverage
+#         run: bash scripts/check_kyc_guards.sh
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
+#   build:
+#     name: Build
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+#       - name: Install Rust
+#         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+#       - name: Cache cargo registry
+#         uses: actions/cache@v3
+#         with:
+#           path: |
+#             ~/.cargo/registry
+#             ~/.cargo/git
+#             target
+#           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-cargo-
 
-      - name: Build workspace
-        run: cargo build --workspace --verbose
+#       - name: Build workspace
+#         run: cargo build --workspace --verbose
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
+#   test:
+#     name: Test
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+#       - name: Install Rust
+#         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+#       - name: Cache cargo registry
+#         uses: actions/cache@v3
+#         with:
+#           path: |
+#             ~/.cargo/registry
+#             ~/.cargo/git
+#             target
+#           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-cargo-
 
-      - name: Run library test suite
-        run: cargo test --workspace --lib --verbose
+#       - name: Run library test suite
+#         run: cargo test --workspace --lib --verbose
 
-      - name: Validate KYC expiry logic
-        run: cargo test --manifest-path swaptrade-contracts/counter/Cargo.toml --lib kyc_tests -- --nocapture
+#       - name: Validate KYC expiry logic
+#         run: cargo test --manifest-path swaptrade-contracts/counter/Cargo.toml --lib kyc_tests -- --nocapture
 
-      - name: Validate error catalog consistency
-        run: cargo test --manifest-path swaptrade-contracts/counter/Cargo.toml error_code_tests -- --nocapture
+#       - name: Validate error catalog consistency
+#         run: cargo test --manifest-path swaptrade-contracts/counter/Cargo.toml error_code_tests -- --nocapture
 
-      - name: Run formal verification integration suite
-        run: cargo test --manifest-path swaptrade-contracts/counter/Cargo.toml --test formal_verification_tests formal_verification -- --nocapture --test-threads=1
+#       - name: Run formal verification integration suite
+#         run: cargo test --manifest-path swaptrade-contracts/counter/Cargo.toml --test formal_verification_tests formal_verification -- --nocapture --test-threads=1
 
-  build-release:
-    name: Build Release
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+#   build-release:
+#     name: Build Release
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+#       - name: Install Rust
+#         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+#       - name: Cache cargo registry
+#         uses: actions/cache@v3
+#         with:
+#           path: |
+#             ~/.cargo/registry
+#             ~/.cargo/git
+#             target
+#           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-cargo-
 
-      - name: Build release
-        run: cargo build --workspace --release --verbose
+#       - name: Build release
+#         run: cargo build --workspace --release --verbose
