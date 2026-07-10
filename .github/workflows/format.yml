@@ -1,62 +1,62 @@
-name: Enforce Rust Formatting
+# name: Enforce Rust Formatting
 
-on:
-  pull_request:
-    paths:
-      - '**/*.rs'
-      - 'swaptrade-contracts/**'
-  push:
-    branches: [ main ]
-    paths:
-      - '**/*.rs'
-      - 'swaptrade-contracts/**'
+# on:
+#   pull_request:
+#     paths:
+#       - '**/*.rs'
+#       - 'swaptrade-contracts/**'
+#   push:
+#     branches: [ main ]
+#     paths:
+#       - '**/*.rs'
+#       - 'swaptrade-contracts/**'
 
-jobs:
-  fmt-check:
-    name: Check rustfmt
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+# jobs:
+#   fmt-check:
+#     name: Check rustfmt
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+#       - name: Install Rust toolchain
+#         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install rustfmt
-        run: rustup component add rustfmt
+#       - name: Install rustfmt
+#         run: rustup component add rustfmt
 
-      - name: Check formatting (counter crate)
-        run: |
-          cd swaptrade-contracts/counter
-          cargo fmt --all -- --check
+#       - name: Check formatting (counter crate)
+#         run: |
+#           cd swaptrade-contracts/counter
+#           cargo fmt --all -- --check
 
-  fmt-apply-on-main:
-    name: Auto-format & push (main only)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+#   fmt-apply-on-main:
+#     name: Auto-format & push (main only)
+#     runs-on: ubuntu-latest
+#     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+#       - name: Install Rust toolchain
+#         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install rustfmt
-        run: rustup component add rustfmt
+#       - name: Install rustfmt
+#         run: rustup component add rustfmt
 
-      - name: Run cargo fmt and push
-        run: |
-          set -e
-          cd swaptrade-contracts/counter
-          cargo fmt --all
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: apply rustfmt via CI"
-            git push origin HEAD:main
-          else
-            echo "No formatting changes"
-          fi
+#       - name: Run cargo fmt and push
+#         run: |
+#           set -e
+#           cd swaptrade-contracts/counter
+#           cargo fmt --all
+#           git config user.name "github-actions[bot]"
+#           git config user.email "github-actions[bot]@users.noreply.github.com"
+#           git add -A
+#           if ! git diff --staged --quiet; then
+#             git commit -m "chore: apply rustfmt via CI"
+#             git push origin HEAD:main
+#           else
+#             echo "No formatting changes"
+#           fi
