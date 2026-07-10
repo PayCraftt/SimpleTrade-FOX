@@ -1,6 +1,6 @@
-# SwapTrade Contracts
+# SimpleTrade Contracts
 
-This repository contains **Soroban smart contracts** for [SwapTrade](https://github.com/your-org/swaptrade), an educational trading simulator built on the **Stellar ecosystem**. 
+This repository contains **Soroban smart contracts** for [SimpleTrade](https://github.com/your-org/PayCraftt), an educational trading simulator built on the **Stellar ecosystem**. 
 
 The contracts replicate key features of real-world cryptocurrency trading in a **risk-free, simulated environment**:
 
