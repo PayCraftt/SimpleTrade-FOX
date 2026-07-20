@@ -84,7 +84,7 @@ impl CircuitBreaker {
         // Try to get current price
         if let Some(current_data) = get_stored_price(env, (asset_symbol.clone(), Symbol::short("USD"))) {
             if current_data.timestamp >= start_time && current_data.timestamp <= end_time {
-                prices.push((current_data.timestamp, current_data.price));
+                prices.push_back((current_data.timestamp, current_data.price));
             }
         }
 
@@ -94,7 +94,7 @@ impl CircuitBreaker {
                 // Invert price
                 if current_data.price > 0 {
                     let inverted = (1_000_000_000_000_000_000u128 * 1_000_000_000_000_000_000u128) / current_data.price;
-                    prices.push((current_data.timestamp, inverted));
+                    prices.push_back((current_data.timestamp, inverted));
                 }
             }
         }

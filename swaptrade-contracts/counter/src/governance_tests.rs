@@ -1,7 +1,8 @@
 #[cfg(test)]
 mod governance_tests {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Address, Env, Symbol, symbol_short};
+    use crate::CounterContract;
+    use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env, Symbol, symbol_short};
     use crate::governance_types::*;
     use crate::governance_system::GovernanceSystem;
     use crate::staking_bonus::StakingBonusManager;
@@ -16,11 +17,8 @@ mod governance_tests {
         // Set up staked tokens for voting power
         StakingBonusManager::stake(&env, proposer.clone(), 1000, 30).unwrap();
 
-        let proposal_type = ProposalType::ParameterChange {
-            param_key: ParamKey::FeeBps,
-            new_value: 25,
-        };
-        let description = symbol_short!("test_proposal");
+        let proposal_type = ProposalType::ParameterChange(ParamKey::FeeBps, 25);
+        let description = Symbol::new(&env, "test_proposal");
 
         let result = GovernanceSystem::create_proposal(
             &env,
@@ -46,11 +44,8 @@ mod governance_tests {
         let proposer = Address::generate(&env);
 
         // No staked tokens = no voting power
-        let proposal_type = ProposalType::ParameterChange {
-            param_key: ParamKey::FeeBps,
-            new_value: 25,
-        };
-        let description = symbol_short!("test_proposal");
+        let proposal_type = ProposalType::ParameterChange(ParamKey::FeeBps, 25);
+        let description = Symbol::new(&env, "test_proposal");
 
         let result = GovernanceSystem::create_proposal(
             &env,
@@ -71,11 +66,8 @@ mod governance_tests {
         // Set up staked tokens
         StakingBonusManager::stake(&env, proposer.clone(), 1000, 30).unwrap();
 
-        let proposal_type = ProposalType::ParameterChange {
-            param_key: ParamKey::FeeBps,
-            new_value: 25,
-        };
-        let description = symbol_short!("test_proposal");
+        let proposal_type = ProposalType::ParameterChange(ParamKey::FeeBps, 25);
+        let description = Symbol::new(&env, "test_proposal");
 
         // Too short voting period
         let result = GovernanceSystem::create_proposal(
@@ -100,10 +92,7 @@ mod governance_tests {
         StakingBonusManager::stake(&env, voter.clone(), 500, 30).unwrap();
 
         // Create proposal
-        let proposal_type = ProposalType::ParameterChange {
-            param_key: ParamKey::FeeBps,
-            new_value: 25,
-        };
+        let proposal_type = ProposalType::ParameterChange(ParamKey::FeeBps, 25);
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
@@ -145,10 +134,7 @@ mod governance_tests {
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
-            ProposalType::ParameterChange {
-                param_key: ParamKey::FeeBps,
-                new_value: 25,
-            },
+            ProposalType::ParameterChange(ParamKey::FeeBps, 25),
             symbol_short!("test"),
             86400,
         ).unwrap();
@@ -178,11 +164,8 @@ mod governance_tests {
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
-            ProposalType::ParameterChange {
-                param_key: ParamKey::FeeBps,
-                new_value: 25,
-            },
-            symbol_short!("fee_change"),
+            ProposalType::ParameterChange(ParamKey::FeeBps, 25),
+            Symbol::new(&env, "fee_change"),
             86400,
         ).unwrap();
 
@@ -220,11 +203,8 @@ mod governance_tests {
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
-            ProposalType::ParameterChange {
-                param_key: ParamKey::FeeBps,
-                new_value: 25,
-            },
-            symbol_short!("fee_change"),
+            ProposalType::ParameterChange(ParamKey::FeeBps, 25),
+            Symbol::new(&env, "fee_change"),
             86400,
         ).unwrap();
 
@@ -252,10 +232,7 @@ mod governance_tests {
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
-            ProposalType::ParameterChange {
-                param_key: ParamKey::FeeBps,
-                new_value: 25,
-            },
+            ProposalType::ParameterChange(ParamKey::FeeBps, 25),
             symbol_short!("test"),
             86400,
         ).unwrap();
@@ -290,11 +267,8 @@ mod governance_tests {
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
-            ProposalType::ParameterChange {
-                param_key: ParamKey::FeeBps,
-                new_value: 50, // 0.5%
-            },
-            symbol_short!("fee_change"),
+            ProposalType::ParameterChange(ParamKey::FeeBps, 50),
+            Symbol::new(&env, "fee_change"),
             86400,
         ).unwrap();
 
@@ -326,8 +300,8 @@ mod governance_tests {
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
-            ProposalType::AdminUpgrade { new_admin: new_admin.clone() },
-            symbol_short!("admin_upgrade"),
+            ProposalType::AdminUpgrade(new_admin.clone()),
+            Symbol::new(&env, "admin_upgrade"),
             86400,
         ).unwrap();
 
@@ -402,11 +376,8 @@ mod governance_tests {
         let proposal_id = CounterContract::create_governance_proposal(
             env.clone(),
             proposer.clone(),
-            ProposalType::ParameterChange {
-                param_key: ParamKey::MaxSwapAmount,
-                new_value: 1000000,
-            },
-            symbol_short!("increase_max_swap"),
+            ProposalType::ParameterChange(ParamKey::MaxSwapAmount, 1000000),
+            Symbol::new(&env, "increase_max_swap"),
             86400,
         ).unwrap();
 
@@ -466,8 +437,8 @@ mod governance_tests {
         let proposal_id = CounterContract::create_governance_proposal(
             env.clone(),
             proposer.clone(),
-            ProposalType::EmergencyAction { pause: true },
-            symbol_short!("emergency_pause"),
+            ProposalType::EmergencyAction(true),
+            Symbol::new(&env, "emergency_pause"),
             86400,
         ).unwrap();
 
@@ -502,10 +473,7 @@ mod governance_tests {
         CounterContract::create_governance_proposal(
             env.clone(),
             proposer.clone(),
-            ProposalType::ParameterChange {
-                param_key: ParamKey::FeeBps,
-                new_value: 20,
-            },
+            ProposalType::ParameterChange(ParamKey::FeeBps, 20),
             symbol_short!("proposal1"),
             86400,
         ).unwrap();
@@ -514,10 +482,7 @@ mod governance_tests {
         let result = CounterContract::create_governance_proposal(
             env.clone(),
             proposer.clone(),
-            ProposalType::ParameterChange {
-                param_key: ParamKey::FeeBps,
-                new_value: 30,
-            },
+            ProposalType::ParameterChange(ParamKey::FeeBps, 30),
             symbol_short!("proposal2"),
             86400,
         );

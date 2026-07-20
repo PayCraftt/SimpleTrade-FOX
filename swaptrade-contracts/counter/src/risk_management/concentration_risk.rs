@@ -57,7 +57,7 @@ impl ConcentrationRisk {
         let max_position = xlm_value.max(usdc_value);
         let concentration_bps = ((max_position * 10000) / total_value) as u32;
 
-        concentration_bps >= config.concentration_warning_threshold
+        concentration_bps >= config.concentration_warn_threshold
     }
 
     /// Check if concentration exceeds limit threshold (should block trades)

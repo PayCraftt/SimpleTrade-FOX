@@ -1,7 +1,8 @@
 #[cfg(test)]
 mod risk_management_tests {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Address, Env, Symbol, symbol_short};
+    use crate::CounterContract;
+    use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env, Symbol, symbol_short};
     use crate::portfolio::{Portfolio, Asset};
     use crate::tiers::UserTier;
     use crate::risk_management::{
@@ -127,7 +128,7 @@ mod risk_management_tests {
         let env = Env::default();
         let reason = symbol_short!("TEST");
 
-        CircuitBreaker::trigger_circuit_breaker(&env, reason, 2000); // 20% change
+        CircuitBreaker::trigger_circuit_breaker(&env, reason.clone(), 2000); // 20% change
 
         let active = CircuitBreaker::is_circuit_breaker_active(&env);
         assert!(active);

@@ -1,8 +1,7 @@
 #[cfg(test)]
 mod integration_tests {
-    use super::*;
+use soroban_sdk::{Env, Address};
     use soroban_sdk::testutils::{Address as _, Ledger as _};
-    use soroban_sdk::Address;
     use crate::CounterContract;
 
     #[test]
@@ -13,7 +12,7 @@ mod integration_tests {
         let trader = Address::generate(&env);
         
         // Initialize contract
-        CounterContract::initialize(env.clone(), admin.clone());
+        CounterContract::initialize(env.clone());
 
         // Register referral
         assert!(CounterContract::register_referral(env.clone(), referrer.clone(), trader.clone()).is_ok());
@@ -41,7 +40,7 @@ mod integration_tests {
         let user = Address::generate(&env);
         
         // Initialize contract
-        CounterContract::initialize(env.clone(), admin.clone());
+        CounterContract::initialize(env.clone());
 
         // Test that all referral functions are accessible and return expected defaults
         let stats = CounterContract::get_referral_stats(env.clone(), user.clone());
