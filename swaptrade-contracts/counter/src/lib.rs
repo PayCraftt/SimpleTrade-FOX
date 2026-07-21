@@ -1197,9 +1197,33 @@ impl CounterContract {
         token_in: Symbol,
         token_out: Symbol,
         amount_in: i128,
+        max_hops: u32,
     ) -> Option<Route> {
         let registry = load_pool_registry(&env);
-        registry.find_best_route(&env, token_in, token_out, amount_in)
+        registry.find_best_route(&env, token_in, token_out, amount_in, max_hops)
+    }
+
+    pub fn set_max_hops(env: Env, caller: Address, max_hops: u32) -> Result<(), ContractError> {
+        caller.require_auth();
+        crate::admin::require_admin(&env, &caller)?;
+        let mut registry = load_pool_registry(&env);
+        registry.set_max_hops(max_hops);
+        save_pool_registry(&env, &registry);
+        Ok(())
+    }
+
+    pub fn get_max_hops(env: Env) -> u32 {
+        let registry = load_pool_registry(&env);
+        registry.get_max_hops()
+    }
+
+    pub fn simulate_route(
+        env: Env,
+        route: Route,
+        amount_in: i128,
+    ) -> Option<(i128, u32)> {
+        let registry = load_pool_registry(&env);
+        registry.simulate_route(&route, amount_in)
     }
 
     /// Execute a multi-hop swap along a discovered route
