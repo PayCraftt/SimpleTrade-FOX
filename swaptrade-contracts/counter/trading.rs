@@ -3,7 +3,7 @@ use soroban_sdk::{Env, Symbol, Address, symbol_short};
 use crate::portfolio::{Portfolio, Asset};
 use crate::oracle::{get_stored_price, ContractError};
 
-const PRECISION: u128 = 1_000_000_000_000_000_000; // 1e18
+pub const PRECISION: u128 = 1_000_000_000_000_000_000; // 1e18
 const STALE_THRESHOLD_SECONDS: u64 = 600; // 10 minutes
 const LP_FEE_BPS: u128 = 30; // 0.3% = 30 basis points
 
