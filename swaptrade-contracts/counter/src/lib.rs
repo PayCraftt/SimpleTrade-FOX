@@ -1356,6 +1356,27 @@ impl CounterContract {
     }
 
     /// Cancel an existing order
+    /// Place a recurring (DCA) order that executes on a fixed schedule
+    pub fn place_recurring_order(
+        env: Env,
+        token_in: Symbol,
+        token_out: Symbol,
+        amount_in: i128,
+        interval_secs: u64,
+        occurrences: u64,
+        expires_at: Option<u64>,
+        user: Address,
+    ) -> Result<u64, ContractError> {
+        require_authenticated_verified_user(&env, &user)?;
+        orders::OrderManager::place_recurring_order(&env, user, token_in, token_out, amount_in, interval_secs, occurrences, expires_at)
+    }
+
+    /// Execute all due recurring orders
+    pub fn execute_due_orders(env: Env) -> Result<Vec<u64>, ContractError> {
+        orders::OrderManager::execute_due_orders(&env)
+    }
+
+    /// Cancel an existing order
     pub fn cancel_order(env: Env, order_id: u64, user: Address) -> Result<(), ContractError> {
         require_authenticated_verified_user(&env, &user)?;
         orders::OrderManager::cancel_order(&env, order_id, user)

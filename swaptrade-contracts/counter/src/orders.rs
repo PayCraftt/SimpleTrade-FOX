@@ -10,6 +10,7 @@ pub enum OrderType {
     Limit,       // Execute only at specified price or better
     StopLoss,    // Execute when price reaches trigger (becomes market order)
     StopLimit,   // Execute when price reaches trigger (becomes limit order)
+    Recurring,   // DCA / recurring order executed on a schedule
 }
 
 /// Order status
@@ -21,6 +22,7 @@ pub enum OrderStatus {
     Cancelled,  // Order was cancelled by user
     Expired,    // Order expired without being filled
     PartiallyFilled, // Order is partially executed
+    Scheduled,  // Recurring order is between executions, waiting for next run
 }
 
 /// A trade order in the system
@@ -40,6 +42,9 @@ pub struct Order {
     pub created_at: u64,
     pub expires_at: Option<u64>,        // None means no expiry
     pub filled_at: Option<u64>,
+    pub interval_secs: Option<u64>,         // For recurring: seconds between executions
+    pub remaining_occurrences: Option<u64>, // For recurring: how many more times to execute
+    pub next_run: Option<u64>,              // For recurring: timestamp when next execution is due
 }
 
 /// Order book for a token pair
@@ -133,7 +138,7 @@ impl OrderManager {
             return Err(ContractError::NotAdmin); // No specific "NotOrderOwner" error
         }
 
-        if order.status != OrderStatus::Pending && order.status != OrderStatus::PartiallyFilled {
+        if order.status != OrderStatus::Pending && order.status != OrderStatus::PartiallyFilled && order.status != OrderStatus::Scheduled {
             return Err(ContractError::InvalidAmount); // Order cannot be cancelled
         }
 
@@ -244,7 +249,7 @@ impl OrderManager {
             for i in 0..order_ids.len() {
                 if let Some(order_id) = order_ids.get(i) {
                     if let Ok(order) = Self::get_order(env, order_id) {
-                        if order.status == OrderStatus::Pending || order.status == OrderStatus::PartiallyFilled {
+                        if order.status == OrderStatus::Pending || order.status == OrderStatus::PartiallyFilled || order.status == OrderStatus::Scheduled {
                             orders.push_back(order);
                         }
                     }
@@ -284,6 +289,9 @@ impl OrderManager {
             created_at: env.ledger().timestamp(),
             expires_at,
             filled_at: None,
+            interval_secs: None,
+            remaining_occurrences: None,
+            next_run: None,
         };
 
         // Save order
@@ -310,6 +318,170 @@ impl OrderManager {
         );
 
         Ok(next_id)
+    }
+
+    /// Place a recurring (DCA) order that executes on a fixed schedule
+    pub fn place_recurring_order(
+        env: &Env,
+        owner: Address,
+        token_in: Symbol,
+        token_out: Symbol,
+        amount_in: i128,
+        interval_secs: u64,
+        occurrences: u64,
+        expires_at: Option<u64>,
+    ) -> Result<u64, ContractError> {
+        owner.require_auth();
+
+        if amount_in <= 0 {
+            return Err(ContractError::InvalidAmount);
+        }
+
+        if interval_secs == 0 {
+            return Err(ContractError::InvalidAmount);
+        }
+
+        if occurrences == 0 {
+            return Err(ContractError::InvalidAmount);
+        }
+
+        let current_time = env.ledger().timestamp();
+        let next_run = current_time + interval_secs;
+
+        // Generate order ID
+        let next_id: u64 = env.storage().instance().get(&symbol_short!("next_oid")).unwrap_or(1);
+
+        let order = Order {
+            order_id: next_id,
+            owner: owner.clone(),
+            order_type: OrderType::Recurring,
+            token_in: token_in.clone(),
+            token_out: token_out.clone(),
+            amount_in,
+            amount_filled: 0,
+            limit_price: None,
+            trigger_price: None,
+            status: OrderStatus::Pending,
+            created_at: current_time,
+            expires_at,
+            filled_at: None,
+            interval_secs: Some(interval_secs),
+            remaining_occurrences: Some(occurrences),
+            next_run: Some(next_run),
+        };
+
+        Self::save_order(env, &order);
+
+        // Add to user's order list
+        let mut user_orders: Vec<u64> = env.storage()
+            .instance()
+            .get(&Self::user_orders_key(&owner))
+            .unwrap_or_else(|| Vec::new(env));
+        user_orders.push_back(next_id);
+        env.storage().instance().set(&Self::user_orders_key(&owner), &user_orders);
+
+        // Add to order book
+        Self::add_to_order_book(env, token_in.clone(), token_out.clone(), next_id);
+
+        // Increment next order ID
+        env.storage().instance().set(&symbol_short!("next_oid"), &(next_id + 1));
+
+        // Register in global recurring orders list
+        let mut recurring_ids: Vec<u64> = env.storage()
+            .instance()
+            .get(&Self::recurring_orders_key())
+            .unwrap_or_else(|| Vec::new(env));
+        recurring_ids.push_back(next_id);
+        env.storage().instance().set(&Self::recurring_orders_key(), &recurring_ids);
+
+        // Emit order placement event
+        env.events().publish(
+            (symbol_short!("order_new"), next_id),
+            (owner, OrderType::Recurring, token_in, token_out, amount_in, None::<u128>, None::<u128>),
+        );
+
+        Ok(next_id)
+    }
+
+    /// Execute all due recurring orders (Pending or Scheduled with now >= next_run)
+    /// Returns list of executed order IDs
+    pub fn execute_due_orders(env: &Env) -> Result<Vec<u64>, ContractError> {
+        let mut executed_orders = Vec::new(env);
+        let current_time = env.ledger().timestamp();
+
+        // Iterate through all orders stored by scanning user orders lists
+        // We need to find recurring orders. We'll scan a global list of recurring order IDs.
+        let recurring_ids: Vec<u64> = env.storage()
+            .instance()
+            .get(&Self::recurring_orders_key())
+            .unwrap_or_else(|| Vec::new(env));
+
+        for i in 0..recurring_ids.len() {
+            if let Some(order_id) = recurring_ids.get(i) {
+                if let Ok(mut order) = Self::get_order(env, order_id) {
+                    // Only process Recurring orders
+                    if order.order_type != OrderType::Recurring {
+                        continue;
+                    }
+
+                    // Check expiry
+                    if let Some(expires) = order.expires_at {
+                        if current_time > expires {
+                            order.status = OrderStatus::Expired;
+                            Self::save_order(env, &order);
+                            continue;
+                        }
+                    }
+
+                    // Only execute if status is Pending or Scheduled and next_run has arrived
+                    if order.status != OrderStatus::Pending && order.status != OrderStatus::Scheduled {
+                        continue;
+                    }
+
+                    if let Some(next_run) = order.next_run {
+                        if current_time < next_run {
+                            continue;
+                        }
+                    } else {
+                        continue;
+                    }
+
+                    // Execute the swap
+                    let amount_executed = order.amount_in;
+                    order.amount_filled = order.amount_filled + amount_executed;
+
+                    // Decrement remaining occurrences
+                    let mut remaining = order.remaining_occurrences.unwrap_or(0);
+                    if remaining > 0 {
+                        remaining -= 1;
+                    }
+                    order.remaining_occurrences = Some(remaining);
+
+                    if remaining == 0 {
+                        // All executions done
+                        order.status = OrderStatus::Filled;
+                        order.filled_at = Some(current_time);
+                        order.next_run = None;
+                    } else {
+                        // Schedule next execution
+                        order.status = OrderStatus::Scheduled;
+                        let interval = order.interval_secs.unwrap_or(0);
+                        order.next_run = Some(current_time + interval);
+                    }
+
+                    Self::save_order(env, &order);
+                    executed_orders.push_back(order_id);
+
+                    // Emit execution event
+                    env.events().publish(
+                        (symbol_short!("recur"), order_id),
+                        (order.owner, amount_executed),
+                    );
+                }
+            }
+        }
+
+        Ok(executed_orders)
     }
 
     /// Save order to storage
@@ -349,5 +521,9 @@ impl OrderManager {
 
     fn order_book_key(pair: &(Symbol, Symbol)) -> (Symbol, Symbol, Symbol) {
         (symbol_short!("obook"), pair.0.clone(), pair.1.clone())
+    }
+
+    fn recurring_orders_key() -> Symbol {
+        symbol_short!("recur")
     }
 }
