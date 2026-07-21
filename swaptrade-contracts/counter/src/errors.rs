@@ -82,6 +82,10 @@ pub enum SwapTradeError {
     SelfReferral = 800,
     AlreadyReferred = 801,
     CircularReferral = 802,
+
+    // ── Faucet ─────────────────────────────────────────────────────────────
+    FaucetRateLimited = 900,
+    FaucetNotConfigured = 901,
 }
 
 /// Alias kept for modules that still import `ContractError` by name.
