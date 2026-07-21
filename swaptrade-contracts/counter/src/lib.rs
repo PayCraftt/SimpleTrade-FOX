@@ -82,6 +82,10 @@ mod risk_management_tests;
 
 // Staking Bonus System
 mod staking_bonus;
+// Yield Farming / Liquidity Mining System
+mod farming;
+#[cfg(test)]
+mod farming_tests;
 
 // Re-export fee adjustment types
 #[cfg(feature = "experimental")]
