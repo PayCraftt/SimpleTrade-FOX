@@ -1159,8 +1159,19 @@ impl CounterContract {
         require_verified_user(&env, &provider)?;
 
         let mut registry = load_pool_registry(&env);
-        let lp_tokens = registry.add_liquidity(&env, pool_id, amount_a, amount_b, provider)?;
+        let lp_tokens = registry.add_liquidity(&env, pool_id, amount_a, amount_b, provider.clone())?;
         save_pool_registry(&env, &registry);
+        
+        // Emit LiquidityAdded event with correct signature
+        env.events().publish(
+            (
+                soroban_sdk::Symbol::new(&env, "LiquidityAdded"),
+                provider,
+                pool_id,
+            ),
+            (amount_a, amount_b, lp_tokens, env.ledger().timestamp()),
+        );
+        
         Ok(lp_tokens)
     }
 
@@ -1174,9 +1185,20 @@ impl CounterContract {
         require_verified_user(&env, &provider)?;
 
         let mut registry = load_pool_registry(&env);
-        let result = registry.remove_liquidity(&env, pool_id, lp_tokens, provider)?;
+        let (amount_a, amount_b) = registry.remove_liquidity(&env, pool_id, lp_tokens, provider.clone())?;
         save_pool_registry(&env, &registry);
-        Ok(result)
+        
+        // Emit LiquidityRemoved event with correct signature
+        env.events().publish(
+            (
+                soroban_sdk::Symbol::new(&env, "LiquidityRemoved"),
+                provider,
+                pool_id,
+            ),
+            (amount_a, amount_b, lp_tokens, env.ledger().timestamp()),
+        );
+        
+        Ok((amount_a, amount_b))
     }
 
     pub fn pool_swap(
