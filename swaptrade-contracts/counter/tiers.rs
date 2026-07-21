@@ -1,6 +1,9 @@
-use soroban_sdk::contracttype;
+use soroban_sdk::{contracttype, symbol_short, Env, Map, Symbol};
+use crate::errors::ContractError;
 
-#[derive(Clone, PartialEq, Debug)]
+const TIER_DISCOUNT_KEY: Symbol = symbol_short!("tdisc");
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 #[contracttype]
 pub enum UserTier {
     Novice,
@@ -29,7 +32,62 @@ impl UserTier {
         // Using integer arithmetic to avoid floating point
         (swap_amount * bps) / 10000
     }
+}
 
+fn default_discount_table(env: &Env) -> Map<UserTier, u32> {
+    let mut table = Map::new(env);
+    table.set(UserTier::Novice, 0);
+    table.set(UserTier::Trader, 5);
+    table.set(UserTier::Expert, 10);
+    table.set(UserTier::Whale, 20);
+    table
+}
+
+pub fn get_tier_discount_bps(env: &Env, tier: UserTier) -> u32 {
+    let table: Map<UserTier, u32> = env
+        .storage()
+        .instance()
+        .get(&TIER_DISCOUNT_KEY)
+        .unwrap_or_else(|| default_discount_table(env));
+    table.get(tier).unwrap_or(0)
+}
+
+pub fn set_tier_discount_bps(
+    env: &Env,
+    admin: &soroban_sdk::Address,
+    tier: UserTier,
+    discount_bps: u32,
+) -> Result<(), ContractError> {
+    crate::admin::require_admin(env, admin)?;
+    let mut table: Map<UserTier, u32> = env
+        .storage()
+        .instance()
+        .get(&TIER_DISCOUNT_KEY)
+        .unwrap_or_else(|| default_discount_table(env));
+    table.set(tier, discount_bps);
+    env.storage().instance().set(&TIER_DISCOUNT_KEY, &table);
+    Ok(())
+}
+
+pub fn get_all_tier_discounts(env: &Env) -> Map<UserTier, u32> {
+    env.storage()
+        .instance()
+        .get(&TIER_DISCOUNT_KEY)
+        .unwrap_or_else(|| default_discount_table(env))
+}
+
+pub fn get_effective_fee_bps(env: &Env, user_tier: UserTier) -> u32 {
+    let base = user_tier.effective_fee_bps();
+    let discount = get_tier_discount_bps(env, user_tier);
+    base.saturating_sub(discount).max(1)
+}
+
+pub fn calculate_effective_fee(env: &Env, swap_amount: i128, user_tier: UserTier) -> i128 {
+    let bps = get_effective_fee_bps(env, user_tier) as i128;
+    if swap_amount <= 0 || bps <= 0 {
+        return 0;
+    }
+    (swap_amount * bps) / 10000
 }
 
 /// Calculate the user tier based on trade count and volume
