@@ -59,7 +59,7 @@ impl PortfolioRisk {
         let mut position_count = 0u32;
 
         for (_, size) in positions.iter() {
-            let size_abs = if size < 0 { -size } else { *size };
+            let size_abs = if size < 0 { -size } else { size };
             let max_allowed = crate::risk_management::PositionLimits::get_tier_position_limit(&config, &user_tier);
 
             if max_allowed > 0 {

@@ -2,7 +2,9 @@
 
 use super::*;
 use crate::errors::ContractError;
+use crate::oracle_adapter::{OracleAdapter, OracleProvider};
 use soroban_sdk::testutils::Address as _;
+use soroban_sdk::testutils::Ledger as _;
 use soroban_sdk::{symbol_short, Env, Symbol};
 
 const PRECISION: u128 = 1_000_000_000_000_000_000; // 1e18
