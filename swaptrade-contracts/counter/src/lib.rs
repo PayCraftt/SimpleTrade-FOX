@@ -1228,6 +1228,34 @@ impl CounterContract {
         registry.get_lp_balance(pool_id, provider)
     }
 
+    // ===== VOLUME CIRCUIT BREAKER =====
+
+    /// Set the volume-threshold circuit breaker configuration (admin only).
+    pub fn set_circuit_breaker_threshold(
+        env: Env,
+        admin: Address,
+        window_secs: u64,
+        max_volume: i128,
+    ) -> Result<(), SwapTradeError> {
+        risk_management::volume_circuit_breaker::set_threshold(&env, admin, window_secs, max_volume)
+    }
+
+    /// Get the current status of the volume-threshold circuit breaker.
+    /// Returns `{ tripped, current_volume, threshold, window }`.
+    pub fn get_circuit_breaker_status(
+        env: Env,
+    ) -> risk_management::VolumeCircuitBreakerStatus {
+        risk_management::volume_circuit_breaker::get_status(&env)
+    }
+
+    /// Reset the volume-threshold circuit breaker and restore trading (admin only).
+    pub fn reset_circuit_breaker(
+        env: Env,
+        admin: Address,
+    ) -> Result<(), SwapTradeError> {
+        risk_management::volume_circuit_breaker::reset(&env, admin)
+    }
+
     pub fn set_price(env: Env, token_pair: (Symbol, Symbol), price: u128) {
         set_stored_price(&env, token_pair, price);
     }
