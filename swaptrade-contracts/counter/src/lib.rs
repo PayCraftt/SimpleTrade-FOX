@@ -11,6 +11,7 @@ mod alert_tests;
 mod alerts;
 mod errors;
 mod events;
+mod faucet;
 mod invariants;
 mod kyc;
 #[cfg(test)]
@@ -1578,6 +1579,30 @@ impl CounterContract {
         referral_system::withdraw_commission(&env, user)
     }
 
+    // ────────────────────────────────────────────────────────────────────────
+    // Faucet – simulated token drip for new users
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Claim simulated tokens from the faucet for a given asset.
+    /// Enforces a per-user, per-asset cooldown set via `set_faucet_config`.
+    pub fn claim_faucet(env: Env, user: Address, asset: Symbol) -> Result<i128, SwapTradeError> {
+        faucet::claim_faucet(&env, &user, asset)
+    }
+
+    /// Set faucet drip amount and cooldown for an asset (admin only).
+    pub fn set_faucet_config(
+        env: Env,
+        caller: Address,
+        asset: Symbol,
+        drip_amount: i128,
+        cooldown_secs: u64,
+    ) -> Result<(), SwapTradeError> {
+        faucet::set_faucet_config(&env, &caller, asset, drip_amount, cooldown_secs)
+    }
+
+    /// Get faucet configuration for an asset.
+    pub fn get_faucet_config(env: Env, asset: Symbol) -> Result<faucet::FaucetConfig, SwapTradeError> {
+        faucet::get_faucet_config(&env, asset)
     // ── Governance System ───────────────────────────────────────────────────
 
     /// Create a new governance proposal

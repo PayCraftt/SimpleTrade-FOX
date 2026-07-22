@@ -103,6 +103,13 @@ impl Events {
         env.events()
             .publish((Symbol::new(env, "AdminResumed"), admin), (timestamp,));
     }
+
+    pub fn faucet_claimed(env: &Env, user: Address, asset: Symbol, amount: i128, timestamp: u64) {
+        env.events().publish(
+            (Symbol::new(env, "FaucetClaimed"), user, asset),
+            (amount, timestamp),
+        );
+    }
 }
 
 /// Emitted whenever an alert fires. Carries enough metadata for an
