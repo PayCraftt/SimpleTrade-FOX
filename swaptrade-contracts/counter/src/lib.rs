@@ -422,7 +422,7 @@ impl CounterContract {
             return Err(ContractError::InvalidAmount); // Position limit exceeded
         }
 
-        let fee_bps = user_tier.effective_fee_bps();
+        let fee_bps = tiers::get_effective_fee_bps(&env, user_tier.clone());
 
         // Calculate fee amount (fee is collected on input amount)
         let fee_amount = (amount * fee_bps as i128) / 10000;
@@ -1640,6 +1640,32 @@ impl CounterContract {
         referral_system::withdraw_commission(&env, user)
     }
 
+    // ── Tier-Based Fee Discounts ───────────────────────────────────────────
+
+    pub fn get_effective_fee_bps(env: Env, user_tier: UserTier) -> u32 {
+        tiers::get_effective_fee_bps(&env, user_tier)
+    }
+
+    pub fn set_tier_discount(
+        env: Env,
+        admin: Address,
+        tier: UserTier,
+        discount_bps: u32,
+    ) -> Result<(), ContractError> {
+        admin.require_auth();
+        tiers::set_tier_discount_bps(&env, &admin, tier, discount_bps)
+    }
+
+    pub fn get_tier_discount(env: Env, tier: UserTier) -> u32 {
+        tiers::get_tier_discount_bps(&env, tier)
+    }
+
+    pub fn get_all_tier_discounts(env: Env) -> Map<UserTier, u32> {
+        tiers::get_all_tier_discounts(&env)
+    }
+
+    pub fn calculate_effective_fee(env: Env, swap_amount: i128, user_tier: UserTier) -> i128 {
+        tiers::calculate_effective_fee(&env, swap_amount, user_tier)
     // ────────────────────────────────────────────────────────────────────────
     // Faucet – simulated token drip for new users
     // ────────────────────────────────────────────────────────────────────────
