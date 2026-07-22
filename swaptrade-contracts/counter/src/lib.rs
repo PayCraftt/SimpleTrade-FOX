@@ -38,6 +38,7 @@ mod batch_performance_tests;
 mod oracle;
 mod oracle_adapter;
 mod orders;
+mod flash_loan;
 #[cfg(test)]
 mod orders_tests;
 #[cfg(test)]
@@ -1375,6 +1376,21 @@ impl CounterContract {
     /// Get total earned bonuses for a user
     pub fn get_user_earned_bonuses(env: Env, user: Address) -> i128 {
         StakingBonusManager::get_user_earned_bonuses(&env, user)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Flash Loan Module
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn flash_loan(
+        env: Env,
+        pool_id: u64,
+        receiver: Address,
+        asset: Symbol,
+        amount: i128,
+        data: Vec<u8>,
+    ) -> Result<i128, ContractError> {
+        flash_loan::FlashLoanManager::flash_loan(&env, pool_id, receiver, asset, amount, data)
     }
 
     // ────────────────────────────────────────────────────────────────────────
