@@ -304,149 +304,66 @@ impl PoolRegistry {
         let effective_max_hops = max_hops.min(self.max_hops).min(3);
 
         let (norm_in, norm_out) = Self::normalize_pair(token_in.clone(), token_out.clone());
-        if effective_max_hops >= 1 {
-            if let Some(pool_id) = self.pair_to_pool.get((norm_in, norm_out)) {
-                if let Some(pool) = self.pools.get(pool_id) {
-                    let output = self.calculate_output(&pool, token_in.clone(), amount_in)?;
-                    let impact = self.calculate_price_impact(&pool, token_in.clone(), amount_in);
-                    let mut pools = Vec::new(env);
-                    pools.push_back(pool_id);
-                    let mut tokens = Vec::new(env);
-                    tokens.push_back(token_in);
-                    tokens.push_back(token_out);
-                    return Some(Route {
-                        pools,
-                        tokens,
-                        expected_output: output,
-                        total_price_impact_bps: impact,
-                    });
-                }
+        if let Some(pool_id) = self.pair_to_pool.get((norm_in, norm_out)) {
+            if let Some(pool) = self.pools.get(pool_id) {
+                let output = self.calculate_output(&pool, token_in.clone(), amount_in).ok()?;
+                let impact = self.calculate_price_impact(&pool, token_in.clone(), amount_in);
+                let mut pools = Vec::new(env);
+                pools.push_back(pool_id);
+                let mut tokens = Vec::new(env);
+                tokens.push_back(token_in);
+                tokens.push_back(token_out);
+                return Some(Route {
+                    pools,
+                    tokens,
+                    expected_output: output,
+                    total_price_impact_bps: impact,
+                });
             }
         }
 
         let mut best_route: Option<Route> = None;
         let mut best_output = 0i128;
-
-        if effective_max_hops >= 2 {
-            for i in 0..self.next_pool_id {
-                if let Some(pool1) = self.pools.get(i) {
-                    if pool1.token_a == token_in || pool1.token_b == token_in {
-                        let intermediate = if pool1.token_a == token_in {
-                            pool1.token_b.clone()
-                        } else {
-                            pool1.token_a.clone()
-                        };
-                        if intermediate != token_out {
-                            let (norm_int, norm_out) =
-                                Self::normalize_pair(intermediate.clone(), token_out.clone());
-                            if let Some(pool2_id) = self.pair_to_pool.get((norm_int, norm_out)) {
-                                if let Some(pool2) = self.pools.get(pool2_id) {
-                                    let out1 =
-                                         self.calculate_output(&pool1, token_in.clone(), amount_in)?;
-                                    let out2 =
-                                         self.calculate_output(&pool2, intermediate.clone(), out1)?;
-                                    let impact1 = self.calculate_price_impact(
-                                        &pool1,
-                                        token_in.clone(),
-                                        amount_in,
-                                    );
-                                    let impact2 =
-                                        self.calculate_price_impact(&pool2, intermediate.clone(), out1);
-                                    let total_impact = impact1.saturating_add(impact2);
-                                    if out2 > best_output {
-                                        best_output = out2;
-                                        let mut pools = Vec::new(env);
-                                        pools.push_back(i);
-                                        pools.push_back(pool2_id);
-                                        let mut tokens = Vec::new(env);
-                                        tokens.push_back(token_in.clone());
-                                        tokens.push_back(intermediate);
-                                        tokens.push_back(token_out.clone());
-                                        best_route = Some(Route {
-                                            pools,
-                                            tokens,
-                                            expected_output: out2,
-                                            total_price_impact_bps: total_impact,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if effective_max_hops >= 3 {
-            for i in 0..self.next_pool_id {
-                if let Some(pool1) = self.pools.get(i) {
-                    if pool1.token_a == token_in || pool1.token_b == token_in {
-                        let inter1 = if pool1.token_a == token_in {
-                            pool1.token_b.clone()
-                        } else {
-                            pool1.token_a.clone()
-                        };
-                        let out1 = match self.calculate_output(&pool1, token_in.clone(), amount_in) {
-                            Ok(o) => o,
-                            Err(_) => continue,
-                        };
-                        let impact1 = self.calculate_price_impact(&pool1, token_in.clone(), amount_in);
-
-                        for j in 0..self.next_pool_id {
-                            if j == i {
-                                continue;
-                            }
-                            if let Some(pool2) = self.pools.get(j) {
-                                if pool2.token_a == inter1 || pool2.token_b == inter1 {
-                                    let inter2 = if pool2.token_a == inter1 {
-                                        pool2.token_b.clone()
-                                    } else {
-                                        pool2.token_a.clone()
-                                    };
-                                    if inter2 == token_in || inter2 == inter1 {
-                                        continue;
-                                    }
-                                    let out2 = match self.calculate_output(&pool2, inter1.clone(), out1) {
-                                        Ok(o) => o,
-                                        Err(_) => continue,
-                                    };
-                                    let impact2 = self.calculate_price_impact(&pool2, inter1.clone(), out1);
-
-                                    let (norm_int2, norm_out) =
-                                        Self::normalize_pair(inter2.clone(), token_out.clone());
-                                    if let Some(pool3_id) = self.pair_to_pool.get((norm_int2, norm_out)) {
-                                        if pool3_id == i || pool3_id == j {
-                                            continue;
-                                        }
-                                        if let Some(pool3) = self.pools.get(pool3_id) {
-                                            let out3 = match self.calculate_output(&pool3, inter2.clone(), out2) {
-                                                Ok(o) => o,
-                                                Err(_) => continue,
-                                            };
-                                            let impact3 = self.calculate_price_impact(&pool3, inter2.clone(), out2);
-                                            let total_impact = impact1
-                                                .saturating_add(impact2)
-                                                .saturating_add(impact3);
-                                            if out3 > best_output {
-                                                best_output = out3;
-                                                let mut pools = Vec::new(env);
-                                                pools.push_back(i);
-                                                pools.push_back(j);
-                                                pools.push_back(pool3_id);
-                                                let mut tokens = Vec::new(env);
-                                                tokens.push_back(token_in.clone());
-                                                tokens.push_back(inter1);
-                                                tokens.push_back(inter2);
-                                                tokens.push_back(token_out.clone());
-                                                best_route = Some(Route {
-                                                    pools,
-                                                    tokens,
-                                                    expected_output: out3,
-                                                    total_price_impact_bps: total_impact,
-                                                });
-                                            }
-                                        }
-                                    }
+        for i in 0..self.next_pool_id {
+            if let Some(pool1) = self.pools.get(i) {
+                if pool1.token_a == token_in || pool1.token_b == token_in {
+                    let intermediate = if pool1.token_a == token_in {
+                        pool1.token_b.clone()
+                    } else {
+                        pool1.token_a.clone()
+                    };
+                    if intermediate != token_out {
+                        let (norm_int, norm_out) =
+                            Self::normalize_pair(intermediate.clone(), token_out.clone());
+                        if let Some(pool2_id) = self.pair_to_pool.get((norm_int, norm_out)) {
+                            if let Some(pool2) = self.pools.get(pool2_id) {
+                                let out1 =
+                                     self.calculate_output(&pool1, token_in.clone(), amount_in).ok()?;
+                                let out2 =
+                                     self.calculate_output(&pool2, intermediate.clone(), out1).ok()?;
+                                let impact1 = self.calculate_price_impact(
+                                    &pool1,
+                                    token_in.clone(),
+                                    amount_in,
+                                );
+                                let impact2 =
+                                    self.calculate_price_impact(&pool2, intermediate.clone(), out1);
+                                let total_impact = impact1.saturating_add(impact2);
+                                if out2 > best_output {
+                                    best_output = out2;
+                                    let mut pools = Vec::new(env);
+                                    pools.push_back(i);
+                                    pools.push_back(pool2_id);
+                                    let mut tokens = Vec::new(env);
+                                    tokens.push_back(token_in.clone());
+                                    tokens.push_back(intermediate);
+                                    tokens.push_back(token_out.clone());
+                                    best_route = Some(Route {
+                                        pools,
+                                        tokens,
+                                        expected_output: out2,
+                                        total_price_impact_bps: total_impact,
+                                    });
                                 }
                             }
                         }

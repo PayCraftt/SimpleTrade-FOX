@@ -103,6 +103,13 @@ impl Events {
         env.events()
             .publish((Symbol::new(env, "AdminResumed"), admin), (timestamp,));
     }
+
+    pub fn faucet_claimed(env: &Env, user: Address, asset: Symbol, amount: i128, timestamp: u64) {
+        env.events().publish(
+            (Symbol::new(env, "FaucetClaimed"), user, asset),
+            (amount, timestamp),
+        );
+    }
 }
 
 /// Emitted whenever an alert fires. Carries enough metadata for an
@@ -304,6 +311,26 @@ pub fn emergency_fee_override_deactivated(env: &Env, timestamp: u64) {
     env.events().publish(
         (Symbol::new(env, "EmergencyFeeOverrideDeactivated"),),
         (timestamp,),
+    );
+}
+
+/// Emitted when the volume-threshold circuit breaker trips and pauses trading.
+///
+/// Off-chain indexers can subscribe to this event to trigger notifications,
+/// webhook calls, or dashboard alerts for the emergency-recovery workflow.
+///
+/// Topic  : ("CircuitBreakerTripped",)
+/// Payload: (current_volume, threshold, window_secs, timestamp)
+pub fn circuit_breaker_tripped(
+    env: &Env,
+    current_volume: i128,
+    threshold: i128,
+    window_secs: u64,
+    timestamp: u64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "CircuitBreakerTripped"),),
+        (current_volume, threshold, window_secs, timestamp),
     );
 }
 

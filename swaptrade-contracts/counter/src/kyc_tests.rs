@@ -3,6 +3,7 @@
 use std::panic::{self, AssertUnwindSafe};
 
 use super::*;
+use crate::admin::set_admin;
 use crate::batch::{BatchOperation, BatchResult};
 use crate::errors::ContractError;
 use crate::kyc::KYCStorageKey;
@@ -23,7 +24,7 @@ fn setup_contract() -> (Env, Address, Address, Address, Address, Address) {
     let other_user = Address::generate(&env);
 
     env.as_contract(&contract_id, || {
-        set_admin(env.clone(), admin.clone()).unwrap();
+        set_admin(&env, &admin);
         KYCSystem::add_operator(&env, &admin, operator.clone()).unwrap();
     });
 
@@ -428,7 +429,7 @@ fn test_sensitive_contract_entry_points_require_verified_kyc() {
         .unwrap();
     });
 
-    expect_kyc_panic(|| {
+    assert_eq!(
         with_contract(&env, &contract_id, || {
             CounterContract::swap(
                 env.clone(),
@@ -436,9 +437,10 @@ fn test_sensitive_contract_entry_points_require_verified_kyc() {
                 symbol_short!("USDCSIM"),
                 100,
                 user.clone(),
-            );
-        });
-    });
+            )
+        }),
+        Err(ContractError::KYCVerificationRequired)
+    );
 
     assert_eq!(
         with_contract(&env, &contract_id, || {
@@ -471,16 +473,18 @@ fn test_sensitive_contract_entry_points_require_verified_kyc() {
     });
     assert_eq!(batch_result.operations_failed, 1);
 
-    expect_kyc_panic(|| {
+    assert_eq!(
         with_contract(&env, &contract_id, || {
-            CounterContract::add_liquidity(env.clone(), 100, 100, user.clone());
-        });
-    });
-    expect_kyc_panic(|| {
+            CounterContract::add_liquidity(env.clone(), 100, 100, user.clone())
+        }),
+        Err(ContractError::KYCVerificationRequired)
+    );
+    assert_eq!(
         with_contract(&env, &contract_id, || {
-            CounterContract::stake(env.clone(), user.clone(), 100, 30);
-        });
-    });
+            CounterContract::stake(env.clone(), user.clone(), 100, 30)
+        }),
+        Err(ContractError::KYCVerificationRequired)
+    );
 
     verify_user(&env, &contract_id, &operator, &user);
 
@@ -498,10 +502,10 @@ fn test_sensitive_contract_entry_points_require_verified_kyc() {
     let lp_tokens = with_contract(&env, &contract_id, || {
         CounterContract::add_liquidity(env.clone(), 100, 100, user.clone())
     });
-    assert!(lp_tokens > 0);
+    assert!(lp_tokens.unwrap() > 0);
 
     let stake_id = with_contract(&env, &contract_id, || {
         CounterContract::stake(env.clone(), user.clone(), 100, 30)
     });
-    assert_eq!(stake_id, 0);
+    assert_eq!(stake_id.unwrap(), 0);
 }

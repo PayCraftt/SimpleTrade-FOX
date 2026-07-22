@@ -11,6 +11,7 @@ mod alert_tests;
 mod alerts;
 mod errors;
 mod events;
+mod faucet;
 mod invariants;
 mod kyc;
 #[cfg(test)]
@@ -37,6 +38,7 @@ mod batch_performance_tests;
 mod oracle;
 mod oracle_adapter;
 mod orders;
+mod flash_loan;
 #[cfg(test)]
 mod orders_tests;
 #[cfg(test)]
@@ -78,10 +80,13 @@ mod network_congestion;
 
 #[cfg(all(test, feature = "experimental"))]
 mod dynamic_fee_adjustment_tests;
-mod risk_management_tests;
 
 // Staking Bonus System
 mod staking_bonus;
+// Yield Farming / Liquidity Mining System
+mod farming;
+#[cfg(test)]
+mod farming_tests;
 
 // Re-export fee adjustment types
 #[cfg(feature = "experimental")]
@@ -161,8 +166,8 @@ pub use zkp_types::{
 #[cfg(feature = "experimental")]
 pub use zkp_verification::ProofVerifier;
 
-use portfolio::{Asset, CachedPortfolio, CachedTopTraders, LPPosition, Portfolio};
-pub use portfolio::{Badge, Metrics, Transaction};
+use portfolio::{Asset, CachedPortfolio, CachedTopTraders, LPPosition, Portfolio, TradeRecord};
+pub use portfolio::{Badge, Metrics, Transaction, TradeRecord as PubTradeRecord};
 pub use rate_limit::{RateLimitStatus, RateLimiter};
 pub use tiers::UserTier;
 use trading::perform_swap;
@@ -790,7 +795,7 @@ impl CounterContract {
                     let swap_count = operations.iter().filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _))).count();
                     if swap_count > 0 && res.operations_executed > 0 {
                         for _ in 0..res.operations_executed {
-                            RateLimiter::record_swap_op(&env, caller_addr, env.ledger().timestamp());
+                            RateLimiter::record_swap(&env, caller_addr, env.ledger().timestamp());
                         }
                     }
                 }
@@ -866,7 +871,7 @@ impl CounterContract {
                     let swap_count = operations.iter().filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _))).count();
                     if swap_count > 0 && res.operations_executed > 0 {
                         for _ in 0..res.operations_executed {
-                            RateLimiter::record_swap_op(&env, caller_addr, env.ledger().timestamp());
+                            RateLimiter::record_swap(&env, caller_addr, env.ledger().timestamp());
                         }
                     }
                 }
@@ -1155,8 +1160,19 @@ impl CounterContract {
         require_verified_user(&env, &provider)?;
 
         let mut registry = load_pool_registry(&env);
-        let lp_tokens = registry.add_liquidity(&env, pool_id, amount_a, amount_b, provider)?;
+        let lp_tokens = registry.add_liquidity(&env, pool_id, amount_a, amount_b, provider.clone())?;
         save_pool_registry(&env, &registry);
+        
+        // Emit LiquidityAdded event with correct signature
+        env.events().publish(
+            (
+                soroban_sdk::Symbol::new(&env, "LiquidityAdded"),
+                provider,
+                pool_id,
+            ),
+            (amount_a, amount_b, lp_tokens, env.ledger().timestamp()),
+        );
+        
         Ok(lp_tokens)
     }
 
@@ -1170,9 +1186,20 @@ impl CounterContract {
         require_verified_user(&env, &provider)?;
 
         let mut registry = load_pool_registry(&env);
-        let result = registry.remove_liquidity(&env, pool_id, lp_tokens, provider)?;
+        let (amount_a, amount_b) = registry.remove_liquidity(&env, pool_id, lp_tokens, provider.clone())?;
         save_pool_registry(&env, &registry);
-        Ok(result)
+        
+        // Emit LiquidityRemoved event with correct signature
+        env.events().publish(
+            (
+                soroban_sdk::Symbol::new(&env, "LiquidityRemoved"),
+                provider,
+                pool_id,
+            ),
+            (amount_a, amount_b, lp_tokens, env.ledger().timestamp()),
+        );
+        
+        Ok((amount_a, amount_b))
     }
 
     pub fn pool_swap(
@@ -1250,6 +1277,34 @@ impl CounterContract {
     pub fn get_pool_lp_balance(env: Env, pool_id: u64, provider: Address) -> i128 {
         let registry = load_pool_registry(&env);
         registry.get_lp_balance(pool_id, provider)
+    }
+
+    // ===== VOLUME CIRCUIT BREAKER =====
+
+    /// Set the volume-threshold circuit breaker configuration (admin only).
+    pub fn set_circuit_breaker_threshold(
+        env: Env,
+        admin: Address,
+        window_secs: u64,
+        max_volume: i128,
+    ) -> Result<(), SwapTradeError> {
+        risk_management::volume_circuit_breaker::set_threshold(&env, admin, window_secs, max_volume)
+    }
+
+    /// Get the current status of the volume-threshold circuit breaker.
+    /// Returns `{ tripped, current_volume, threshold, window }`.
+    pub fn get_circuit_breaker_status(
+        env: Env,
+    ) -> risk_management::VolumeCircuitBreakerStatus {
+        risk_management::volume_circuit_breaker::get_status(&env)
+    }
+
+    /// Reset the volume-threshold circuit breaker and restore trading (admin only).
+    pub fn reset_circuit_breaker(
+        env: Env,
+        admin: Address,
+    ) -> Result<(), SwapTradeError> {
+        risk_management::volume_circuit_breaker::reset(&env, admin)
     }
 
     pub fn set_price(env: Env, token_pair: (Symbol, Symbol), price: u128) {
@@ -1345,6 +1400,21 @@ impl CounterContract {
     /// Get total earned bonuses for a user
     pub fn get_user_earned_bonuses(env: Env, user: Address) -> i128 {
         StakingBonusManager::get_user_earned_bonuses(&env, user)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Flash Loan Module
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn flash_loan(
+        env: Env,
+        pool_id: u64,
+        receiver: Address,
+        asset: Symbol,
+        amount: i128,
+        data: Vec<u8>,
+    ) -> Result<i128, ContractError> {
+        flash_loan::FlashLoanManager::flash_loan(&env, pool_id, receiver, asset, amount, data)
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -1548,9 +1618,138 @@ impl CounterContract {
     pub fn withdraw_commission(env: Env, user: Address) -> i128 {
         referral_system::withdraw_commission(&env, user)
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Faucet – simulated token drip for new users
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Claim simulated tokens from the faucet for a given asset.
+    /// Enforces a per-user, per-asset cooldown set via `set_faucet_config`.
+    pub fn claim_faucet(env: Env, user: Address, asset: Symbol) -> Result<i128, SwapTradeError> {
+        faucet::claim_faucet(&env, &user, asset)
+    }
+
+    /// Set faucet drip amount and cooldown for an asset (admin only).
+    pub fn set_faucet_config(
+        env: Env,
+        caller: Address,
+        asset: Symbol,
+        drip_amount: i128,
+        cooldown_secs: u64,
+    ) -> Result<(), SwapTradeError> {
+        faucet::set_faucet_config(&env, &caller, asset, drip_amount, cooldown_secs)
+    }
+
+    /// Get faucet configuration for an asset.
+    pub fn get_faucet_config(env: Env, asset: Symbol) -> Result<faucet::FaucetConfig, SwapTradeError> {
+        faucet::get_faucet_config(&env, asset)
+    // ── Governance System ───────────────────────────────────────────────────
+
+    /// Create a new governance proposal
+    pub fn create_governance_proposal(
+        env: Env,
+        proposer: Address,
+        proposal_type: governance_types::ProposalType,
+        description: Symbol,
+        voting_period: u64,
+    ) -> Result<u64, SwapTradeError> {
+        governance_system::GovernanceSystem::create_proposal(
+            &env,
+            &proposer,
+            proposal_type,
+            description,
+            voting_period,
+        )
+    }
+
+    /// Cast a vote on a proposal
+    pub fn cast_governance_vote(
+        env: Env,
+        voter: Address,
+        proposal_id: u64,
+        support: governance_types::VoteOption,
+    ) -> Result<(), SwapTradeError> {
+        governance_system::GovernanceSystem::cast_vote(
+            &env,
+            &voter,
+            proposal_id,
+            support,
+        )
+    }
+
+    /// Execute a passed proposal
+    pub fn execute_governance_proposal(
+        env: Env,
+        executor: Address,
+        proposal_id: u64,
+    ) -> Result<(), SwapTradeError> {
+        governance_system::GovernanceSystem::execute_proposal(
+            &env,
+            &executor,
+            proposal_id,
+        )
+    }
+
+    /// Get a proposal's details
+    pub fn get_governance_proposal(
+        env: Env,
+        proposal_id: u64,
+    ) -> Result<governance_types::Proposal, SwapTradeError> {
+        governance_system::GovernanceSystem::get_proposal(&env, proposal_id)
+    }
+
+    // ── Risk Management ─────────────────────────────────────────────────────
+
+    /// Check if concentration limit is exceeded for a user
+    pub fn check_concentration_limit(env: Env, user: Address) -> bool {
+        let portfolio: Portfolio = env
+            .storage()
+            .instance()
+            .get(&())
+            .unwrap_or_else(|| Portfolio::new(&env));
+        risk_management::ConcentrationRisk::check_concentration_limit(&env, &portfolio, &user)
+    }
+
+    /// Get circuit breaker status
+    pub fn get_circuit_breaker_status(env: Env) -> risk_management::CircuitBreakerState {
+        risk_management::CircuitBreaker::get_circuit_breaker_state(&env)
+    }
+
+    /// Check if a position increase would exceed limits
+    pub fn check_risk_limits(
+        env: Env,
+        user: Address,
+        asset: Symbol,
+        additional_amount: i128,
+    ) -> bool {
+        let portfolio: Portfolio = env
+            .storage()
+            .instance()
+            .get(&())
+            .unwrap_or_else(|| Portfolio::new(&env));
+        let asset_type = if asset == symbol_short!("XLM") {
+            Asset::XLM
+        } else {
+            Asset::Custom(asset)
+        };
+        risk_management::PositionLimits::check_position_limits(
+            &env,
+            &portfolio,
+            &user,
+            &asset_type,
+            additional_amount,
+        )
+        .is_err()
+    }
 }
 
 #[cfg(all(test, feature = "experimental"))]
 mod migration_tests;
+#[cfg(test)]
 mod risk_management_tests;
+#[cfg(test)]
 mod governance_tests;
+#[cfg(test)]
+mod referral_system_tests;
+#[cfg(test)]
+mod referral_integration_test;

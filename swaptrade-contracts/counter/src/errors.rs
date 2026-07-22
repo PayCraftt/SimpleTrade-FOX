@@ -74,6 +74,9 @@ pub enum SwapTradeError {
     StakeLocked = 603,
     NoClaimableBonuses = 604,
     DistributionTooEarly = 605,
+    // Farming errors
+    FarmingPoolNotFound = 606,
+    InsufficientStakedLP = 607,
 
     // ── Emergency / circuit-breaker ─────────────────────────────────────────
     NotEmergencyAdmin = 700,
@@ -82,6 +85,10 @@ pub enum SwapTradeError {
     SelfReferral = 800,
     AlreadyReferred = 801,
     CircularReferral = 802,
+
+    // ── Faucet ─────────────────────────────────────────────────────────────
+    FaucetRateLimited = 900,
+    FaucetNotConfigured = 901,
 }
 
 /// Alias kept for modules that still import `ContractError` by name.
