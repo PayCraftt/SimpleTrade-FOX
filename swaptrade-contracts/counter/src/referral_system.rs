@@ -91,7 +91,7 @@ pub fn register_referral(env: &Env, referrer: Address, referred: Address) -> Res
 
     // Emit event
     env.events().publish(
-        symbol_short!("referral_registered"),
+        (Symbol::new(env, "referral_registered"),),
         (referrer, referred, ReferralLevel::Direct)
     );
 
@@ -242,7 +242,7 @@ pub fn withdraw_commission(env: &Env, user: Address) -> i128 {
 
     // Emit event
     env.events().publish(
-        symbol_short!("commission_withdrawn"),
+        (Symbol::new(env, "commission_withdrawn"),),
         (user, balance)
     );
 
@@ -255,8 +255,3 @@ pub fn get_commission_balance(env: &Env, user: Address) -> i128 {
         .get(&DataKey::CommissionBalance(user))
         .unwrap_or(0)
 }
-
-#[cfg(test)]
-mod referral_system_tests;
-#[cfg(test)]
-mod referral_integration_test;

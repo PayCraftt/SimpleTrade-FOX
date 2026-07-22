@@ -1,8 +1,14 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+use soroban_sdk::{Env, Address, Symbol, symbol_short};
     use soroban_sdk::testutils::{Address as _, Ledger as _};
-    use soroban_sdk::Address;
+    use crate::referral_system::{
+        register_referral, get_referral_stats, calculate_and_distribute_commission,
+        withdraw_commission, get_commission_balance, get_tier_for_volume,
+        ReferralInfo, ReferralLevel,
+    };
+    use crate::storage::DataKey;
+    use crate::errors::SwapTradeError;
 
     fn setup_test_env() -> (Env, Address, Address, Address) {
         let env = Env::default();
@@ -195,7 +201,7 @@ mod tests {
         assert!(register_referral(&env, referrer.clone(), referred2.clone()).is_ok());
 
         // Check stats
-        let stats = get_referral_stats(&env, referrer);
+        let stats = get_referral_stats(&env, referrer.clone());
         assert_eq!(stats.direct_referrals, 2);
         assert_eq!(stats.indirect_referrals, 0);
 
