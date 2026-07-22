@@ -368,8 +368,23 @@ impl CounterContract {
     }
 
     /// Swap tokens using simplified AMM (1:1 XLM <-> USDC-SIM)
-    pub fn swap(env: Env, from: Symbol, to: Symbol, amount: i128, user: Address) -> Result<i128, ContractError> {
+    pub fn swap(env: Env, from: Symbol, to: Symbol, amount: i128, min_amount_out: i128, user: Address) -> Result<i128, ContractError> {
         require_authenticated_verified_user(&env, &user)?;
+
+        // Oracle validation
+        use crate::oracle::{AggregatorV3Interface, OracleWrapper};
+        let oracle = OracleWrapper;
+        let (price, timestamp) = oracle.latest_round_data(&env, (from.clone(), to.clone()))?;
+        
+        // Basic staleness check (e.g., 5 minutes = 300 seconds)
+        if env.ledger().timestamp().saturating_sub(timestamp) > 300 {
+            return Err(ContractError::StalePrice);
+        }
+        
+        // Minimal price check (price must be positive)
+        if price <= 0 {
+             return Err(ContractError::InvalidPrice);
+        }
 
         let mut portfolio: Portfolio = env
             .storage()
@@ -428,6 +443,13 @@ impl CounterContract {
         let fee_amount = (amount * fee_bps as i128) / 10000;
         let swap_amount = amount - fee_amount;
 
+        // Calculate oracle-based minimum amount
+        let expected_min_amount = (swap_amount as u128 * price) / crate::trading::PRECISION;
+        let slippage_tolerance_bps = 500; // 5%
+        let oracle_min_amount = expected_min_amount * (10000 - slippage_tolerance_bps) / 10000;
+        
+        let required_min = core::cmp::max(min_amount_out as u128, oracle_min_amount);
+        
         // Collect the fee
         if fee_amount > 0 {
             // Deduct from user
@@ -453,6 +475,10 @@ impl CounterContract {
             swap_amount,
             user.clone(),
         );
+        
+        if out_amount < required_min as i128 {
+            return Err(ContractError::SlippageExceeded);
+        }
 
         portfolio.record_trade(&env, user.clone());
 

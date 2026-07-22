@@ -13,6 +13,10 @@ doctest = false
 name = "formal_verification_tests"
 path = "tests/formal_verification_tests.rs"
 
+[[test]]
+name = "trading_comprehensive_test"
+path = "tests/trading_comprehensive_test.rs"
+
 [dependencies]
 soroban-sdk = { workspace = true }
 
