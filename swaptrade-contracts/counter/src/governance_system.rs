@@ -49,7 +49,7 @@ impl GovernanceSystem {
             id: proposal_id,
             proposer: proposer.clone(),
             proposal_type,
-            description,
+            description: description.clone(),
             start_time: current_time,
             end_time: current_time + voting_period,
             execution_time: None,
@@ -317,16 +317,16 @@ impl GovernanceSystem {
 
     fn execute_proposal_action(env: &Env, proposal: &Proposal) -> Result<(), SwapTradeError> {
         match &proposal.proposal_type {
-            ProposalType::ParameterChange { param_key, new_value } => {
+            ProposalType::ParameterChange(param_key, new_value) => {
                 Self::execute_parameter_change(env, param_key, *new_value)
             }
-            ProposalType::AdminUpgrade { new_admin } => {
+            ProposalType::AdminUpgrade(new_admin) => {
                 Self::execute_admin_upgrade(env, new_admin)
             }
-            ProposalType::EmergencyAction { pause } => {
+            ProposalType::EmergencyAction(pause) => {
                 Self::execute_emergency_action(env, *pause)
             }
-            ProposalType::Custom { .. } => {
+            ProposalType::Custom(..) => {
                 // Custom proposals require manual execution
                 Ok(())
             }
@@ -393,7 +393,7 @@ impl GovernanceSystem {
         Ok(())
     }
 
-    fn get_voting_power(env: &Env, voter: &Address) -> u128 {
+    pub(crate) fn get_voting_power(env: &Env, voter: &Address) -> u128 {
         // For now, voting power is based on staked tokens
         // In production, this could be more complex (LP tokens, etc.)
         crate::staking_bonus::StakingBonusManager::get_user_total_staked(env, voter.clone()) as u128

@@ -1,0 +1,1999 @@
+warning: unused import: `crate::set_admin`
+   --> swaptrade-contracts/counter/src/rate_limit.rs:480:9
+    |
+480 |     use crate::set_admin;
+    |         ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `Address` and `Symbol`
+  --> swaptrade-contracts/counter/src/state_snapshot.rs:13:38
+   |
+13 | use soroban_sdk::{contracttype, Env, Address, Symbol};
+   |                                      ^^^^^^^  ^^^^^^
+
+warning: unused imports: `Map`, `Vec`, and `symbol_short`
+ --> swaptrade-contracts/counter/src/referral_system.rs:1:47
+  |
+1 | ...type, Address, Env, Map, Vec, Symbol, symbol_short};
+  |                        ^^^  ^^^          ^^^^^^^^^^^^
+
+warning: unused import: `Map`
+ --> swaptrade-contracts/counter/src/oracle_adapter.rs:1:61
+  |
+1 | use soroban_sdk::{contracttype, symbol_short, Address, Env, Map, Symbol, ...
+  |                                                             ^^^
+
+warning: unused import: `Map`
+ --> swaptrade-contracts/counter/src/orders.rs:1:61
+  |
+1 | use soroban_sdk::{contracttype, symbol_short, Address, Env, Map, Symbol, ...
+  |                                                             ^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/orders_tests.rs:3:5
+  |
+3 | use super::*;
+  |     ^^^^^^^^
+
+warning: unused import: `crate::errors::ContractError`
+ --> swaptrade-contracts/counter/src/orders_tests.rs:4:5
+  |
+4 | use crate::errors::ContractError;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:3:5
+  |
+3 | use super::*;
+  |     ^^^^^^^^
+
+warning: unused import: `soroban_sdk::testutils::Address as _`
+ --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:6:5
+  |
+6 | use soroban_sdk::testutils::Address as _;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::errors::ContractError`
+ --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:6:5
+  |
+6 | use crate::errors::ContractError;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Env` and `Vec`
+ --> swaptrade-contracts/counter/src/governance_types.rs:1:42
+  |
+1 | use soroban_sdk::{contracttype, Address, Env, Symbol, Vec, Map};
+  |                                          ^^^          ^^^
+
+warning: unused import: `crate::errors::SwapTradeError`
+ --> swaptrade-contracts/counter/src/governance_types.rs:2:5
+  |
+2 | use crate::errors::SwapTradeError;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Vec` and `contracttype`
+ --> swaptrade-contracts/counter/src/governance_system.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Address, Env, Symbol, Vec, Map};
+  |                   ^^^^^^^^^^^^                        ^^^
+
+warning: unused import: `crate::events::Events`
+ --> swaptrade-contracts/counter/src/governance_system.rs:4:5
+  |
+4 | use crate::events::Events;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Symbol`
+ --> swaptrade-contracts/counter/src/governance_params.rs:7:61
+  |
+7 | use soroban_sdk::{contracttype, symbol_short, Address, Env, Symbol};
+  |                                                             ^^^^^^
+
+warning: unused imports: `Address`, `Map`, and `contracttype`
+ --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                   ^^^^^^^^^^^^       ^^^               ^^^^^^^
+
+warning: unused imports: `Address`, `Env`, `Map`, and `Vec`
+ --> swaptrade-contracts/counter/src/risk_management/risk_metrics.rs:1:33
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                                 ^^^  ^^^          ^^^  ^^^^^^^
+
+warning: unused imports: `Map`, `Vec`, and `contracttype`
+ --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                   ^^^^^^^^^^^^       ^^^          ^^^
+
+warning: unused import: `calculate_user_tier`
+ --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:3:30
+  |
+3 | use crate::tiers::{UserTier, calculate_user_tier};
+  |                              ^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Map`, `Vec`, and `contracttype`
+ --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                   ^^^^^^^^^^^^       ^^^          ^^^
+
+warning: unused import: `RiskMetrics`
+ --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:3:42
+  |
+3 | use crate::risk_management::{RiskConfig, RiskMetrics};
+  |                                          ^^^^^^^^^^^
+
+warning: unused import: `position::*`
+  --> swaptrade-contracts/counter/src/risk_management/mod.rs:15:9
+   |
+15 | pub use position::*;
+   |         ^^^^^^^^^^^
+
+warning: unused import: `TradeRecord`
+   --> swaptrade-contracts/counter/src/lib.rs:163:82
+    |
+163 | ...ers, LPPosition, Portfolio, TradeRecord};
+    |                                ^^^^^^^^^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/risk_management_tests.rs:3:9
+  |
+3 |     use super::*;
+  |         ^^^^^^^^
+
+warning: unused import: `Symbol`
+ --> swaptrade-contracts/counter/src/risk_management_tests.rs:5:86
+  |
+5 | ...ils::Ledger as _, Address, Env, Symbol, symbol_short};
+  |                                    ^^^^^^
+
+warning: unused imports: `CircuitBreakerState`, `PositionLimitError`, and `RiskMetrics`
+  --> swaptrade-contracts/counter/src/risk_management_tests.rs:9:21
+   |
+ 9 |         RiskConfig, RiskMetrics, CircuitBreakerState,
+   |                     ^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^
+10 |         PositionLimits, ConcentrationRisk, CircuitBreaker, PortfolioRisk,
+11 |         PositionLimitError,
+   |         ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/governance_tests.rs:3:9
+  |
+3 |     use super::*;
+  |         ^^^^^^^^
+
+warning: unused imports: `Symbol` and `symbol_short`
+ --> swaptrade-contracts/counter/src/referral_system_tests.rs:3:33
+  |
+3 | use soroban_sdk::{Env, Address, Symbol, symbol_short};
+  |                                 ^^^^^^  ^^^^^^^^^^^^
+
+warning: unused import: `Ledger as _`
+ --> swaptrade-contracts/counter/src/referral_integration_test.rs:4:48
+  |
+4 |     use soroban_sdk::testutils::{Address as _, Ledger as _};
+  |                                                ^^^^^^^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/events.rs:11:42
+   |
+11 | const EVENT_BUFFER_KEY: Symbol = Symbol::short("evt_buf");
+   |                                          ^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/governance_system.rs:78:22
+   |
+78 |             (Symbol::short("gov"), Symbol::short("proposal_created")),
+   |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/governance_system.rs:78:44
+   |
+78 |             (Symbol::short("gov"), Symbol::short("proposal_created")),
+   |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:146:22
+    |
+146 |             (Symbol::short("gov"), Symbol::short("vote_cast")),
+    |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:146:44
+    |
+146 |             (Symbol::short("gov"), Symbol::short("vote_cast")),
+    |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:209:22
+    |
+209 |             (Symbol::short("gov"), Symbol::short("proposal_executed")),
+    |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:209:44
+    |
+209 |             (Symbol::short("gov"), Symbol::short("proposal_executed")),
+    |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:242:22
+    |
+242 |             (Symbol::short("gov"), Symbol::short("proposal_cancelled")),
+    |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:242:44
+    |
+242 |             (Symbol::short("gov"), Symbol::short("proposal_cancelled")),
+    |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:340:55
+    |
+340 | ...   env.storage().instance().set(&Symbol::short("max_swap"), &new_val...
+    |                                             ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:344:55
+    |
+344 | ...   env.storage().instance().set(&Symbol::short("fee_bps"), &(new_val...
+    |                                             ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:348:55
+    |
+348 | ...   env.storage().instance().set(&Symbol::short("rate_win"), &new_val...
+    |                                             ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:352:55
+    |
+352 | ...   env.storage().instance().set(&Symbol::short("max_slip"), &(new_va...
+    |                                             ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:356:55
+    |
+356 | ...   env.storage().instance().set(&Symbol::short("paused"), &(new_valu...
+    |                                             ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:392:47
+    |
+392 |         env.storage().instance().set(&Symbol::short("paused"), &pause);
+    |                                               ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:112:94
+    |
+112 | ...rtfolio::Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+    |                                   ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:145:94
+    |
+145 | ...rtfolio::Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+    |                                   ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:151:67
+    |
+151 | ...   positions.set(crate::portfolio::Asset::Custom(Symbol::short("USDC...
+    |                                                             ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:161:27
+    |
+161 |             .get(&Symbol::short("risk_cfg"))
+    |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:40:76
+   |
+40 | ...e_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:46:49
+   |
+46 | ...   positions.set(Asset::Custom(Symbol::short("USDCSIM")), usdc_balance);
+   |                                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:42:27
+   |
+42 |             .set(&Symbol::short("circuit"), &state);
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:49:40
+   |
+49 |         state.trigger_reason = Symbol::short("reset");
+   |                                        ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:55:27
+   |
+55 |             .set(&Symbol::short("circuit"), &state);
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:67:27
+   |
+67 |             .get(&Symbol::short("circuit"))
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:85:90
+   |
+85 | ... (asset_symbol.clone(), Symbol::short("USD"))) {
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:92:68
+   |
+92 | ... get_stored_price(env, (Symbol::short("USD"), asset_symbol.clone())) {
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:150:27
+    |
+150 |             .get(&Symbol::short("risk_cfg"))
+    |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/risk_metrics.rs:108:37
+    |
+108 |             trigger_reason: Symbol::short("none"),
+    |                                     ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:78:76
+   |
+78 | ...e_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:87:27
+   |
+87 |             .get(&Symbol::short("risk_cfg"))
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:97:47
+   |
+97 |         env.storage().instance().set(&Symbol::short("risk_cfg"), config);
+   |                                               ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:21:74
+   |
+21 | ...e_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:55:74
+   |
+55 | ...e_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:76:74
+   |
+76 | ...e_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:96:74
+   |
+96 | ...e_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:110:76
+    |
+110 | ..._of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+    |                                   ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:119:27
+    |
+119 |             .get(&Symbol::short("risk_cfg"))
+    |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/migration.rs:42:23
+   |
+42 |         .get(&Symbol::short("v_code"))
+   |                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/migration.rs:50:23
+   |
+50 |         .set(&Symbol::short("v_code"), &version);
+   |                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/lib.rs:310:31
+    |
+310 |                 .set(&Symbol::short("v_code"), &CONTRACT_VERSION);
+    |                               ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/lib.rs:331:41
+    |
+331 |         let asset = if token == Symbol::short("XLM") {
+    |                                         ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/lib.rs:350:41
+    |
+350 |         let asset = if token == Symbol::short("XLM") {
+    |                                         ^^^^^
+
+warning: unused import: `testutils::Ledger`
+ --> swaptrade-contracts/counter/src/risk_management_tests.rs:5:48
+  |
+5 |     use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Ad...
+  |                                                ^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Ledger`
+ --> swaptrade-contracts/counter/src/referral_system_tests.rs:4:48
+  |
+4 |     use soroban_sdk::testutils::{Address as _, Ledger as _};
+  |                                                ^^^^^^
+
+warning: unused variable: `portfolio`
+   --> swaptrade-contracts/counter/src/invariants.rs:100:5
+    |
+100 |     portfolio: &Portfolio,
+    |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_portfolio`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `sym`
+   --> swaptrade-contracts/counter/src/kyc.rs:166:27
+    |
+166 | fn validate_symbol_length(sym: &Symbol, max_len: u32) -> Result<(), KYC...
+    |                           ^^^ help: if this is intentional, prefix it with an underscore: `_sym`
+
+warning: unused variable: `max_len`
+   --> swaptrade-contracts/counter/src/kyc.rs:166:41
+    |
+166 | ...bol_length(sym: &Symbol, max_len: u32) -> Result<(), KYCError> {
+    |                             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_len`
+
+warning: unused variable: `env`
+  --> swaptrade-contracts/counter/src/liquidity_pool.rs:58:9
+   |
+58 |         env: &Env,
+   |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/liquidity_pool.rs:114:9
+    |
+114 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/liquidity_pool.rs:177:9
+    |
+177 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/liquidity_pool.rs:225:9
+    |
+225 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/referral_system.rs:149:28
+    |
+149 | pub fn get_tier_for_volume(env: &Env, volume: i128) -> TierConfig {
+    |                            ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `capacity`
+  --> swaptrade-contracts/counter/src/../batch.rs:57:41
+   |
+57 |     pub fn new_with_capacity(env: &Env, capacity: u32) -> Self {
+   |                                         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_capacity`
+
+warning: unused variable: `xlm_key`
+   --> swaptrade-contracts/counter/src/../batch.rs:283:17
+    |
+283 |             let xlm_key = (user.clone(), Asset::XLM);
+    |                 ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_xlm_key`
+
+warning: unused variable: `usdc_key`
+   --> swaptrade-contracts/counter/src/../batch.rs:284:17
+    |
+284 |             let usdc_key = (user.clone(), Asset::Custom(Symbol::new(env...
+    |                 ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_usdc_key`
+
+warning: variable does not need to be mutable
+   --> swaptrade-contracts/counter/src/oracle_adapter.rs:148:13
+    |
+148 |         let mut config = Self::get_config(env, &pair)?;
+    |             ----^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:103:9
+    |
+103 |     let mut ledger = env.ledger();
+    |         ----^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:136:13
+    |
+136 |         let mut ledger = env.ledger();
+    |             ----^^^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: unused variable: `pool1`
+  --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:24:9
+   |
+24 |     let pool1 = client.register_pool(&admin, &xlm, &usdc, &10000, &10000...
+   |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_pool1`
+
+warning: unused variable: `pool2`
+  --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:25:9
+   |
+25 |     let pool2 = client.register_pool(&admin, &usdc, &btc, &10000, &5000,...
+   |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_pool2`
+
+warning: unused variable: `total_voting_power`
+   --> swaptrade-contracts/counter/src/governance_system.rs:294:13
+    |
+294 |         let total_voting_power = proposal.total_voting_power;
+    |             ^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_total_voting_power`
+
+warning: unused variable: `size`
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:60:21
+   |
+60 |         for (asset, size) in positions.iter() {
+   |                     ^^^^ help: if this is intentional, prefix it with an underscore: `_size`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:186:30
+    |
+186 | ...pub fn credit(&mut self, env: &Env, token: Asset, user: Address, amo...
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:226:29
+    |
+226 |     pub fn debit(&mut self, env: &Env, token: Asset, from: Address, amo...
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:316:29
+    |
+316 |     pub fn has_badge(&self, env: &Env, user: Address, badge: Badge) -> ...
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:342:30
+    |
+342 | ...pub fn balance_of(&self, env: &Env, token: Asset, user: Address) -> ...
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:349:33
+    |
+349 |     pub fn get_portfolio(&self, env: &Env, user: Address) -> (u32, i128) {
+    |                                 ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:405:44
+    |
+405 | ...t_portfolio_value(&self, env: &Env, user: Address) -> Option<i128> {
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:519:9
+    |
+519 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:780:38
+    |
+780 |     fn get_total_user_balance(&self, env: &Env, user: Address) -> i128 {
+    |                                      ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `to`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:855:41
+    |
+855 |     fn format_pair_helper(from: Symbol, to: Symbol) -> Symbol {
+    |                                         ^^ help: if this is intentional, prefix it with an underscore: `_to`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:914:41
+    |
+914 | ...tats_on_trade(&mut self, env: &Env, user: Address, swap_amount: i128) {
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:941:38
+    |
+941 |     fn update_top_traders(&mut self, env: &Env, user: Address) {
+    |                                      ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1113:48
+     |
+1113 |     pub fn invariant_asset_conservation(&self, env: &Env) -> bool {
+     |                                                ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1151:48
+     |
+1151 | ...tate_monotonicity(&self, env: &Env, previous_version: u32, current_...
+     |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `user`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1248:46
+     |
+1248 | ..._badge_uniqueness(&self, user: &Address, badges: &Vec<Badge>, env: ...
+     |                             ^^^^ help: if this is intentional, prefix it with an underscore: `_user`
+
+warning: unused variable: `env`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1248:83
+     |
+1248 | ...ss, badges: &Vec<Badge>, env: &Env) -> bool {
+     |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `price`
+  --> swaptrade-contracts/counter/src/../trading.rs:70:9
+   |
+70 |     let price = match get_price_with_staleness_check(env, from.clone(), ...
+   |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_price`
+
+warning: unused variable: `env`
+  --> swaptrade-contracts/counter/src/risk_management_tests.rs:60:13
+   |
+60 |         let env = Env::default();
+   |             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `from`
+   --> swaptrade-contracts/counter/src/risk_management_tests.rs:201:13
+    |
+201 |         let from = symbol_short!("XLM");
+    |             ^^^^ help: if this is intentional, prefix it with an underscore: `_from`
+
+warning: unused variable: `admin`
+   --> swaptrade-contracts/counter/src/risk_management_tests.rs:235:13
+    |
+235 |         let admin = Address::generate(&env);
+    |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_admin`
+
+warning: unused variable: `admin`
+  --> swaptrade-contracts/counter/src/referral_integration_test.rs:10:13
+   |
+10 |         let admin = Address::generate(&env);
+   |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_admin`
+
+warning: unused variable: `admin`
+  --> swaptrade-contracts/counter/src/referral_integration_test.rs:39:13
+   |
+39 |         let admin = Address::generate(&env);
+   |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_admin`
+
+warning: constant `BRIDGE_COUNTER_KEY` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:24:7
+   |
+24 | const BRIDGE_COUNTER_KEY: &str = "bridge_counter";
+   |       ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `BRIDGE_REQUEST_PREFIX` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:25:7
+   |
+25 | const BRIDGE_REQUEST_PREFIX: &str = "bridge_req";
+   |       ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `initiate_bridge` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:27:8
+   |
+27 | pub fn initiate_bridge(
+   |        ^^^^^^^^^^^^^^^
+
+warning: function `confirm_bridge` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:66:8
+   |
+66 | pub fn confirm_bridge(env: &Env, oracle: Address, request_id: u64) {
+   |        ^^^^^^^^^^^^^^
+
+warning: function `fail_bridge` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:85:8
+   |
+85 | pub fn fail_bridge(env: &Env, oracle: Address, request_id: u64) {
+   |        ^^^^^^^^^^^
+
+warning: function `get_bridge_request` is never used
+   --> swaptrade-contracts/counter/src/bridge.rs:104:8
+    |
+104 | pub fn get_bridge_request(env: &Env, request_id: u64) -> BridgeRequest {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: associated functions `swap_executed`, `liquidity_added`, `liquidity_removed`, `user_tier_changed`, `admin_paused`, and `admin_resumed` are never used
+   --> swaptrade-contracts/counter/src/events.rs:16:12
+    |
+ 15 | impl Events {
+    | ----------- associated functions in this implementation
+ 16 |     pub fn swap_executed(
+    |            ^^^^^^^^^^^^^
+...
+ 31 |     pub fn liquidity_added(
+    |            ^^^^^^^^^^^^^^^
+...
+ 45 |     pub fn liquidity_removed(
+    |            ^^^^^^^^^^^^^^^^^
+...
+ 84 |     pub fn user_tier_changed(
+    |            ^^^^^^^^^^^^^^^^^
+...
+ 97 |     pub fn admin_paused(env: &Env, admin: Address, timestamp: i64) {
+    |            ^^^^^^^^^^^^
+...
+102 |     pub fn admin_resumed(env: &Env, admin: Address, timestamp: i64) {
+    |            ^^^^^^^^^^^^^
+
+warning: function `alert_triggered` is never used
+   --> swaptrade-contracts/counter/src/events.rs:118:8
+    |
+118 | pub fn alert_triggered(
+    |        ^^^^^^^^^^^^^^^
+
+warning: function `alert_created` is never used
+   --> swaptrade-contracts/counter/src/events.rs:139:8
+    |
+139 | pub fn alert_created(env: &Env, owner: Address, alert_id: u64, kind_tag...
+    |        ^^^^^^^^^^^^^
+
+warning: function `network_congestion_changed` is never used
+   --> swaptrade-contracts/counter/src/events.rs:243:8
+    |
+243 | pub fn network_congestion_changed(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fee_adjustment_applied` is never used
+   --> swaptrade-contracts/counter/src/events.rs:261:8
+    |
+261 | pub fn fee_adjustment_applied(
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `emergency_fee_override_activated` is never used
+   --> swaptrade-contracts/counter/src/events.rs:286:8
+    |
+286 | pub fn emergency_fee_override_activated(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `emergency_fee_override_deactivated` is never used
+   --> swaptrade-contracts/counter/src/events.rs:303:8
+    |
+303 | pub fn emergency_fee_override_deactivated(env: &Env, timestamp: u64) {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fee_configuration_updated` is never used
+   --> swaptrade-contracts/counter/src/events.rs:315:8
+    |
+315 | pub fn fee_configuration_updated(env: &Env, admin: Address, change_type...
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fee_statistics_report` is never used
+   --> swaptrade-contracts/counter/src/events.rs:327:8
+    |
+327 | pub fn fee_statistics_report(
+    |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_SLIPPAGE_BPS` is never used
+  --> swaptrade-contracts/counter/src/invariants.rs:14:7
+   |
+14 | const MAX_SLIPPAGE_BPS: u128 = 10000;
+   |       ^^^^^^^^^^^^^^^^
+
+warning: constant `PRECISION` is never used
+  --> swaptrade-contracts/counter/src/invariants.rs:16:7
+   |
+16 | const PRECISION: u128 = 1_000_000_000_000_000_000;
+   |       ^^^^^^^^^
+
+warning: function `verify_swap_invariants` is never used
+  --> swaptrade-contracts/counter/src/invariants.rs:98:8
+   |
+98 | pub fn verify_swap_invariants(
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_add_liquidity_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:144:8
+    |
+144 | pub fn verify_add_liquidity_invariants(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_remove_liquidity_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:196:8
+    |
+196 | pub fn verify_remove_liquidity_invariants(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_batch_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:242:8
+    |
+242 | pub fn verify_batch_invariants(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `invariant_rate_limit_monotonic` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:421:8
+    |
+421 | pub fn invariant_rate_limit_monotonic(previous_count: u32, current_coun...
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `invariant_badge_uniqueness` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:436:8
+    |
+436 | pub fn invariant_badge_uniqueness(env: &Env, portfolio: &Portfolio, use...
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `invariant_trading_volume_non_negative` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:446:8
+    |
+446 | pub fn invariant_trading_volume_non_negative(portfolio: &Portfolio) -> ...
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `get_invariant_report` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:462:8
+    |
+462 | pub fn get_invariant_report(env: &Env, portfolio: &Portfolio) -> Vec<(S...
+    |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `assert_all_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:501:8
+    |
+501 | pub fn assert_all_invariants(env: &Env, portfolio: &Portfolio) {
+    |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: trait `PriceFeed` is never used
+  --> swaptrade-contracts/counter/src/oracle.rs:21:11
+   |
+21 | pub trait PriceFeed {
+   |           ^^^^^^^^^
+
+warning: function `get_price_safe` is never used
+  --> swaptrade-contracts/counter/src/oracle.rs:78:8
+   |
+78 | pub fn get_price_safe(env: &Env, pair: (Symbol, Symbol)) -> Result<u128,...
+   |        ^^^^^^^^^^^^^^
+
+warning: constant `PRECISION` is never used
+ --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:9:7
+  |
+9 | const PRECISION: i128 = 1_000_000_000_000_000_000;
+  |       ^^^^^^^^^
+
+warning: struct `PositionManager` is never constructed
+ --> swaptrade-contracts/counter/src/risk_management/position.rs:6:12
+  |
+6 | pub struct PositionManager;
+  |            ^^^^^^^^^^^^^^^
+
+warning: associated functions `record_position_change`, `get_position_size`, `get_user_positions`, and `has_exceeded_limits` are never used
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:10:12
+   |
+ 8 | impl PositionManager {
+   | -------------------- associated functions in this implementation
+ 9 |     /// Record a position change and check limits
+10 |     pub fn record_position_change(
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+...
+21 |     pub fn get_position_size(
+   |            ^^^^^^^^^^^^^^^^^
+...
+31 |     pub fn get_user_positions(
+   |            ^^^^^^^^^^^^^^^^^^
+...
+53 |     pub fn has_exceeded_limits(
+   |            ^^^^^^^^^^^^^^^^^^^
+
+warning: function `check_circuit_breaker` is never used
+ --> swaptrade-contracts/counter/src/risk_management/volatility.rs:3:8
+  |
+3 | pub fn check_circuit_breaker(env: &Env, asset: Symbol) -> bool {
+  |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `send_alert` is never used
+ --> swaptrade-contracts/counter/src/risk_management/alerts.rs:3:8
+  |
+3 | pub fn send_alert(env: &Env, user: Symbol, message: Symbol) {
+  |        ^^^^^^^^^^
+
+warning: associated functions `check_circuit_breaker`, `get_price_changes_in_window`, `calculate_max_price_change`, and `get_risk_config` are never used
+   --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:10:12
+    |
+  8 | impl CircuitBreaker {
+    | ------------------- associated functions in this implementation
+  9 |     /// Check if circuit breaker should be triggered
+ 10 |     pub fn check_circuit_breaker(env: &Env, asset_symbol: &Symbol) -> R...
+    |            ^^^^^^^^^^^^^^^^^^^^^
+...
+ 72 |     fn get_price_changes_in_window(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+106 |     fn calculate_max_price_change(prices: &Vec<(u64, u128)>) -> u32 {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+147 |     fn get_risk_config(env: &Env) -> RiskConfig {
+    |        ^^^^^^^^^^^^^^^
+
+warning: constant `MIN_STAKING_PERIOD_SECS` is never used
+  --> swaptrade-contracts/counter/src/staking_bonus.rs:22:7
+   |
+22 | const MIN_STAKING_PERIOD_SECS: u64 = 30 * 24 * 60 * 60;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/invariants.rs:306:5
+    |
+306 |     metrics.trades_executed >= 0 && metrics.failed_orders >= 0 && metri...
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_comparisons)]` on by default
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/invariants.rs:306:37
+    |
+306 |     metrics.trades_executed >= 0 && metrics.failed_orders >= 0 && metri...
+    |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/invariants.rs:306:67
+    |
+306 | ...led_orders >= 0 && metrics.balances_updated >= 0
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused `std::result::Result` that must be used
+   --> swaptrade-contracts/counter/src/kyc_tests.rs:434:13
+    |
+434 | /             CounterContract::swap(
+435 | |                 env.clone(),
+436 | |                 symbol_short!("XLM"),
+437 | |                 symbol_short!("USDCSIM"),
+438 | |                 100,
+439 | |                 user.clone(),
+440 | |             );
+    | |_____________^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+    = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: use `let _ = ...` to ignore the resulting value
+    |
+434 |             let _ = CounterContract::swap(
+    |             +++++++
+
+warning: unused `std::result::Result` that must be used
+   --> swaptrade-contracts/counter/src/kyc_tests.rs:477:13
+    |
+477 | ...   CounterContract::add_liquidity(env.clone(), 100, 100, user.clone());
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+    |
+477 |             let _ = CounterContract::add_liquidity(env.clone(), 100, 100, user.clone());
+    |             +++++++
+
+warning: unused `std::result::Result` that must be used
+   --> swaptrade-contracts/counter/src/kyc_tests.rs:482:13
+    |
+482 |             CounterContract::stake(env.clone(), user.clone(), 100, 30);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+    |
+482 |             let _ = CounterContract::stake(env.clone(), user.clone(), 100, 30);
+    |             +++++++
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/analytics_dashboard_tests.rs:181:13
+    |
+181 |     assert!(summary.max_drawdown >= 0);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `counter` (lib test) generated 155 warnings (run `cargo fix --lib -p counter --tests` to apply 68 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running unittests src/lib.rs (target/debug/deps/counter-e78ceec7837b0ba9)
+
+running 177 tests
+
+thread 'alert_tests::test_alerts_are_isolated_per_user' (71068) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'alert_tests::test_create_portfolio_alert_stored_correctly' (71071) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_cleanup_removes_expired_alerts' (71069) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_create_market_alert_stored_correctly' (71070) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_cleanup_removes_expired_alerts ... FAILED
+test alert_tests::test_alerts_are_isolated_per_user ... FAILED
+test alert_tests::test_create_portfolio_alert_stored_correctly ... FAILED
+test alert_tests::test_create_market_alert_stored_correctly ... FAILED
+
+thread 'alert_tests::test_create_price_alert_returns_incrementing_ids' (71072) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_create_price_alert_visible_in_active_list' (71073) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_expired_alert_not_returned_in_active_list' (71074) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_create_price_alert_visible_in_active_list ... FAILED
+test alert_tests::test_create_price_alert_returns_incrementing_ids ... FAILED
+test alert_tests::test_expired_alert_not_returned_in_active_list ... FAILED
+
+thread 'alert_tests::test_market_alert_does_not_fire_for_different_signal' (71075) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_market_alert_does_not_fire_for_different_signal ... FAILED
+
+thread 'alert_tests::test_market_alert_fires_on_matching_signal' (71076) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_market_alert_fires_on_matching_signal ... FAILED
+
+thread 'alert_tests::test_portfolio_liquidation_alert_fires' (71079) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_persistent_price_alert_stays_active_after_trigger' (71078) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_portfolio_liquidation_alert_fires ... FAILED
+
+thread 'alert_tests::test_portfolio_value_change_alert_fires' (71080) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_persistent_price_alert_stays_active_after_trigger ... FAILED
+
+thread 'alert_tests::test_persistent_alert_zero_expiry_never_expires' (71077) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_price_alert_below_direction' (71081) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_price_alert_does_not_fire_if_condition_not_met' (71082) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_portfolio_value_change_alert_fires ... FAILED
+test alert_tests::test_persistent_alert_zero_expiry_never_expires ... FAILED
+test alert_tests::test_price_alert_below_direction ... FAILED
+test alert_tests::test_price_alert_does_not_fire_if_condition_not_met ... FAILED
+
+thread 'alert_tests::test_price_alert_fires_above_threshold' (71083) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'alert_tests::test_subscribe_alerts_changes_notification_method' (71084) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test alert_tests::test_price_alert_fires_above_threshold ... FAILED
+test alert_tests::test_subscribe_alerts_changes_notification_method ... FAILED
+test analytics_dashboard_tests::test_empty_analytics_summary ... ok
+test analytics_dashboard_tests::test_max_drawdown_calculation ... ok
+test analytics_dashboard_tests::test_best_and_worst_trade ... ok
+test analytics_dashboard_tests::test_multiple_users_analytics ... ok
+test analytics_dashboard_tests::test_avg_trade_metrics ... ok
+test analytics_dashboard_tests::test_portfolio_value_snapshots ... ok
+
+thread 'analytics_dashboard_tests::test_record_trade_with_pnl' (71092) panicked at swaptrade-contracts/counter/src/analytics_dashboard_tests.rs:27:5:
+assertion `left == right` failed
+  left: 0
+ right: 1
+test analytics_dashboard_tests::test_record_trade_with_pnl ... FAILED
+test analytics_dashboard_tests::test_realized_pnl_tracking ... ok
+test analytics_dashboard_tests::test_trade_history_storage ... ok
+
+thread 'analytics_dashboard_tests::test_win_rate_calculation' (71095) panicked at swaptrade-contracts/counter/src/analytics_dashboard_tests.rs:70:5:
+assertion `left == right` failed
+  left: 0
+ right: 6000000
+
+thread 'analytics_dashboard_tests::test_sharpe_ratio_calculation' (71093) panicked at swaptrade-contracts/counter/src/analytics_dashboard_tests.rs:164:5:
+assertion failed: summary.sharpe_ratio > 0
+test analytics_dashboard_tests::test_sharpe_ratio_calculation ... FAILED
+test analytics_dashboard_tests::test_win_rate_calculation ... 
+thread 'FAILEDgovernance_params::tests::test_duplicate_execution_fails
+' (71096) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Context, InternalError)], data:"host.0.ledger.try_borrow failed"
+   2: [Contract Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[gov, proposed], data:[0, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, 100]
+
+
+thread 'governance_params::tests::test_invalid_param_value_rejected' (71097) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rsWriting test snapshot file for test :"847governance_params::tests::test_duplicate_execution_fails:"9 to :
+"HostError: Error(Auth, ExistingValue)
+
+Event log (newest first):
+   0: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"escalating error to panic"
+   1: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"frame is already authorized"
+test_snapshots/governance_params/tests/test_duplicate_execution_fails.1.json
+".
+Writing test snapshot file for test "governance_params::tests::test_invalid_param_value_rejected" to "test_snapshots/governance_params/tests/test_invalid_param_value_rejected.1.json".
+
+thread 'governance_params::tests::test_only_target_param_changes' (71098) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Context, InternalError)], data:"host.0.ledger.try_borrow failed"
+   2: [Contract Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[gov, proposed], data:[0, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, 200]
+
+Writing test snapshot file for test "governance_params::tests::test_only_target_param_changes" to "test_snapshots/governance_params/tests/test_only_target_param_changes.1.json".
+
+thread 'governance_params::tests::test_propose_and_execute_after_timelock' (71099) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, ExistingValue)
+
+Event log (newest first):
+   0: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"escalating error to panic"
+   1: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"frame is already authorized"
+   2: [Contract Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[gov, proposed], data:[0, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, 300]
+
+test governance_params::tests::test_invalid_param_value_rejected ... FAILED
+Writing test snapshot file for test "governance_params::tests::test_propose_and_execute_after_timelock" to "test_snapshots/governance_params/tests/test_propose_and_execute_after_timelock.1.json".
+
+thread 'governance_tests::governance_tests::test_cancel_proposal' (71100) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_cancel_proposal ... FAILED
+test governance_params::tests::test_duplicate_execution_fails ... FAILED
+
+thread 'governance_tests::governance_tests::test_cast_vote_for' (71101) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'governance_tests::governance_tests::test_cast_vote_twice_fails' (71102) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_cast_vote_for ... FAILED
+test governance_tests::governance_tests::test_cast_vote_twice_fails ... FAILED
+
+thread 'governance_tests::governance_tests::test_create_proposal_basic' (71103) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_create_proposal_basic ... FAILED
+
+thread 'governance_tests::governance_tests::test_create_proposal_invalid_voting_period' (71105) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_create_proposal_invalid_voting_period ... FAILED
+
+thread 'governance_tests::governance_tests::test_execute_admin_upgrade' (71106) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_execute_admin_upgrade ... FAILED
+
+thread 'governance_tests::governance_tests::test_execute_failed_proposal' (71107) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_execute_failed_proposal ... FAILED
+
+thread 'governance_tests::governance_tests::test_execute_fee_change' (71108) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_execute_fee_change ... FAILED
+
+thread 'governance_tests::governance_tests::test_create_proposal_insufficient_voting_power' (71104) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'governance_tests::governance_tests::test_execute_passed_proposal' (71109) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_params::tests::test_only_target_param_changes ... FAILED
+test governance_tests::governance_tests::test_create_proposal_insufficient_voting_power ... FAILED
+test governance_tests::governance_tests::test_execute_passed_proposal ... FAILED
+
+thread 'governance_tests::governance_tests::test_full_governance_flow' (71110) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_full_governance_flow ... FAILED
+
+thread 'governance_tests::governance_tests::test_governance_config_validation' (71111) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'governance_tests::governance_tests::test_quorum_failure' (71113) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_quorum_failure ... FAILED
+test governance_tests::governance_tests::test_governance_config_validation ... FAILED
+
+thread 'governance_tests::governance_tests::test_proposal_cooldown' (71112) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'governance_tests::governance_tests::test_voting_power_calculation' (71114) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:89:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test governance_tests::governance_tests::test_proposal_cooldown ... FAILED
+test governance_tests::governance_tests::test_voting_power_calculation ... FAILED
+test invariants::tests::test_invariant_amm_constant_product_fail ... ok
+test invariants::tests::test_invariant_amm_constant_product_pass ... ok
+test invariants::tests::test_invariant_balance_update_consistency_fail ... ok
+test invariants::tests::test_invariant_fee_bounds_fail ... ok
+test invariants::tests::test_invariant_balance_update_consistency_pass ... ok
+test invariants::tests::test_invariant_fee_bounds_pass ... ok
+test invariants::tests::test_invariant_lp_position_integrity_empty_pass ... ok
+test invariants::tests::test_invariant_slippage_bounds_fail ... ok
+test invariants::tests::test_invariant_lp_position_integrity_pass ... ok
+test invariants::tests::test_invariant_non_negative_balances_pass ... ok
+test invariants::tests::test_invariant_timestamp_monotonic_fail ... ok
+test invariants::tests::test_invariant_slippage_bounds_pass ... ok
+test invariants::tests::test_invariant_version_monotonic_fail ... ok
+test invariants::tests::test_invariant_timestamp_monotonic_pass ... ok
+test invariants::tests::test_invariant_version_monotonic_pass ... ok
+test governance_params::tests::test_propose_and_execute_after_timelock ... FAILED
+test kyc::mxllv_tests::test_save_record_is_private ... ok
+Writing test snapshot file for test "kyc::mxllv_tests::test_add_operator_emits_event" to "test_snapshots/kyc/mxllv_tests/test_add_operator_emits_event.1.json".
+Writing test snapshot file for test "kyc::mxllv_tests::test_set_timelock_emits_event" to "test_snapshots/kyc/mxllv_tests/test_set_timelock_emits_event.1.json".
+
+thread 'kyc::mxllv_tests::test_operator_limit_enforced' (71131) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, ExistingValue)
+
+Event log (newest first):
+   0: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"escalating error to panic"
+   1: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"frame is already authorized"
+   2: [Contract Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[kyc_op, added], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM, 0]
+
+Writing test snapshot file for test "kyc::mxllv_tests::test_operator_limit_enforced" to "test_snapshots/kyc/mxllv_tests/test_operator_limit_enforced.1.json".
+test kyc::mxllv_tests::test_add_operator_emits_event ... ok
+Writing test snapshot file for test "kyc::mxllv_tests::test_update_status_emits_event" to test kyc::mxllv_tests::test_set_timelock_emits_event ... ok
+"test_snapshots/kyc/mxllv_tests/test_update_status_emits_event.1.json".
+test kyc::mxllv_tests::test_validate_helpers_are_private ... ok
+test kyc::mxllv_tests::test_operator_limit_enforced ... FAILED
+
+thread 'kyc::mxllv_tests::test_update_status_validates_reason' (71135) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, ExistingValue)
+
+Event log (newest first):
+   0: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"escalating error to panic"
+   1: [Diagnostic Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, ExistingValue)], data:"frame is already authorized"
+   2: [Contract Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[kyc, updated], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4, 2, 0]
+   3: [Contract Event] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[kyc, submitted], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4, 2592000]
+
+Writing test snapshot file for test "kyc::mxllv_tests::test_update_status_validates_reason" to "test_snapshots/kyc/mxllv_tests/test_update_status_validates_reason.1.json".
+Writing test snapshot file for test "kyc_tests::test_governance_override_requires_timelock_and_can_execute_after_delay" to "test_snapshots/kyc_tests/test_governance_override_requires_timelock_and_can_execute_after_delay.1.json".
+test kyc::mxllv_tests::test_update_status_emits_event ... ok
+test kyc::mxllv_tests::test_update_status_validates_reason ... FAILED
+Writing test snapshot file for test "kyc_tests::test_kyc_expired_request_emits_event" to "test_snapshots/kyc_tests/test_kyc_expired_request_emits_event.1.json".
+Writing test snapshot file for test "kyc_tests::test_kyc_expiry_boundary_exact_expiry_time" to "test_snapshots/kyc_tests/test_kyc_expiry_boundary_exact_expiry_time.1.json".
+Writing test snapshot file for test "kyc_tests::test_invalid_transition_sequences_revert_deterministically" to "test_snapshots/kyc_tests/test_invalid_transition_sequences_revert_deterministically.1.json".
+test kyc_tests::test_kyc_expiry_boundary_exact_expiry_time ... ok
+test kyc_tests::test_governance_override_requires_timelock_and_can_execute_after_delay ... ok
+Writing test snapshot file for test "kyc_tests::test_kyc_expiry_cleared_on_status_transition" to "test_snapshots/kyc_tests/test_kyc_expiry_cleared_on_status_transition.1.json".
+Writing test snapshot file for test "kyc_tests::test_kyc_pending_request_expires_after_duration" to "test_snapshots/kyc_tests/test_kyc_pending_request_expires_after_duration.1.json".
+test kyc_tests::test_kyc_expired_request_emits_event ... ok
+test kyc_tests::test_kyc_expiry_cleared_on_status_transition ... ok
+test kyc_tests::test_invalid_transition_sequences_revert_deterministically ... ok
+Writing test snapshot file for test "kyc_tests::test_only_authorized_operators_can_assign_status_and_self_verify_is_blocked" to "test_snapshots/kyc_tests/test_only_authorized_operators_can_assign_status_and_self_verify_is_blocked.1.json".
+Writing test snapshot file for test "kyc_tests::test_seeded_terminal_record_cannot_be_mutated_through_controlled_flow" to "test_snapshots/kyc_tests/test_seeded_terminal_record_cannot_be_mutated_through_controlled_flow.1.json".
+
+thread 'kyc_tests::test_sensitive_contract_entry_points_require_verified_kyc' (71145) panicked at swaptrade-contracts/counter/src/kyc_tests.rs:93:5:
+assertion failed: result.is_err()
+Writing test snapshot file for test "kyc_tests::test_sensitive_contract_entry_points_require_verified_kyc" to "test_snapshots/kyc_tests/test_sensitive_contract_entry_points_require_verified_kyc.1.json".
+test kyc_tests::test_kyc_pending_request_expires_after_duration ... ok
+test kyc_tests::test_seeded_terminal_record_cannot_be_mutated_through_controlled_flow ... ok
+Writing test snapshot file for test "kyc_tests::test_terminal_states_are_immutable_without_override" to "test_snapshots/kyc_tests/test_terminal_states_are_immutable_without_override.1.json".
+test kyc_tests::test_only_authorized_operators_can_assign_status_and_self_verify_is_blocked ... ok
+test kyc_tests::test_transition_matrix_matches_expected_fsm ... ok
+
+thread 'multihop_swap_tests::test_multi_hop_atomic_execution' (71149) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]
+
+Writing test snapshot file for test "multihop_swap_tests::test_multi_hop_atomic_execution" to "test_snapshots/multihop_swap_tests/test_multi_hop_atomic_execution.1.json".
+test multihop_swap_tests::test_multi_hop_atomic_execution ... FAILED
+
+thread 'multihop_swap_tests::test_multi_hop_emits_events' (71150) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]
+
+Writing test snapshot file for test "multihop_swap_tests::test_multi_hop_emits_events" to "test_snapshots/multihop_swap_tests/test_multi_hop_emits_events.1.json".
+test multihop_swap_tests::test_multi_hop_emits_events ... FAILED
+
+thread 'multihop_swap_tests::test_multi_hop_respects_slippage_tolerance' (71151) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 1000, 1000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 1000, 1000, 30]
+
+Writing test snapshot file for test "multihop_swap_tests::test_multi_hop_respects_slippage_tolerance" to "test_snapshots/multihop_swap_tests/test_multi_hop_respects_slippage_tolerance.1.json".
+Writing test snapshot file for test "kyc_tests::test_valid_transition_flows_succeed" to "test_snapshots/kyc_tests/test_valid_transition_flows_succeed.1.json".
+test multihop_swap_tests::test_multi_hop_respects_slippage_tolerance ... FAILED
+Writing test snapshot file for test "multihop_swap_tests::test_multi_hop_with_invalid_route" to "test_snapshots/multihop_swap_tests/test_multi_hop_with_invalid_route.1.json".
+test kyc_tests::test_terminal_states_are_immutable_without_override ... ok
+test multihop_swap_tests::test_multi_hop_with_invalid_route ... ok
+test kyc_tests::test_sensitive_contract_entry_points_require_verified_kyc ... FAILED
+
+thread 'multihop_swap_tests::test_multi_hop_with_zero_amount' (71153) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]
+
+Writing test snapshot file for test "multihop_swap_tests::test_multi_hop_with_zero_amount" to "test_snapshots/multihop_swap_tests/test_multi_hop_with_zero_amount.1.json".
+
+thread 'multihop_swap_tests::test_three_hop_route_execution' (71155) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]
+
+Writing test snapshot file for test "multihop_swap_tests::test_three_hop_route_execution" to "test_snapshots/multihop_swap_tests/test_three_hop_route_execution.1.json".
+test multihop_swap_tests::test_multi_hop_with_zero_amount ... FAILED
+
+thread 'multihop_swap_tests::test_single_hop_swap_via_route' (71154) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]
+
+test multihop_swap_tests::test_three_hop_route_execution ... FAILED
+Writing test snapshot file for test "multihop_swap_tests::test_single_hop_swap_via_route" to "test_snapshots/multihop_swap_tests/test_single_hop_swap_via_route.1.json".
+
+thread 'multihop_swap_tests::test_two_hop_swap_execution' (71156) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, XLM, USDC, 10000, 10000, 30]
+
+Writing test snapshot file for test "multihop_swap_tests::test_two_hop_swap_execution" to "test_snapshots/multihop_swap_tests/test_two_hop_swap_execution.1.json".
+Writing test snapshot file for test "nonce::tests::test_different_users_same_nonce" to "test_snapshots/nonce/tests/test_different_users_same_nonce.1.json".
+test multihop_swap_tests::test_single_hop_swap_via_route ... FAILED
+Writing test snapshot file for test "nonce::tests::test_duplicate_nonce_rejected" to "test_snapshots/nonce/tests/test_duplicate_nonce_rejected.1.json".
+test multihop_swap_tests::test_two_hop_swap_execution ... FAILED
+test nonce::tests::test_different_users_same_nonce ... ok
+Writing test snapshot file for test "nonce::tests::test_fresh_nonce_accepted" to "test_snapshots/nonce/tests/test_fresh_nonce_accepted.1.json".
+Writing test snapshot file for test "nonce::tests::test_is_used_reflects_state" to "test_snapshots/nonce/tests/test_is_used_reflects_state.1.json".
+test nonce::tests::test_is_used_reflects_state ... ok
+Writing test snapshot file for test "nonce::tests::test_replay_attack_simulation" to "test_snapshots/nonce/tests/test_replay_attack_simulation.1.json".
+test nonce::tests::test_replay_attack_simulation ... ok
+
+thread 'oracle_adapter_tests::test_circuit_breaker_deactivates_on_stable_price' (71162) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test oracle_adapter_tests::test_circuit_breaker_deactivates_on_stable_price ... FAILED
+
+thread 'oracle_adapter_tests::test_circuit_breaker_triggers_on_large_deviation' (71163) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test oracle_adapter_tests::test_circuit_breaker_triggers_on_large_deviation ... FAILED
+test oracle_adapter_tests::test_deviation_calculation ... ok
+
+thread 'oracle_adapter_tests::test_get_price_returns_fallback_when_circuit_breaker_active' (71165) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test oracle_adapter_tests::test_get_price_returns_fallback_when_circuit_breaker_active ... FAILED
+
+thread 'oracle_adapter_tests::test_initialize_oracle' (71166) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test oracle_adapter_tests::test_initialize_oracle ... FAILED
+
+thread 'oracle_adapter_tests::test_invalid_config_rejected' (71167) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test nonce::tests::test_duplicate_nonce_rejected ... ok
+test oracle_adapter_tests::test_invalid_config_rejected ... FAILED
+test kyc_tests::test_valid_transition_flows_succeed ... ok
+
+thread 'oracle_adapter_tests::test_reset_circuit_breaker' (71168) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test oracle_adapter_tests::test_reset_circuit_breaker ... FAILED
+
+thread 'oracle_adapter_tests::test_set_oracle_active' (71169) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'oracle_adapter_tests::test_twap_calculation' (71171) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'oracle_adapter_tests::test_staleness_check_returns_fallback' (71170) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test oracle_adapter_tests::test_set_oracle_active ... FAILED
+test oracle_adapter_tests::test_twap_calculation ... FAILED
+test nonce::tests::test_fresh_nonce_accepted ... ok
+test oracle_adapter_tests::test_staleness_check_returns_fallback ... FAILED
+
+thread 'oracle_adapter_tests::test_update_config' (71172) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'oracle_adapter_tests::test_update_price_success' (71173) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'orders_tests::test_cancel_order' (71175) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'oracle_adapter_tests::test_zero_price_rejected' (71174) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test oracle_adapter_tests::test_update_config ... FAILED
+test oracle_adapter_tests::test_update_price_success ... FAILED
+test orders_tests::test_cancel_order ... FAILED
+test oracle_adapter_tests::test_zero_price_rejected ... FAILED
+
+thread 'orders_tests::test_cancel_order_wrong_owner' (71176) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'orders_tests::test_get_user_orders' (71177) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'orders_tests::test_invalid_order_amount' (71178) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'orders_tests::test_invalid_order_price' (71179) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test orders_tests::test_cancel_order_wrong_owner ... FAILED
+test orders_tests::test_get_user_orders ... FAILED
+test orders_tests::test_invalid_order_amount ... FAILED
+test orders_tests::test_invalid_order_price ... FAILED
+
+thread 'orders_tests::test_match_pending_orders' (71180) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'orders_tests::test_order_with_expiry' (71182) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'orders_tests::test_order_id_increment' (71181) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'orders_tests::test_place_limit_order' (71183) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test orders_tests::test_match_pending_orders ... FAILED
+test orders_tests::test_order_with_expiry ... FAILED
+test orders_tests::test_order_id_increment ... FAILED
+test orders_tests::test_place_limit_order ... FAILED
+
+thread 'orders_tests::test_place_stop_loss' (71184) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+Writing test snapshot file for test "rate_limit::sensitive_tests::test_exceeding_limit_fails" to "test_snapshots/rate_limit/sensitive_tests/test_exceeding_limit_fails.1.json".
+Writing test snapshot file for test "rate_limit::sensitive_tests::test_boundary_exact_limit" to "test_snapshots/rate_limit/sensitive_tests/test_boundary_exact_limit.1.json".
+test orders_tests::test_place_stop_loss ... FAILED
+Writing test snapshot file for test "rate_limit::sensitive_tests::test_within_limit_succeedstest rate_limit::sensitive_tests::test_exceeding_limit_fails ... " to ok"
+test_snapshots/rate_limit/sensitive_tests/test_within_limit_succeeds.1.json".
+Writing test snapshot file for test "rate_limit::sensitive_tests::test_limit_resets_after_window" to "test_snapshots/rate_limit/sensitive_tests/test_limit_resets_after_window.1.json".
+
+thread 'referral_integration_test::integration_tests::test_referral_functions_public_interface' (71189) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test referral_integration_test::integration_tests::test_referral_functions_public_interface ... FAILED
+test rate_limit::sensitive_tests::test_boundary_exact_limit ... ok
+
+thread 'referral_system_tests::tests::test_already_referred_prevention' (71191) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'referral_integration_test::integration_tests::test_referral_integration_with_swap' (71190) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test referral_system_tests::tests::test_already_referred_prevention ... FAILED
+test referral_integration_test::integration_tests::test_referral_integration_with_swap ... FAILED
+
+thread 'referral_system_tests::tests::test_circular_referral_prevention' (71192) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'referral_system_tests::tests::test_commission_calculation_direct_only' (71193) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_circular_referral_prevention ... FAILED
+test referral_system_tests::tests::test_commission_calculation_direct_only ... FAILED
+
+thread 'referral_system_tests::tests::test_deep_referral_chain_beyond_two_levels' (71195) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_deep_referral_chain_beyond_two_levels ... FAILED
+
+thread 'referral_system_tests::tests::test_commission_calculation_two_levels' (71194) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_commission_calculation_two_levels ... FAILED
+
+thread 'referral_system_tests::tests::test_indirect_circular_referral_prevention' (71196) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_indirect_circular_referral_prevention ... FAILED
+
+thread 'referral_system_tests::tests::test_multiple_referrals_same_referrer' (71197) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_multiple_referrals_same_referrer ... FAILED
+
+thread 'referral_system_tests::tests::test_negative_fee_no_commission' (71198) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_negative_fee_no_commission ... FAILED
+
+thread 'referral_system_tests::tests::test_register_referral_success' (71200) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_register_referral_success ... FAILED
+
+thread 'referral_system_tests::tests::test_self_referral_prevention' (71201) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_self_referral_prevention ... FAILED
+test referral_system_tests::tests::test_tier_upgrade ... ok
+
+thread 'referral_system_tests::tests::test_volume_tracking_and_tier_upgrade' (71203) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_volume_tracking_and_tier_upgrade ... FAILED
+test rate_limit::sensitive_tests::test_limit_resets_after_window ... ok
+
+thread 'referral_system_tests::tests::test_withdraw_commission' (71204) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+
+thread 'referral_system_tests::tests::test_zero_fee_no_commission' (71205) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test referral_system_tests::tests::test_withdraw_commission ... FAILED
+test rate_limit::sensitive_tests::test_within_limit_succeeds ... ok
+test referral_system_tests::tests::test_zero_fee_no_commission ... FAILED
+
+thread 'risk_management_tests::risk_management_tests::test_circuit_breaker_inactive_by_default' (71206) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'risk_management_tests::risk_management_tests::test_circuit_breaker_integration' (71207) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test risk_management_tests::risk_management_tests::test_circuit_breaker_inactive_by_default ... FAILED
+
+thread 'referral_system_tests::tests::test_referral_info_storage' (71199) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Context, InternalError)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Context, InternalError)], data:"no contract running"
+
+test risk_management_tests::risk_management_tests::test_circuit_breaker_integration ... FAILED
+
+thread 'risk_management_tests::risk_management_tests::test_circuit_breaker_trigger' (71209) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test referral_system_tests::tests::test_referral_info_storage ... FAILED
+
+thread 'risk_management_tests::risk_management_tests::test_concentration_limit_integration' (71210) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test risk_management_tests::risk_management_tests::test_circuit_breaker_trigger ... FAILED
+test risk_management_tests::risk_management_tests::test_concentration_limit_integration ... FAILED
+
+thread 'risk_management_tests::risk_management_tests::test_circuit_breaker_reset' (71208) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'risk_management_tests::risk_management_tests::test_concentration_warning_threshold' (71213) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'risk_management_tests::risk_management_tests::test_concentration_risk_low' (71212) panicked at swaptrade-contracts/counter/src/risk_management_tests.rs:85:9:
+assertion failed: risk < 30
+test risk_management_tests::risk_management_tests::test_circuit_breaker_reset ... FAILED
+test risk_management_tests::risk_management_tests::test_concentration_warning_threshold ... FAILED
+test risk_management_tests::risk_management_tests::test_concentration_risk_high ... ok
+test risk_management_tests::risk_management_tests::test_concentration_risk_low ... FAILED
+
+thread 'risk_management_tests::risk_management_tests::test_position_limits_basic' (71215) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'risk_management_tests::risk_management_tests::test_maximum_position_limits' (71214) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test risk_management_tests::risk_management_tests::test_position_limits_basic ... FAILED
+test risk_management_tests::risk_management_tests::test_risk_config_validation ... ok
+
+thread 'risk_management_tests::risk_management_tests::test_position_limits_exceeded' (71216) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'risk_management_tests::risk_management_tests::test_risk_limits_integration' (71219) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+
+thread 'risk_management_tests::risk_management_tests::test_risk_config_updates' (71217) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test risk_management_tests::risk_management_tests::test_position_limits_exceeded ... FAILED
+test risk_management_tests::risk_management_tests::test_risk_limits_integration ... FAILED
+test risk_management_tests::risk_management_tests::test_maximum_position_limits ... FAILED
+test risk_management_tests::risk_management_tests::test_risk_config_updates ... FAILED
+
+thread 'risk_management_tests::risk_management_tests::test_risk_metrics_calculation' (71220) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:141:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test risk_management_tests::risk_management_tests::test_tier_based_limits ... ok
+test risk_management_tests::risk_management_tests::test_risk_metrics_calculation ... FAILED
+test risk_management_tests::risk_management_tests::test_single_asset_portfolio ... ok
+
+thread 'state_snapshot_tests::tests::test_atomic_operation_with_validation' (71226) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_atomic_operation_with_validation ... FAILED
+test risk_management_tests::risk_management_tests::test_zero_balance_portfolio ... ok
+
+thread 'state_snapshot_tests::tests::test_atomic_operation_executes_successfully' (71225) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_execute_with_validation_failure ... ok
+test state_snapshot_tests::tests::test_atomic_operation_executes_successfully ... FAILED
+test state_snapshot_tests::tests::test_execute_with_validation_success ... ok
+
+thread 'state_snapshot_tests::tests::test_pool_swap_consistent_state_snapshot' (71231) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", register_pool, [CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, TOKA, TOKB, 1000, 1000, 30]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, register_pool], data:[CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4, TOKA, TOKB, 1000, 1000, 30]
+
+Writing test snapshot file for test "state_snapshot_tests::tests::test_pool_swap_consistent_state_snapshot" to "test_snapshots/state_snapshot_tests/tests/test_pool_swap_consistent_state_snapshot.1.json".
+test state_snapshot_tests::tests::test_pool_swap_consistent_state_snapshot ... FAILED
+
+thread 'state_snapshot_tests::tests::test_read_consistency_guard' (71232) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_read_consistency_guard ... FAILED
+
+thread 'state_snapshot_tests::tests::test_read_consistency_guard_panics_on_invalid' (71233) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_read_consistency_guard_panics_on_invalid - should panic ... FAILED
+
+thread 'state_snapshot_tests::tests::test_remove_liquidity_consistent_state_snapshot' (71234) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", add_liquidity, [1000, 1000, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, add_liquidity], data:[1000, 1000, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+
+Writing test snapshot file for test "state_snapshot_tests::tests::test_remove_liquidity_consistent_state_snapshot" to "test_snapshots/state_snapshot_tests/tests/test_remove_liquidity_consistent_state_snapshot.1.json".
+
+thread 'state_snapshot_tests::tests::test_multiple_operations_maintain_snapshot_consistency' (71230) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+Writing test snapshot file for test "state_snapshot_tests::tests::test_multiple_operations_maintain_snapshot_consistency" to "test_snapshots/state_snapshot_tests/tests/test_multiple_operations_maintain_snapshot_consistency.1.json".
+
+thread 'state_snapshot_tests::tests::test_concurrent_swaps_maintain_consistency' (71227) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", swap, [XLM, USDCSIM, 500, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, swap], data:[XLM, USDCSIM, 500, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+
+Writing test snapshot file for test "state_snapshot_tests::tests::test_concurrent_swaps_maintain_consistency" to "test_snapshots/state_snapshot_tests/tests/test_concurrent_swaps_maintain_consistency.1.json".
+
+thread 'state_snapshot_tests::tests::test_add_liquidity_consistent_state_snapshot' (71224) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", add_liquidity, [1000, 1000, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, add_liquidity], data:[1000, 1000, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+
+Writing test snapshot file for test "state_snapshot_tests::tests::test_add_liquidity_consistent_state_snapshot" to "test_snapshots/state_snapshot_tests/tests/test_add_liquidity_consistent_state_snapshot.1.json".
+test state_snapshot_tests::tests::test_remove_liquidity_consistent_state_snapshot ... FAILED
+
+thread 'state_snapshot_tests::tests::test_snapshot_creation' (71235) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_snapshot_creation ... FAILED
+
+thread 'state_snapshot_tests::tests::test_snapshot_ids_increment' (71236) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_snapshot_ids_increment ... FAILED
+
+thread 'state_snapshot_tests::tests::test_snapshot_invalid_after_multiple_blocks' (71237) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_snapshot_invalid_after_multiple_blocks ... FAILED
+
+thread 'state_snapshot_tests::tests::test_snapshot_validation_next_block' (71238) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_snapshot_validation_next_block ... FAILED
+
+thread 'state_snapshot_tests::tests::test_snapshot_validation_same_block' (71239) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+test state_snapshot_tests::tests::test_snapshot_validation_same_block ... FAILED
+test state_snapshot_tests::tests::test_state_consistency_checker_preconditions ... ok
+test state_snapshot_tests::tests::test_state_consistency_checker_validates_transition ... ok
+
+thread 'state_snapshot_tests::tests::test_state_read_write_ordering' (71242) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-sdk-22.0.11/src/storage.rs:108:9:
+this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract
+Writing test snapshot file for test "state_snapshot_tests::tests::test_state_read_write_ordering" to "test_snapshots/state_snapshot_tests/tests/test_state_read_write_ordering.1.json".
+test state_snapshot_tests::tests::test_multiple_operations_maintain_snapshot_consistency ... FAILED
+test state_snapshot_tests::tests::test_concurrent_swaps_maintain_consistency ... FAILED
+test tiers::tests::test_tier_fee_calculations ... ok
+test state_snapshot_tests::tests::test_state_read_write_ordering ... FAILED
+
+thread 'state_snapshot_tests::tests::test_swap_consistent_state_snapshot' (71243) panicked at /home/semicolon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-env-host-22.1.3/src/host.rs:847:9:
+HostError: Error(Auth, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   1: [Diagnostic Event] topics:[error, Error(Auth, InvalidAction)], data:["contract call failed", swap, [XLM, USDCSIM, 500, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]]
+   2: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"caught error from function"
+   3: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:"escalating error to panic"
+   4: [Failed Diagnostic Event (not emitted)] contract:CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, topics:[error, Error(Auth, InvalidAction)], data:["Unauthorized function call for address", CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+   5: [Diagnostic Event] topics:[fn_call, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM, swap], data:[XLM, USDCSIM, 500, CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4]
+
+Writing test snapshot file for test "state_snapshot_tests::tests::test_swap_consistent_state_snapshot" to "test_snapshots/state_snapshot_tests/tests/test_swap_consistent_state_snapshot.1.json".
+test state_snapshot_tests::tests::test_add_liquidity_consistent_state_snapshot ... FAILED
+test state_snapshot_tests::tests::test_swap_consistent_state_snapshot ... FAILED
+
+failures:
+
+---- state_snapshot_tests::tests::test_read_consistency_guard_panics_on_invalid stdout ----
+note: panic did not contain expected string
+      panic message: "this function is not accessible outside of a contract, wrap the call with `env.as_contract()` to access it from a particular contract"
+ expected substring: "State changed during operation execution"
+
+failures:
+    alert_tests::test_alerts_are_isolated_per_user
+    alert_tests::test_cleanup_removes_expired_alerts
+    alert_tests::test_create_market_alert_stored_correctly
+    alert_tests::test_create_portfolio_alert_stored_correctly
+    alert_tests::test_create_price_alert_returns_incrementing_ids
+    alert_tests::test_create_price_alert_visible_in_active_list
+    alert_tests::test_expired_alert_not_returned_in_active_list
+    alert_tests::test_market_alert_does_not_fire_for_different_signal
+    alert_tests::test_market_alert_fires_on_matching_signal
+    alert_tests::test_persistent_alert_zero_expiry_never_expires
+    alert_tests::test_persistent_price_alert_stays_active_after_trigger
+    alert_tests::test_portfolio_liquidation_alert_fires
+    alert_tests::test_portfolio_value_change_alert_fires
+    alert_tests::test_price_alert_below_direction
+    alert_tests::test_price_alert_does_not_fire_if_condition_not_met
+    alert_tests::test_price_alert_fires_above_threshold
+    alert_tests::test_subscribe_alerts_changes_notification_method
+    analytics_dashboard_tests::test_record_trade_with_pnl
+    analytics_dashboard_tests::test_sharpe_ratio_calculation
+    analytics_dashboard_tests::test_win_rate_calculation
+    governance_params::tests::test_duplicate_execution_fails
+    governance_params::tests::test_invalid_param_value_rejected
+    governance_params::tests::test_only_target_param_changes
+    governance_params::tests::test_propose_and_execute_after_timelock
+    governance_tests::governance_tests::test_cancel_proposal
+    governance_tests::governance_tests::test_cast_vote_for
+    governance_tests::governance_tests::test_cast_vote_twice_fails
+    governance_tests::governance_tests::test_create_proposal_basic
+    governance_tests::governance_tests::test_create_proposal_insufficient_voting_power
+    governance_tests::governance_tests::test_create_proposal_invalid_voting_period
+    governance_tests::governance_tests::test_execute_admin_upgrade
+    governance_tests::governance_tests::test_execute_failed_proposal
+    governance_tests::governance_tests::test_execute_fee_change
+    governance_tests::governance_tests::test_execute_passed_proposal
+    governance_tests::governance_tests::test_full_governance_flow
+    governance_tests::governance_tests::test_governance_config_validation
+    governance_tests::governance_tests::test_proposal_cooldown
+    governance_tests::governance_tests::test_quorum_failure
+    governance_tests::governance_tests::test_voting_power_calculation
+    kyc::mxllv_tests::test_operator_limit_enforced
+    kyc::mxllv_tests::test_update_status_validates_reason
+    kyc_tests::test_sensitive_contract_entry_points_require_verified_kyc
+    multihop_swap_tests::test_multi_hop_atomic_execution
+    multihop_swap_tests::test_multi_hop_emits_events
+    multihop_swap_tests::test_multi_hop_respects_slippage_tolerance
+    multihop_swap_tests::test_multi_hop_with_zero_amount
+    multihop_swap_tests::test_single_hop_swap_via_route
+    multihop_swap_tests::test_three_hop_route_execution
+    multihop_swap_tests::test_two_hop_swap_execution
+    oracle_adapter_tests::test_circuit_breaker_deactivates_on_stable_price
+    oracle_adapter_tests::test_circuit_breaker_triggers_on_large_deviation
+    oracle_adapter_tests::test_get_price_returns_fallback_when_circuit_breaker_active
+    oracle_adapter_tests::test_initialize_oracle
+    oracle_adapter_tests::test_invalid_config_rejected
+    oracle_adapter_tests::test_reset_circuit_breaker
+    oracle_adapter_tests::test_set_oracle_active
+    oracle_adapter_tests::test_staleness_check_returns_fallback
+    oracle_adapter_tests::test_twap_calculation
+    oracle_adapter_tests::test_update_config
+    oracle_adapter_tests::test_update_price_success
+    oracle_adapter_tests::test_zero_price_rejected
+    orders_tests::test_cancel_order
+    orders_tests::test_cancel_order_wrong_owner
+    orders_tests::test_get_user_orders
+    orders_tests::test_invalid_order_amount
+    orders_tests::test_invalid_order_price
+    orders_tests::test_match_pending_orders
+    orders_tests::test_order_id_increment
+    orders_tests::test_order_with_expiry
+    orders_tests::test_place_limit_order
+    orders_tests::test_place_stop_loss
+    referral_integration_test::integration_tests::test_referral_functions_public_interface
+    referral_integration_test::integration_tests::test_referral_integration_with_swap
+    referral_system_tests::tests::test_already_referred_prevention
+    referral_system_tests::tests::test_circular_referral_prevention
+    referral_system_tests::tests::test_commission_calculation_direct_only
+    referral_system_tests::tests::test_commission_calculation_two_levels
+    referral_system_tests::tests::test_deep_referral_chain_beyond_two_levels
+    referral_system_tests::tests::test_indirect_circular_referral_prevention
+    referral_system_tests::tests::test_multiple_referrals_same_referrer
+    referral_system_tests::tests::test_negative_fee_no_commission
+    referral_system_tests::tests::test_referral_info_storage
+    referral_system_tests::tests::test_register_referral_success
+    referral_system_tests::tests::test_self_referral_prevention
+    referral_system_tests::tests::test_volume_tracking_and_tier_upgrade
+    referral_system_tests::tests::test_withdraw_commission
+    referral_system_tests::tests::test_zero_fee_no_commission
+    risk_management_tests::risk_management_tests::test_circuit_breaker_inactive_by_default
+    risk_management_tests::risk_management_tests::test_circuit_breaker_integration
+    risk_management_tests::risk_management_tests::test_circuit_breaker_reset
+    risk_management_tests::risk_management_tests::test_circuit_breaker_trigger
+    risk_management_tests::risk_management_tests::test_concentration_limit_integration
+    risk_management_tests::risk_management_tests::test_concentration_risk_low
+    risk_management_tests::risk_management_tests::test_concentration_warning_threshold
+    risk_management_tests::risk_management_tests::test_maximum_position_limits
+    risk_management_tests::risk_management_tests::test_position_limits_basic
+    risk_management_tests::risk_management_tests::test_position_limits_exceeded
+    risk_management_tests::risk_management_tests::test_risk_config_updates
+    risk_management_tests::risk_management_tests::test_risk_limits_integration
+    risk_management_tests::risk_management_tests::test_risk_metrics_calculation
+    state_snapshot_tests::tests::test_add_liquidity_consistent_state_snapshot
+    state_snapshot_tests::tests::test_atomic_operation_executes_successfully
+    state_snapshot_tests::tests::test_atomic_operation_with_validation
+    state_snapshot_tests::tests::test_concurrent_swaps_maintain_consistency
+    state_snapshot_tests::tests::test_multiple_operations_maintain_snapshot_consistency
+    state_snapshot_tests::tests::test_pool_swap_consistent_state_snapshot
+    state_snapshot_tests::tests::test_read_consistency_guard
+    state_snapshot_tests::tests::test_read_consistency_guard_panics_on_invalid
+    state_snapshot_tests::tests::test_remove_liquidity_consistent_state_snapshot
+    state_snapshot_tests::tests::test_snapshot_creation
+    state_snapshot_tests::tests::test_snapshot_ids_increment
+    state_snapshot_tests::tests::test_snapshot_invalid_after_multiple_blocks
+    state_snapshot_tests::tests::test_snapshot_validation_next_block
+    state_snapshot_tests::tests::test_snapshot_validation_same_block
+    state_snapshot_tests::tests::test_state_read_write_ordering
+    state_snapshot_tests::tests::test_swap_consistent_state_snapshot
+
+test result: FAILED. 61 passed; 116 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+error: test failed, to rerun pass `-p counter --lib`

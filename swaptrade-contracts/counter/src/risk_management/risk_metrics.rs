@@ -45,7 +45,7 @@ pub struct RiskConfig {
     /// Maximum position size per asset per user (absolute amount)
     pub max_position_per_asset: i128,
     /// Concentration warning threshold (basis points, 3000 = 30%)
-    pub concentration_warning_threshold: u32,
+    pub concentration_warn_threshold: u32,
     /// Concentration limit threshold (basis points, 5000 = 50%)
     pub concentration_limit_threshold: u32,
     /// Circuit breaker threshold (basis points, 1500 = 15%)
@@ -70,7 +70,7 @@ impl Default for RiskConfig {
         Self {
             max_position_per_user: 1000000000000, // 1M tokens (with 6 decimals)
             max_position_per_asset: 500000000000,  // 500K tokens per asset
-            concentration_warning_threshold: 3000, // 30%
+            concentration_warn_threshold: 3000, // 30%
             concentration_limit_threshold: 5000,   // 50%
             circuit_breaker_threshold: 1500,       // 15%
             circuit_breaker_window: 3600,          // 1 hour

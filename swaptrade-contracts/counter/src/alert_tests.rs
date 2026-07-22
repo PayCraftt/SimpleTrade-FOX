@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, Vec};
+use soroban_sdk::{symbol_short, testutils::{Address as _, Ledger}, Address, Env, Vec};
 
 use crate::alerts::{
     check_market_alerts, check_portfolio_alerts, check_price_alerts, cleanup_alerts,
@@ -82,10 +82,7 @@ fn test_create_portfolio_alert_stored_correctly() {
     let active = get_active_alerts(&env, user);
     assert_eq!(active.len(), 1);
     match active.get(0).unwrap().kind {
-        AlertKind::Portfolio {
-            ref trigger_type,
-            threshold_bps,
-        } => {
+        AlertKind::Portfolio(ref trigger_type, threshold_bps) => {
             assert!(matches!(trigger_type, PortfolioTrigger::ValueChangeBps));
             assert_eq!(threshold_bps, 500);
         }

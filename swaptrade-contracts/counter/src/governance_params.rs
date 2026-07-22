@@ -226,7 +226,7 @@ impl GovernanceParams {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::set_admin;
+    use crate::admin::set_admin;
     use soroban_sdk::{
         testutils::{Address as _, Ledger},
         Address, Env,
@@ -238,7 +238,7 @@ mod tests {
         let contract_id = env.register(crate::CounterContract, ());
         let admin = Address::generate(&env);
         env.as_contract(&contract_id, || {
-            set_admin(env.clone(), admin.clone()).unwrap();
+            set_admin(&env, &admin);
         });
         (env, contract_id, admin)
     }
