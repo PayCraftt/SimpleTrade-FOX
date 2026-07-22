@@ -33,6 +33,7 @@ pub struct PoolRegistry {
     pair_to_pool: Map<(Symbol, Symbol), u64>,
     next_pool_id: u64,
     lp_balances: Map<(u64, Address), i128>,
+    max_hops: u32,
 }
 
 impl PoolRegistry {
@@ -42,7 +43,16 @@ impl PoolRegistry {
             pair_to_pool: Map::new(env),
             next_pool_id: 1,
             lp_balances: Map::new(env),
+            max_hops: 2,
         }
+    }
+
+    pub fn set_max_hops(&mut self, max_hops: u32) {
+        self.max_hops = max_hops;
+    }
+
+    pub fn get_max_hops(&self) -> u32 {
+        self.max_hops
     }
 
     fn normalize_pair(token_a: Symbol, token_b: Symbol) -> (Symbol, Symbol) {
@@ -289,7 +299,10 @@ impl PoolRegistry {
         token_in: Symbol,
         token_out: Symbol,
         amount_in: i128,
+        max_hops: u32,
     ) -> Option<Route> {
+        let effective_max_hops = max_hops.min(self.max_hops).min(3);
+
         let (norm_in, norm_out) = Self::normalize_pair(token_in.clone(), token_out.clone());
         if let Some(pool_id) = self.pair_to_pool.get((norm_in, norm_out)) {
             if let Some(pool) = self.pools.get(pool_id) {
@@ -358,7 +371,32 @@ impl PoolRegistry {
                 }
             }
         }
+
         best_route
+    }
+
+    pub fn simulate_route(
+        &self,
+        route: &Route,
+        amount_in: i128,
+    ) -> Option<(i128, u32)> {
+        if route.pools.len() == 0 || route.tokens.len() < 2 {
+            return None;
+        }
+        let mut current_amount = amount_in;
+        let mut total_fees_bps: u32 = 0;
+
+        for idx in 0..route.pools.len() {
+            let pool_id = route.pools.get(idx)?;
+            let pool = self.pools.get(pool_id)?;
+            let token_in = route.tokens.get(idx)?;
+
+            let output = self.calculate_output(&pool, token_in, current_amount).ok()?;
+            total_fees_bps = total_fees_bps.saturating_add(pool.fee_tier);
+            current_amount = output;
+        }
+
+        Some((current_amount, total_fees_bps))
     }
 
     fn calculate_output(&self, pool: &LiquidityPool, token_in: Symbol, amount_in: i128) -> Result<i128, ContractError> {
