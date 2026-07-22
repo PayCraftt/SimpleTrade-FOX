@@ -8,13 +8,28 @@ use crate::{CounterContract, CounterContractClient};
 
 const PRECISION: i128 = 1_000_000_000_000_000_000;
 
+fn verify_trader(env: &Env, contract_id: &Address, admin: &Address, trader: &Address) {
+    use crate::kyc::{KYCSystem, KYCStatus};
+    use crate::admin::set_admin;
+    let operator = Address::generate(env);
+
+    env.as_contract(contract_id, || {
+        set_admin(env, admin);
+        let _ = KYCSystem::add_operator(env, admin, operator.clone());
+        let _ = KYCSystem::submit_kyc(env, trader);
+        let _ = KYCSystem::update_status(env, &operator, trader, KYCStatus::Verified, None);
+    });
+}
+
 #[test]
 fn test_two_hop_swap_execution() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     let xlm = symbol_short!("XLM");
     let usdc = symbol_short!("USDC");
@@ -33,7 +48,7 @@ fn test_two_hop_swap_execution() {
     assert_eq!(r.tokens.len(), 3); // XLM -> USDC -> BTC
 
     // Execute multi-hop swap
-    let min_out = (r.expected_output as u128).saturating_mul(9500) / 10000; // 5% slippage
+    let min_out = ((r.expected_output as u128).saturating_mul(9500) / 10000) as i128; // 5% slippage
     let result = client.execute_multi_hop_swap(&r, &100, &min_out, &trader);
     
     assert!(result > 0);
@@ -42,10 +57,12 @@ fn test_two_hop_swap_execution() {
 #[test]
 fn test_multi_hop_respects_slippage_tolerance() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     let xlm = symbol_short!("XLM");
     let usdc = symbol_short!("USDC");
@@ -72,10 +89,12 @@ fn test_multi_hop_respects_slippage_tolerance() {
 #[test]
 fn test_multi_hop_atomic_execution() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     let xlm = symbol_short!("XLM");
     let usdc = symbol_short!("USDC");
@@ -105,10 +124,12 @@ fn test_multi_hop_atomic_execution() {
 #[test]
 fn test_multi_hop_emits_events() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     let xlm = symbol_short!("XLM");
     let usdc = symbol_short!("USDC");
@@ -123,7 +144,7 @@ fn test_multi_hop_emits_events() {
     assert!(route.is_some());
 
     let r = route.unwrap();
-    let min_out = (r.expected_output as u128).saturating_mul(9000) / 10000; // 10% slippage
+    let min_out = ((r.expected_output as u128).saturating_mul(9000) / 10000) as i128; // 10% slippage
     let _result = client.execute_multi_hop_swap(&r, &100, &min_out, &trader);
 
     // Events are emitted (verified by successful execution)
@@ -133,10 +154,12 @@ fn test_multi_hop_emits_events() {
 #[test]
 fn test_single_hop_swap_via_route() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     let xlm = symbol_short!("XLM");
     let usdc = symbol_short!("USDC");
@@ -153,7 +176,7 @@ fn test_single_hop_swap_via_route() {
     assert_eq!(r.tokens.len(), 2);
 
     // Execute via multi-hop function (should work for single hop too)
-    let min_out = (r.expected_output as u128).saturating_mul(9500) / 10000;
+    let min_out = ((r.expected_output as u128).saturating_mul(9500) / 10000) as i128;
     let result = client.execute_multi_hop_swap(&r, &100, &min_out, &trader);
     
     assert!(result > 0);
@@ -162,9 +185,12 @@ fn test_single_hop_swap_via_route() {
 #[test]
 fn test_multi_hop_with_invalid_route() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     // Create empty route
     let empty_route = crate::Route {
@@ -182,10 +208,12 @@ fn test_multi_hop_with_invalid_route() {
 #[test]
 fn test_multi_hop_with_zero_amount() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     let xlm = symbol_short!("XLM");
     let usdc = symbol_short!("USDC");
@@ -205,10 +233,12 @@ fn test_multi_hop_with_zero_amount() {
 #[test]
 fn test_three_hop_route_execution() {
     let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
     let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let trader = Address::generate(&env);
+    verify_trader(&env, &contract_id, &admin, &trader);
 
     let xlm = symbol_short!("XLM");
     let usdc = symbol_short!("USDC");
@@ -227,7 +257,7 @@ fn test_three_hop_route_execution() {
     // This test validates that the execution function can handle it if route is provided
     if route.is_some() {
         let r = route.unwrap();
-        let min_out = (r.expected_output as u128).saturating_mul(9000) / 10000;
+        let min_out = ((r.expected_output as u128).saturating_mul(9000) / 10000) as i128;
         let result = client.execute_multi_hop_swap(&r, &100, &min_out, &trader);
         assert!(result > 0);
     }

@@ -74,6 +74,9 @@ pub enum SwapTradeError {
     StakeLocked = 603,
     NoClaimableBonuses = 604,
     DistributionTooEarly = 605,
+    // Farming errors
+    FarmingPoolNotFound = 606,
+    InsufficientStakedLP = 607,
 
     // ── Emergency / circuit-breaker ─────────────────────────────────────────
     NotEmergencyAdmin = 700,

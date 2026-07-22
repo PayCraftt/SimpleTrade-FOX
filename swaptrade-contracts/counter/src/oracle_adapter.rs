@@ -228,7 +228,7 @@ impl OracleAdapter {
     }
 
     /// Calculate price deviation in basis points
-    fn calculate_deviation_bps(old_price: u128, new_price: u128) -> u32 {
+    pub fn calculate_deviation_bps(old_price: u128, new_price: u128) -> u32 {
         if old_price == 0 {
             return u32::MAX;
         }

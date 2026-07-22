@@ -314,6 +314,26 @@ pub fn emergency_fee_override_deactivated(env: &Env, timestamp: u64) {
     );
 }
 
+/// Emitted when the volume-threshold circuit breaker trips and pauses trading.
+///
+/// Off-chain indexers can subscribe to this event to trigger notifications,
+/// webhook calls, or dashboard alerts for the emergency-recovery workflow.
+///
+/// Topic  : ("CircuitBreakerTripped",)
+/// Payload: (current_volume, threshold, window_secs, timestamp)
+pub fn circuit_breaker_tripped(
+    env: &Env,
+    current_volume: i128,
+    threshold: i128,
+    window_secs: u64,
+    timestamp: u64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "CircuitBreakerTripped"),),
+        (current_volume, threshold, window_secs, timestamp),
+    );
+}
+
 /// Emitted when fee adjustment configuration is updated.
 /// Used for audit trail of configuration changes.
 ///

@@ -66,7 +66,7 @@ pub struct Portfolio {
     last_update_timestamp: Map<Address, u64>,          // last time portfolio was recorded
     
     // Advanced Analytics Data
-    trade_history: Map<Address, Vec<TradeRecord>>,     // Detailed trade history per user
+    pub trade_history: Map<Address, Vec<TradeRecord>>,     // Detailed trade history per user
     realized_pnl: Map<Address, i128>,                  // Realized PnL per user
     unrealized_pnl: Map<Address, i128>,                // Unrealized PnL per user
     winning_trades: Map<Address, u32>,                 // Count of winning trades

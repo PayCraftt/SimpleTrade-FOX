@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod dashboard_cache_tests {
-    use crate::{set_admin, CounterContract, CounterContractClient};
+    use crate::{CounterContract, CounterContractClient};
+    use crate::admin::set_admin;
     use core::time::Duration;
     use soroban_sdk::testutils::Address as _;
     use soroban_sdk::{symbol_short, Address, Env};
@@ -73,8 +74,7 @@ mod dashboard_cache_tests {
         let client = CounterContractClient::new(&env, &contract_id);
         let admin = Address::generate(&env);
 
-        let set_admin_result = set_admin(env.clone(), admin.clone());
-        assert!(set_admin_result.is_ok());
+        set_admin(&env, &admin);
 
         let user = Address::generate(&env);
         let xlm = symbol_short!("XLM");
@@ -101,7 +101,7 @@ mod dashboard_cache_tests {
         let client = CounterContractClient::new(&env, &contract_id);
 
         let admin = Address::generate(&env);
-        let _ = set_admin(env.clone(), admin.clone());
+        set_admin(&env, &admin);
         let _ = client.set_cache_ttl(&admin, &3600);
 
         let user = Address::generate(&env);
