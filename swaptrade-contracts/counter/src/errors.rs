@@ -45,6 +45,7 @@ pub enum SwapTradeError {
     // ── Rate limiting / slippage ────────────────────────────────────────────
     RateLimitExceeded = 300,
     SlippageExceeded = 301,
+    Expired = 302,
 
     // ── Liquidity pool ──────────────────────────────────────────────────────
     LPPositionNotFound = 400,
