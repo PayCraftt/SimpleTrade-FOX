@@ -29,6 +29,7 @@ pub enum SeasonError {
     SeasonAlreadyExists = 2,
     NoSeasonActive = 3,
     SeasonStillActive = 4,
+    NotAdmin = 5,
 }
 
 #[contracttype]
