@@ -19,6 +19,7 @@ mod kyc_tests;
 mod liquidity_pool;
 mod rate_limit;
 mod referral_system;
+mod seasons;
 mod state_snapshot;
 #[cfg(test)]
 mod state_snapshot_tests;
@@ -427,6 +428,30 @@ impl CounterContract {
                 .instance()
                 .set(&Symbol::short("v_code"), &CONTRACT_VERSION);
         }
+    }
+
+    pub fn start_season(env: Env, caller: Address, end_time: u64) -> Result<(), seasons::SeasonError> {
+        caller.require_auth();
+        if !admin::is_admin(&env, &caller) {
+            return Err(seasons::SeasonError::NotAdmin);
+        }
+        seasons::start_season(&env, end_time)
+    }
+
+    pub fn end_season(env: Env, caller: Address) -> Result<(), seasons::SeasonError> {
+        caller.require_auth();
+        if !admin::is_admin(&env, &caller) {
+            return Err(seasons::SeasonError::NotAdmin);
+        }
+        seasons::end_season(&env)
+    }
+
+    pub fn get_season_leaderboard(env: Env, season_id: u64) -> Result<Vec<(Address, i128)>, seasons::SeasonError> {
+        seasons::get_season_leaderboard(&env, season_id)
+    }
+
+    pub fn get_current_season(env: Env) -> Result<seasons::Season, seasons::SeasonError> {
+        seasons::get_current_season(&env)
     }
 
     /// Get the current contract version from storage

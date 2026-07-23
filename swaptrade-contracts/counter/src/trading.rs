@@ -5,6 +5,7 @@ use crate::errors::SwapTradeError;
 use crate::storage::PAUSED_KEY;
 use crate::tiers::UserTier;
 use crate::fee_progression::FeeProgression;
+use crate::seasons;
 
 pub fn swap(
     env: Env,
@@ -41,6 +42,9 @@ pub fn swap(
             fee_amount,
         ),
     );
+
+    // Update seasonal leaderboard
+    seasons::update_user_score(&env, &user, amount).unwrap();
 
     // Check price alerts for the XLM token against the swap amount.
     // In production, replace `amount` with oracle price for the traded token.
