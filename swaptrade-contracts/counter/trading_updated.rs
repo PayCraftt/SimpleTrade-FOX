@@ -314,7 +314,7 @@ pub fn execute_multihop_swap(
     let mut intermediate_amounts: soroban_sdk::Vec<i128> = soroban_sdk::Vec::new(env);
     
     for pool in &route.pools {
-        let mut pool_data = registry.pools.get(&pool.id).ok_or(SwapTradeError::LPPositionNotFound)?;
+        let pool_data = registry.pools.get(&pool.id).ok_or(SwapTradeError::LPPositionNotFound)?;
         
         // Perform swap for this hop
         let output = perform_swap(
@@ -326,10 +326,6 @@ pub fn execute_multihop_swap(
             trader.clone(),
             None,
         )?;
-        
-        // Update the pool in the registry
-        registry.pools.set(&pool.id, &pool_data);
-        env.storage().instance().set(POOL_REGISTRY_KEY, &registry);
         
         intermediate_amounts.push_back(current_amount);
         current_amount = output;

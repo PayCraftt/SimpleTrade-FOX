@@ -335,16 +335,13 @@ impl GovernanceSystem {
 
     fn execute_proposal_action(env: &Env, proposal: &Proposal) -> Result<(), SwapTradeError> {
         match &proposal.proposal_type {
-            ProposalType::ParameterChange(param_key, new_value) => {
-                Self::execute_parameter_change(env, param_key, *new_value)
-            }
-            ProposalType::AdminUpgrade(new_admin) => {
-                Self::execute_admin_upgrade(env, new_admin)
-            }
-            ProposalType::EmergencyAction(pause) => {
-                Self::execute_emergency_action(env, *pause)
-            }
-            ProposalType::Custom(..) => {
+            ProposalType::ParameterChange {
+                param_key,
+                new_value,
+            } => Self::execute_parameter_change(env, param_key, *new_value),
+            ProposalType::AdminUpgrade { new_admin } => Self::execute_admin_upgrade(env, new_admin),
+            ProposalType::EmergencyAction { pause } => Self::execute_emergency_action(env, *pause),
+            ProposalType::Custom { .. } => {
                 // Custom proposals require manual execution
                 Ok(())
             }
