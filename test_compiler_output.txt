@@ -1,0 +1,1020 @@
+    Checking counter v0.0.0 (/home/semicolon/Desktop/TechBroAfrica Fox/swaptrade-contract/swaptrade-contracts/counter)
+warning: unused import: `crate::set_admin`
+   --> swaptrade-contracts/counter/src/rate_limit.rs:480:9
+    |
+480 |     use crate::set_admin;
+    |         ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `Address` and `Symbol`
+  --> swaptrade-contracts/counter/src/state_snapshot.rs:13:38
+   |
+13 | use soroban_sdk::{contracttype, Env, Address, Symbol};
+   |                                      ^^^^^^^  ^^^^^^
+
+warning: unused imports: `Map`, `Vec`, and `symbol_short`
+ --> swaptrade-contracts/counter/src/referral_system.rs:1:47
+  |
+1 | use soroban_sdk::{contracttype, Address, Env, Map, Vec, Symbol, symbol_short};
+  |                                               ^^^  ^^^          ^^^^^^^^^^^^
+
+warning: unused import: `Map`
+ --> swaptrade-contracts/counter/src/oracle_adapter.rs:1:61
+  |
+1 | use soroban_sdk::{contracttype, symbol_short, Address, Env, Map, Symbol, Vec};
+  |                                                             ^^^
+
+warning: unused import: `Map`
+ --> swaptrade-contracts/counter/src/orders.rs:1:61
+  |
+1 | use soroban_sdk::{contracttype, symbol_short, Address, Env, Map, Symbol, Vec};
+  |                                                             ^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/orders_tests.rs:3:5
+  |
+3 | use super::*;
+  |     ^^^^^^^^
+
+warning: unused import: `crate::errors::ContractError`
+ --> swaptrade-contracts/counter/src/orders_tests.rs:4:5
+  |
+4 | use crate::errors::ContractError;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:3:5
+  |
+3 | use super::*;
+  |     ^^^^^^^^
+
+warning: unused import: `soroban_sdk::testutils::Address as _`
+ --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:6:5
+  |
+6 | use soroban_sdk::testutils::Address as _;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::errors::ContractError`
+ --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:6:5
+  |
+6 | use crate::errors::ContractError;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Env` and `Vec`
+ --> swaptrade-contracts/counter/src/governance_types.rs:1:42
+  |
+1 | use soroban_sdk::{contracttype, Address, Env, Symbol, Vec, Map};
+  |                                          ^^^          ^^^
+
+warning: unused import: `crate::errors::SwapTradeError`
+ --> swaptrade-contracts/counter/src/governance_types.rs:2:5
+  |
+2 | use crate::errors::SwapTradeError;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Vec` and `contracttype`
+ --> swaptrade-contracts/counter/src/governance_system.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Address, Env, Symbol, Vec, Map};
+  |                   ^^^^^^^^^^^^                        ^^^
+
+warning: unused import: `crate::events::Events`
+ --> swaptrade-contracts/counter/src/governance_system.rs:4:5
+  |
+4 | use crate::events::Events;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Symbol`
+ --> swaptrade-contracts/counter/src/governance_params.rs:7:61
+  |
+7 | use soroban_sdk::{contracttype, symbol_short, Address, Env, Symbol};
+  |                                                             ^^^^^^
+
+warning: unused imports: `Address`, `Map`, and `contracttype`
+ --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                   ^^^^^^^^^^^^       ^^^               ^^^^^^^
+
+warning: unused imports: `Address`, `Env`, `Map`, and `Vec`
+ --> swaptrade-contracts/counter/src/risk_management/risk_metrics.rs:1:33
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                                 ^^^  ^^^          ^^^  ^^^^^^^
+
+warning: unused imports: `Map`, `Vec`, and `contracttype`
+ --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                   ^^^^^^^^^^^^       ^^^          ^^^
+
+warning: unused import: `calculate_user_tier`
+ --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:3:30
+  |
+3 | use crate::tiers::{UserTier, calculate_user_tier};
+  |                              ^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Map`, `Vec`, and `contracttype`
+ --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:1:19
+  |
+1 | use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
+  |                   ^^^^^^^^^^^^       ^^^          ^^^
+
+warning: unused import: `RiskMetrics`
+ --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:3:42
+  |
+3 | use crate::risk_management::{RiskConfig, RiskMetrics};
+  |                                          ^^^^^^^^^^^
+
+warning: unused import: `position::*`
+  --> swaptrade-contracts/counter/src/risk_management/mod.rs:15:9
+   |
+15 | pub use position::*;
+   |         ^^^^^^^^^^^
+
+warning: unused import: `TradeRecord`
+   --> swaptrade-contracts/counter/src/lib.rs:163:82
+    |
+163 | use portfolio::{Asset, CachedPortfolio, CachedTopTraders, LPPosition, Portfolio, TradeRecord};
+    |                                                                                  ^^^^^^^^^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/risk_management_tests.rs:3:9
+  |
+3 |     use super::*;
+  |         ^^^^^^^^
+
+warning: unused import: `Symbol`
+ --> swaptrade-contracts/counter/src/risk_management_tests.rs:5:86
+  |
+5 |     use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env, Symbol, symbol_short};
+  |                                                                                      ^^^^^^
+
+warning: unused imports: `CircuitBreakerState`, `PositionLimitError`, and `RiskMetrics`
+  --> swaptrade-contracts/counter/src/risk_management_tests.rs:9:21
+   |
+ 9 |         RiskConfig, RiskMetrics, CircuitBreakerState,
+   |                     ^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^
+10 |         PositionLimits, ConcentrationRisk, CircuitBreaker, PortfolioRisk,
+11 |         PositionLimitError,
+   |         ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `super::*`
+ --> swaptrade-contracts/counter/src/governance_tests.rs:3:9
+  |
+3 |     use super::*;
+  |         ^^^^^^^^
+
+warning: unused imports: `Symbol` and `symbol_short`
+ --> swaptrade-contracts/counter/src/referral_system_tests.rs:3:33
+  |
+3 | use soroban_sdk::{Env, Address, Symbol, symbol_short};
+  |                                 ^^^^^^  ^^^^^^^^^^^^
+
+warning: unused import: `Ledger as _`
+ --> swaptrade-contracts/counter/src/referral_integration_test.rs:4:48
+  |
+4 |     use soroban_sdk::testutils::{Address as _, Ledger as _};
+  |                                                ^^^^^^^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/events.rs:11:42
+   |
+11 | const EVENT_BUFFER_KEY: Symbol = Symbol::short("evt_buf");
+   |                                          ^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/governance_system.rs:78:22
+   |
+78 |             (Symbol::short("gov"), Symbol::short("proposal_created")),
+   |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/governance_system.rs:78:44
+   |
+78 |             (Symbol::short("gov"), Symbol::short("proposal_created")),
+   |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:146:22
+    |
+146 |             (Symbol::short("gov"), Symbol::short("vote_cast")),
+    |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:146:44
+    |
+146 |             (Symbol::short("gov"), Symbol::short("vote_cast")),
+    |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:209:22
+    |
+209 |             (Symbol::short("gov"), Symbol::short("proposal_executed")),
+    |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:209:44
+    |
+209 |             (Symbol::short("gov"), Symbol::short("proposal_executed")),
+    |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:242:22
+    |
+242 |             (Symbol::short("gov"), Symbol::short("proposal_cancelled")),
+    |                      ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:242:44
+    |
+242 |             (Symbol::short("gov"), Symbol::short("proposal_cancelled")),
+    |                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:340:55
+    |
+340 |                 env.storage().instance().set(&Symbol::short("max_swap"), &new_value);
+    |                                                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:344:55
+    |
+344 |                 env.storage().instance().set(&Symbol::short("fee_bps"), &(new_value as u32));
+    |                                                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:348:55
+    |
+348 |                 env.storage().instance().set(&Symbol::short("rate_win"), &new_value);
+    |                                                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:352:55
+    |
+352 |                 env.storage().instance().set(&Symbol::short("max_slip"), &(new_value as u32));
+    |                                                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:356:55
+    |
+356 |                 env.storage().instance().set(&Symbol::short("paused"), &(new_value != 0));
+    |                                                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/governance_system.rs:392:47
+    |
+392 |         env.storage().instance().set(&Symbol::short("paused"), &pause);
+    |                                               ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:112:94
+    |
+112 |         let usdc_balance = portfolio.balance_of(env, crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+    |                                                                                              ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:145:94
+    |
+145 |         let usdc_balance = portfolio.balance_of(env, crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+    |                                                                                              ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:151:67
+    |
+151 |             positions.set(crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")), usdc_balance);
+    |                                                                   ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/portfolio.rs:161:27
+    |
+161 |             .get(&Symbol::short("risk_cfg"))
+    |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:40:76
+   |
+40 |         let usdc_balance = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:46:49
+   |
+46 |             positions.set(Asset::Custom(Symbol::short("USDCSIM")), usdc_balance);
+   |                                                 ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:42:27
+   |
+42 |             .set(&Symbol::short("circuit"), &state);
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:49:40
+   |
+49 |         state.trigger_reason = Symbol::short("reset");
+   |                                        ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:55:27
+   |
+55 |             .set(&Symbol::short("circuit"), &state);
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:67:27
+   |
+67 |             .get(&Symbol::short("circuit"))
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:85:90
+   |
+85 |         if let Some(current_data) = get_stored_price(env, (asset_symbol.clone(), Symbol::short("USD"))) {
+   |                                                                                          ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:92:68
+   |
+92 |         if let Some(current_data) = get_stored_price(env, (Symbol::short("USD"), asset_symbol.clone())) {
+   |                                                                    ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:150:27
+    |
+150 |             .get(&Symbol::short("risk_cfg"))
+    |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/risk_metrics.rs:108:37
+    |
+108 |             trigger_reason: Symbol::short("none"),
+    |                                     ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:78:76
+   |
+78 |         let usdc_balance = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:87:27
+   |
+87 |             .get(&Symbol::short("risk_cfg"))
+   |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/position_limits.rs:97:47
+   |
+97 |         env.storage().instance().set(&Symbol::short("risk_cfg"), config);
+   |                                               ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:21:74
+   |
+21 |         let usdc_value = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                                                          ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:55:74
+   |
+55 |         let usdc_value = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                                                          ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:76:74
+   |
+76 |         let usdc_value = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                                                          ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:96:74
+   |
+96 |         let usdc_value = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+   |                                                                          ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:110:76
+    |
+110 |         let usdc_balance = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+    |                                                                            ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/risk_management/concentration_risk.rs:119:27
+    |
+119 |             .get(&Symbol::short("risk_cfg"))
+    |                           ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/migration.rs:42:23
+   |
+42 |         .get(&Symbol::short("v_code"))
+   |                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+  --> swaptrade-contracts/counter/src/migration.rs:50:23
+   |
+50 |         .set(&Symbol::short("v_code"), &version);
+   |                       ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/lib.rs:310:31
+    |
+310 |                 .set(&Symbol::short("v_code"), &CONTRACT_VERSION);
+    |                               ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/lib.rs:331:41
+    |
+331 |         let asset = if token == Symbol::short("XLM") {
+    |                                         ^^^^^
+
+warning: use of deprecated associated function `soroban_sdk::Symbol::short`: use [symbol_short!()]
+   --> swaptrade-contracts/counter/src/lib.rs:350:41
+    |
+350 |         let asset = if token == Symbol::short("XLM") {
+    |                                         ^^^^^
+
+warning: unused import: `testutils::Ledger`
+ --> swaptrade-contracts/counter/src/risk_management_tests.rs:5:48
+  |
+5 |     use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env, Symbol, symbol_short};
+  |                                                ^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Ledger`
+ --> swaptrade-contracts/counter/src/referral_system_tests.rs:4:48
+  |
+4 |     use soroban_sdk::testutils::{Address as _, Ledger as _};
+  |                                                ^^^^^^
+
+warning: unused variable: `portfolio`
+   --> swaptrade-contracts/counter/src/invariants.rs:100:5
+    |
+100 |     portfolio: &Portfolio,
+    |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_portfolio`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `sym`
+   --> swaptrade-contracts/counter/src/kyc.rs:166:27
+    |
+166 | fn validate_symbol_length(sym: &Symbol, max_len: u32) -> Result<(), KYCError> {
+    |                           ^^^ help: if this is intentional, prefix it with an underscore: `_sym`
+
+warning: unused variable: `max_len`
+   --> swaptrade-contracts/counter/src/kyc.rs:166:41
+    |
+166 | fn validate_symbol_length(sym: &Symbol, max_len: u32) -> Result<(), KYCError> {
+    |                                         ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_len`
+
+warning: unused variable: `env`
+  --> swaptrade-contracts/counter/src/liquidity_pool.rs:58:9
+   |
+58 |         env: &Env,
+   |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/liquidity_pool.rs:114:9
+    |
+114 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/liquidity_pool.rs:177:9
+    |
+177 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/liquidity_pool.rs:225:9
+    |
+225 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/referral_system.rs:149:28
+    |
+149 | pub fn get_tier_for_volume(env: &Env, volume: i128) -> TierConfig {
+    |                            ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `capacity`
+  --> swaptrade-contracts/counter/src/../batch.rs:57:41
+   |
+57 |     pub fn new_with_capacity(env: &Env, capacity: u32) -> Self {
+   |                                         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_capacity`
+
+warning: unused variable: `xlm_key`
+   --> swaptrade-contracts/counter/src/../batch.rs:283:17
+    |
+283 |             let xlm_key = (user.clone(), Asset::XLM);
+    |                 ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_xlm_key`
+
+warning: unused variable: `usdc_key`
+   --> swaptrade-contracts/counter/src/../batch.rs:284:17
+    |
+284 |             let usdc_key = (user.clone(), Asset::Custom(Symbol::new(env, "USDCSIM")));
+    |                 ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_usdc_key`
+
+warning: variable does not need to be mutable
+   --> swaptrade-contracts/counter/src/oracle_adapter.rs:148:13
+    |
+148 |         let mut config = Self::get_config(env, &pair)?;
+    |             ----^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:103:9
+    |
+103 |     let mut ledger = env.ledger();
+    |         ----^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> swaptrade-contracts/counter/src/oracle_adapter_tests.rs:136:13
+    |
+136 |         let mut ledger = env.ledger();
+    |             ----^^^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: unused variable: `pool1`
+  --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:24:9
+   |
+24 |     let pool1 = client.register_pool(&admin, &xlm, &usdc, &10000, &10000, &30);
+   |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_pool1`
+
+warning: unused variable: `pool2`
+  --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:25:9
+   |
+25 |     let pool2 = client.register_pool(&admin, &usdc, &btc, &10000, &5000, &30);
+   |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_pool2`
+
+warning: unused variable: `total_voting_power`
+   --> swaptrade-contracts/counter/src/governance_system.rs:294:13
+    |
+294 |         let total_voting_power = proposal.total_voting_power;
+    |             ^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_total_voting_power`
+
+warning: unused variable: `size`
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:60:21
+   |
+60 |         for (asset, size) in positions.iter() {
+   |                     ^^^^ help: if this is intentional, prefix it with an underscore: `_size`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:186:30
+    |
+186 |     pub fn credit(&mut self, env: &Env, token: Asset, user: Address, amount: i128) {
+    |                              ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:226:29
+    |
+226 |     pub fn debit(&mut self, env: &Env, token: Asset, from: Address, amount: i128) {
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:316:29
+    |
+316 |     pub fn has_badge(&self, env: &Env, user: Address, badge: Badge) -> bool {
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:342:30
+    |
+342 |     pub fn balance_of(&self, env: &Env, token: Asset, user: Address) -> i128 {
+    |                              ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:349:33
+    |
+349 |     pub fn get_portfolio(&self, env: &Env, user: Address) -> (u32, i128) {
+    |                                 ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:405:44
+    |
+405 |     pub fn get_last_portfolio_value(&self, env: &Env, user: Address) -> Option<i128> {
+    |                                            ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:519:9
+    |
+519 |         env: &Env,
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:780:38
+    |
+780 |     fn get_total_user_balance(&self, env: &Env, user: Address) -> i128 {
+    |                                      ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `to`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:855:41
+    |
+855 |     fn format_pair_helper(from: Symbol, to: Symbol) -> Symbol {
+    |                                         ^^ help: if this is intentional, prefix it with an underscore: `_to`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:914:41
+    |
+914 |     fn update_stats_on_trade(&mut self, env: &Env, user: Address, swap_amount: i128) {
+    |                                         ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+   --> swaptrade-contracts/counter/src/../portfolio.rs:941:38
+    |
+941 |     fn update_top_traders(&mut self, env: &Env, user: Address) {
+    |                                      ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1113:48
+     |
+1113 |     pub fn invariant_asset_conservation(&self, env: &Env) -> bool {
+     |                                                ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `env`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1151:48
+     |
+1151 |     pub fn invariant_state_monotonicity(&self, env: &Env, previous_version: u32, current_version: u32, previous_timestamp: u64, cu...
+     |                                                ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `user`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1248:46
+     |
+1248 |     pub fn invariant_badge_uniqueness(&self, user: &Address, badges: &Vec<Badge>, env: &Env) -> bool {
+     |                                              ^^^^ help: if this is intentional, prefix it with an underscore: `_user`
+
+warning: unused variable: `env`
+    --> swaptrade-contracts/counter/src/../portfolio.rs:1248:83
+     |
+1248 |     pub fn invariant_badge_uniqueness(&self, user: &Address, badges: &Vec<Badge>, env: &Env) -> bool {
+     |                                                                                   ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `price`
+  --> swaptrade-contracts/counter/src/../trading.rs:70:9
+   |
+70 |     let price = match get_price_with_staleness_check(env, from.clone(), to.clone()) {
+   |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_price`
+
+warning: unused variable: `env`
+  --> swaptrade-contracts/counter/src/risk_management_tests.rs:60:13
+   |
+60 |         let env = Env::default();
+   |             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `from`
+   --> swaptrade-contracts/counter/src/risk_management_tests.rs:201:13
+    |
+201 |         let from = symbol_short!("XLM");
+    |             ^^^^ help: if this is intentional, prefix it with an underscore: `_from`
+
+warning: unused variable: `admin`
+   --> swaptrade-contracts/counter/src/risk_management_tests.rs:235:13
+    |
+235 |         let admin = Address::generate(&env);
+    |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_admin`
+
+warning: unused variable: `admin`
+  --> swaptrade-contracts/counter/src/referral_integration_test.rs:10:13
+   |
+10 |         let admin = Address::generate(&env);
+   |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_admin`
+
+warning: unused variable: `admin`
+  --> swaptrade-contracts/counter/src/referral_integration_test.rs:39:13
+   |
+39 |         let admin = Address::generate(&env);
+   |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_admin`
+
+warning: constant `BRIDGE_COUNTER_KEY` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:24:7
+   |
+24 | const BRIDGE_COUNTER_KEY: &str = "bridge_counter";
+   |       ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `BRIDGE_REQUEST_PREFIX` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:25:7
+   |
+25 | const BRIDGE_REQUEST_PREFIX: &str = "bridge_req";
+   |       ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `initiate_bridge` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:27:8
+   |
+27 | pub fn initiate_bridge(
+   |        ^^^^^^^^^^^^^^^
+
+warning: function `confirm_bridge` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:66:8
+   |
+66 | pub fn confirm_bridge(env: &Env, oracle: Address, request_id: u64) {
+   |        ^^^^^^^^^^^^^^
+
+warning: function `fail_bridge` is never used
+  --> swaptrade-contracts/counter/src/bridge.rs:85:8
+   |
+85 | pub fn fail_bridge(env: &Env, oracle: Address, request_id: u64) {
+   |        ^^^^^^^^^^^
+
+warning: function `get_bridge_request` is never used
+   --> swaptrade-contracts/counter/src/bridge.rs:104:8
+    |
+104 | pub fn get_bridge_request(env: &Env, request_id: u64) -> BridgeRequest {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: associated functions `swap_executed`, `liquidity_added`, `liquidity_removed`, `user_tier_changed`, `admin_paused`, and `admin_resumed` are never used
+   --> swaptrade-contracts/counter/src/events.rs:16:12
+    |
+ 15 | impl Events {
+    | ----------- associated functions in this implementation
+ 16 |     pub fn swap_executed(
+    |            ^^^^^^^^^^^^^
+...
+ 31 |     pub fn liquidity_added(
+    |            ^^^^^^^^^^^^^^^
+...
+ 45 |     pub fn liquidity_removed(
+    |            ^^^^^^^^^^^^^^^^^
+...
+ 84 |     pub fn user_tier_changed(
+    |            ^^^^^^^^^^^^^^^^^
+...
+ 97 |     pub fn admin_paused(env: &Env, admin: Address, timestamp: i64) {
+    |            ^^^^^^^^^^^^
+...
+102 |     pub fn admin_resumed(env: &Env, admin: Address, timestamp: i64) {
+    |            ^^^^^^^^^^^^^
+
+warning: function `alert_triggered` is never used
+   --> swaptrade-contracts/counter/src/events.rs:118:8
+    |
+118 | pub fn alert_triggered(
+    |        ^^^^^^^^^^^^^^^
+
+warning: function `alert_created` is never used
+   --> swaptrade-contracts/counter/src/events.rs:139:8
+    |
+139 | pub fn alert_created(env: &Env, owner: Address, alert_id: u64, kind_tag: Symbol, expires_at: u64) {
+    |        ^^^^^^^^^^^^^
+
+warning: function `network_congestion_changed` is never used
+   --> swaptrade-contracts/counter/src/events.rs:243:8
+    |
+243 | pub fn network_congestion_changed(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fee_adjustment_applied` is never used
+   --> swaptrade-contracts/counter/src/events.rs:261:8
+    |
+261 | pub fn fee_adjustment_applied(
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `emergency_fee_override_activated` is never used
+   --> swaptrade-contracts/counter/src/events.rs:286:8
+    |
+286 | pub fn emergency_fee_override_activated(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `emergency_fee_override_deactivated` is never used
+   --> swaptrade-contracts/counter/src/events.rs:303:8
+    |
+303 | pub fn emergency_fee_override_deactivated(env: &Env, timestamp: u64) {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fee_configuration_updated` is never used
+   --> swaptrade-contracts/counter/src/events.rs:315:8
+    |
+315 | pub fn fee_configuration_updated(env: &Env, admin: Address, change_type: Symbol, timestamp: u64) {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fee_statistics_report` is never used
+   --> swaptrade-contracts/counter/src/events.rs:327:8
+    |
+327 | pub fn fee_statistics_report(
+    |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_SLIPPAGE_BPS` is never used
+  --> swaptrade-contracts/counter/src/invariants.rs:14:7
+   |
+14 | const MAX_SLIPPAGE_BPS: u128 = 10000;
+   |       ^^^^^^^^^^^^^^^^
+
+warning: constant `PRECISION` is never used
+  --> swaptrade-contracts/counter/src/invariants.rs:16:7
+   |
+16 | const PRECISION: u128 = 1_000_000_000_000_000_000;
+   |       ^^^^^^^^^
+
+warning: function `verify_swap_invariants` is never used
+  --> swaptrade-contracts/counter/src/invariants.rs:98:8
+   |
+98 | pub fn verify_swap_invariants(
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_add_liquidity_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:144:8
+    |
+144 | pub fn verify_add_liquidity_invariants(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_remove_liquidity_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:196:8
+    |
+196 | pub fn verify_remove_liquidity_invariants(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_batch_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:242:8
+    |
+242 | pub fn verify_batch_invariants(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `invariant_rate_limit_monotonic` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:421:8
+    |
+421 | pub fn invariant_rate_limit_monotonic(previous_count: u32, current_count: u32) -> bool {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `invariant_badge_uniqueness` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:436:8
+    |
+436 | pub fn invariant_badge_uniqueness(env: &Env, portfolio: &Portfolio, user: &Address) -> bool {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `invariant_trading_volume_non_negative` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:446:8
+    |
+446 | pub fn invariant_trading_volume_non_negative(portfolio: &Portfolio) -> bool {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `get_invariant_report` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:462:8
+    |
+462 | pub fn get_invariant_report(env: &Env, portfolio: &Portfolio) -> Vec<(Symbol, bool)> {
+    |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `assert_all_invariants` is never used
+   --> swaptrade-contracts/counter/src/invariants.rs:501:8
+    |
+501 | pub fn assert_all_invariants(env: &Env, portfolio: &Portfolio) {
+    |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: trait `PriceFeed` is never used
+  --> swaptrade-contracts/counter/src/oracle.rs:21:11
+   |
+21 | pub trait PriceFeed {
+   |           ^^^^^^^^^
+
+warning: function `get_price_safe` is never used
+  --> swaptrade-contracts/counter/src/oracle.rs:78:8
+   |
+78 | pub fn get_price_safe(env: &Env, pair: (Symbol, Symbol)) -> Result<u128, ContractError> {
+   |        ^^^^^^^^^^^^^^
+
+warning: constant `PRECISION` is never used
+ --> swaptrade-contracts/counter/src/multihop_swap_tests.rs:9:7
+  |
+9 | const PRECISION: i128 = 1_000_000_000_000_000_000;
+  |       ^^^^^^^^^
+
+warning: struct `PositionManager` is never constructed
+ --> swaptrade-contracts/counter/src/risk_management/position.rs:6:12
+  |
+6 | pub struct PositionManager;
+  |            ^^^^^^^^^^^^^^^
+
+warning: associated functions `record_position_change`, `get_position_size`, `get_user_positions`, and `has_exceeded_limits` are never used
+  --> swaptrade-contracts/counter/src/risk_management/position.rs:10:12
+   |
+ 8 | impl PositionManager {
+   | -------------------- associated functions in this implementation
+ 9 |     /// Record a position change and check limits
+10 |     pub fn record_position_change(
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+...
+21 |     pub fn get_position_size(
+   |            ^^^^^^^^^^^^^^^^^
+...
+31 |     pub fn get_user_positions(
+   |            ^^^^^^^^^^^^^^^^^^
+...
+53 |     pub fn has_exceeded_limits(
+   |            ^^^^^^^^^^^^^^^^^^^
+
+warning: function `check_circuit_breaker` is never used
+ --> swaptrade-contracts/counter/src/risk_management/volatility.rs:3:8
+  |
+3 | pub fn check_circuit_breaker(env: &Env, asset: Symbol) -> bool {
+  |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `send_alert` is never used
+ --> swaptrade-contracts/counter/src/risk_management/alerts.rs:3:8
+  |
+3 | pub fn send_alert(env: &Env, user: Symbol, message: Symbol) {
+  |        ^^^^^^^^^^
+
+warning: associated functions `check_circuit_breaker`, `get_price_changes_in_window`, `calculate_max_price_change`, and `get_risk_config` are never used
+   --> swaptrade-contracts/counter/src/risk_management/circuit_breaker.rs:10:12
+    |
+  8 | impl CircuitBreaker {
+    | ------------------- associated functions in this implementation
+  9 |     /// Check if circuit breaker should be triggered
+ 10 |     pub fn check_circuit_breaker(env: &Env, asset_symbol: &Symbol) -> Result<bool, ContractError> {
+    |            ^^^^^^^^^^^^^^^^^^^^^
+...
+ 72 |     fn get_price_changes_in_window(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+106 |     fn calculate_max_price_change(prices: &Vec<(u64, u128)>) -> u32 {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+147 |     fn get_risk_config(env: &Env) -> RiskConfig {
+    |        ^^^^^^^^^^^^^^^
+
+warning: constant `MIN_STAKING_PERIOD_SECS` is never used
+  --> swaptrade-contracts/counter/src/staking_bonus.rs:22:7
+   |
+22 | const MIN_STAKING_PERIOD_SECS: u64 = 30 * 24 * 60 * 60;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/invariants.rs:306:5
+    |
+306 |     metrics.trades_executed >= 0 && metrics.failed_orders >= 0 && metrics.balances_updated >= 0
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_comparisons)]` on by default
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/invariants.rs:306:37
+    |
+306 |     metrics.trades_executed >= 0 && metrics.failed_orders >= 0 && metrics.balances_updated >= 0
+    |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/invariants.rs:306:67
+    |
+306 |     metrics.trades_executed >= 0 && metrics.failed_orders >= 0 && metrics.balances_updated >= 0
+    |                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused `std::result::Result` that must be used
+   --> swaptrade-contracts/counter/src/kyc_tests.rs:434:13
+    |
+434 | /             CounterContract::swap(
+435 | |                 env.clone(),
+436 | |                 symbol_short!("XLM"),
+437 | |                 symbol_short!("USDCSIM"),
+438 | |                 100,
+439 | |                 user.clone(),
+440 | |             );
+    | |_____________^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+    = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: use `let _ = ...` to ignore the resulting value
+    |
+434 |             let _ = CounterContract::swap(
+    |             +++++++
+
+warning: unused `std::result::Result` that must be used
+   --> swaptrade-contracts/counter/src/kyc_tests.rs:477:13
+    |
+477 |             CounterContract::add_liquidity(env.clone(), 100, 100, user.clone());
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+    |
+477 |             let _ = CounterContract::add_liquidity(env.clone(), 100, 100, user.clone());
+    |             +++++++
+
+warning: unused `std::result::Result` that must be used
+   --> swaptrade-contracts/counter/src/kyc_tests.rs:482:13
+    |
+482 |             CounterContract::stake(env.clone(), user.clone(), 100, 30);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+    |
+482 |             let _ = CounterContract::stake(env.clone(), user.clone(), 100, 30);
+    |             +++++++
+
+warning: comparison is useless due to type limits
+   --> swaptrade-contracts/counter/src/analytics_dashboard_tests.rs:181:13
+    |
+181 |     assert!(summary.max_drawdown >= 0);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `counter` (lib test) generated 155 warnings (run `cargo fix --lib -p counter --tests` to apply 68 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.07s

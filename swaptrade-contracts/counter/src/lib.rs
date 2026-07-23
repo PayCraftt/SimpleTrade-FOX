@@ -11,6 +11,7 @@ mod alerts;
 mod bridge;
 mod errors;
 mod events;
+mod faucet;
 mod invariants;
 mod kyc;
 #[cfg(test)]
@@ -78,7 +79,6 @@ mod network_congestion;
 
 #[cfg(all(test, feature = "experimental"))]
 mod dynamic_fee_adjustment_tests;
-mod risk_management_tests;
 
 // Staking Bonus System
 mod staking_bonus;
@@ -165,8 +165,8 @@ pub use zkp_types::{
 #[cfg(feature = "experimental")]
 pub use zkp_verification::ProofVerifier;
 
-use portfolio::{Asset, CachedPortfolio, CachedTopTraders, LPPosition, Portfolio};
-pub use portfolio::{Badge, Metrics, Transaction};
+use portfolio::{Asset, CachedPortfolio, CachedTopTraders, LPPosition, Portfolio, TradeRecord};
+pub use portfolio::{Badge, Metrics, Transaction, TradeRecord as PubTradeRecord};
 pub use rate_limit::{RateLimitStatus, RateLimiter};
 pub use tiers::UserTier;
 use trading::perform_swap;
@@ -436,6 +436,21 @@ impl CounterContract {
     ) -> Result<i128, ContractError> {
         require_authenticated_verified_user(&env, &user)?;
 
+        // Oracle validation
+        use crate::oracle::{AggregatorV3Interface, OracleWrapper};
+        let oracle = OracleWrapper;
+        let (price, timestamp) = oracle.latest_round_data(&env, (from.clone(), to.clone()))?;
+        
+        // Basic staleness check (e.g., 5 minutes = 300 seconds)
+        if env.ledger().timestamp().saturating_sub(timestamp) > 300 {
+            return Err(ContractError::StalePrice);
+        }
+        
+        // Minimal price check (price must be positive)
+        if price <= 0 {
+             return Err(ContractError::InvalidPrice);
+        }
+
         let mut portfolio: Portfolio = env
             .storage()
             .instance()
@@ -487,12 +502,19 @@ impl CounterContract {
             return Err(ContractError::InvalidAmount); // Position limit exceeded
         }
 
-        let fee_bps = user_tier.effective_fee_bps();
+        let fee_bps = tiers::get_effective_fee_bps(&env, user_tier.clone());
 
         // Calculate fee amount (fee is collected on input amount)
         let fee_amount = (amount * fee_bps as i128) / 10000;
         let swap_amount = amount - fee_amount;
 
+        // Calculate oracle-based minimum amount
+        let expected_min_amount = (swap_amount as u128 * price) / crate::trading::PRECISION;
+        let slippage_tolerance_bps = 500; // 5%
+        let oracle_min_amount = expected_min_amount * (10000 - slippage_tolerance_bps) / 10000;
+        
+        let required_min = core::cmp::max(min_amount_out as u128, oracle_min_amount);
+        
         // Collect the fee
         if fee_amount > 0 {
             // Deduct from user
@@ -522,6 +544,10 @@ impl CounterContract {
             swap_amount,
             user.clone(),
         );
+        
+        if out_amount < required_min as i128 {
+            return Err(ContractError::SlippageExceeded);
+        }
 
         portfolio.record_trade(&env, user.clone());
 
@@ -1324,9 +1350,33 @@ impl CounterContract {
         token_in: Symbol,
         token_out: Symbol,
         amount_in: i128,
+        max_hops: u32,
     ) -> Option<Route> {
         let registry = load_pool_registry(&env);
-        registry.find_best_route(&env, token_in, token_out, amount_in)
+        registry.find_best_route(&env, token_in, token_out, amount_in, max_hops)
+    }
+
+    pub fn set_max_hops(env: Env, caller: Address, max_hops: u32) -> Result<(), ContractError> {
+        caller.require_auth();
+        crate::admin::require_admin(&env, &caller)?;
+        let mut registry = load_pool_registry(&env);
+        registry.set_max_hops(max_hops);
+        save_pool_registry(&env, &registry);
+        Ok(())
+    }
+
+    pub fn get_max_hops(env: Env) -> u32 {
+        let registry = load_pool_registry(&env);
+        registry.get_max_hops()
+    }
+
+    pub fn simulate_route(
+        env: Env,
+        route: Route,
+        amount_in: i128,
+    ) -> Option<(i128, u32)> {
+        let registry = load_pool_registry(&env);
+        registry.simulate_route(&route, amount_in)
     }
 
     /// Execute a multi-hop swap along a discovered route
@@ -1353,6 +1403,34 @@ impl CounterContract {
     pub fn get_pool_lp_balance(env: Env, pool_id: u64, provider: Address) -> i128 {
         let registry = load_pool_registry(&env);
         registry.get_lp_balance(pool_id, provider)
+    }
+
+    // ===== VOLUME CIRCUIT BREAKER =====
+
+    /// Set the volume-threshold circuit breaker configuration (admin only).
+    pub fn set_circuit_breaker_threshold(
+        env: Env,
+        admin: Address,
+        window_secs: u64,
+        max_volume: i128,
+    ) -> Result<(), SwapTradeError> {
+        risk_management::volume_circuit_breaker::set_threshold(&env, admin, window_secs, max_volume)
+    }
+
+    /// Get the current status of the volume-threshold circuit breaker.
+    /// Returns `{ tripped, current_volume, threshold, window }`.
+    pub fn get_circuit_breaker_status(
+        env: Env,
+    ) -> risk_management::VolumeCircuitBreakerStatus {
+        risk_management::volume_circuit_breaker::get_status(&env)
+    }
+
+    /// Reset the volume-threshold circuit breaker and restore trading (admin only).
+    pub fn reset_circuit_breaker(
+        env: Env,
+        admin: Address,
+    ) -> Result<(), SwapTradeError> {
+        risk_management::volume_circuit_breaker::reset(&env, admin)
     }
 
     pub fn set_price(env: Env, token_pair: (Symbol, Symbol), price: u128) {
@@ -1464,6 +1542,21 @@ impl CounterContract {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // Flash Loan Module
+    // ────────────────────────────────────────────────────────────────────────
+
+    pub fn flash_loan(
+        env: Env,
+        pool_id: u64,
+        receiver: Address,
+        asset: Symbol,
+        amount: i128,
+        data: Vec<u8>,
+    ) -> Result<i128, ContractError> {
+        flash_loan::FlashLoanManager::flash_loan(&env, pool_id, receiver, asset, amount, data)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // Advanced Order Types (Limit & Stop-Loss)
     // ────────────────────────────────────────────────────────────────────────
 
@@ -1509,6 +1602,27 @@ impl CounterContract {
             trigger_price,
             expires_at,
         )
+    }
+
+    /// Cancel an existing order
+    /// Place a recurring (DCA) order that executes on a fixed schedule
+    pub fn place_recurring_order(
+        env: Env,
+        token_in: Symbol,
+        token_out: Symbol,
+        amount_in: i128,
+        interval_secs: u64,
+        occurrences: u64,
+        expires_at: Option<u64>,
+        user: Address,
+    ) -> Result<u64, ContractError> {
+        require_authenticated_verified_user(&env, &user)?;
+        orders::OrderManager::place_recurring_order(&env, user, token_in, token_out, amount_in, interval_secs, occurrences, expires_at)
+    }
+
+    /// Execute all due recurring orders
+    pub fn execute_due_orders(env: Env) -> Result<Vec<u64>, ContractError> {
+        orders::OrderManager::execute_due_orders(&env)
     }
 
     /// Cancel an existing order
@@ -1704,9 +1818,159 @@ impl CounterContract {
     pub fn withdraw_commission(env: Env, user: Address) -> i128 {
         referral_system::withdraw_commission(&env, user)
     }
+
+    // ── Tier-Based Fee Discounts ───────────────────────────────────────────
+
+    pub fn get_effective_fee_bps(env: Env, user_tier: UserTier) -> u32 {
+        tiers::get_effective_fee_bps(&env, user_tier)
+    }
+
+    pub fn set_tier_discount(
+        env: Env,
+        admin: Address,
+        tier: UserTier,
+        discount_bps: u32,
+    ) -> Result<(), ContractError> {
+        admin.require_auth();
+        tiers::set_tier_discount_bps(&env, &admin, tier, discount_bps)
+    }
+
+    pub fn get_tier_discount(env: Env, tier: UserTier) -> u32 {
+        tiers::get_tier_discount_bps(&env, tier)
+    }
+
+    pub fn get_all_tier_discounts(env: Env) -> Map<UserTier, u32> {
+        tiers::get_all_tier_discounts(&env)
+    }
+
+    pub fn calculate_effective_fee(env: Env, swap_amount: i128, user_tier: UserTier) -> i128 {
+        tiers::calculate_effective_fee(&env, swap_amount, user_tier)
+    // ────────────────────────────────────────────────────────────────────────
+    // Faucet – simulated token drip for new users
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// Claim simulated tokens from the faucet for a given asset.
+    /// Enforces a per-user, per-asset cooldown set via `set_faucet_config`.
+    pub fn claim_faucet(env: Env, user: Address, asset: Symbol) -> Result<i128, SwapTradeError> {
+        faucet::claim_faucet(&env, &user, asset)
+    }
+
+    /// Set faucet drip amount and cooldown for an asset (admin only).
+    pub fn set_faucet_config(
+        env: Env,
+        caller: Address,
+        asset: Symbol,
+        drip_amount: i128,
+        cooldown_secs: u64,
+    ) -> Result<(), SwapTradeError> {
+        faucet::set_faucet_config(&env, &caller, asset, drip_amount, cooldown_secs)
+    }
+
+    /// Get faucet configuration for an asset.
+    pub fn get_faucet_config(env: Env, asset: Symbol) -> Result<faucet::FaucetConfig, SwapTradeError> {
+        faucet::get_faucet_config(&env, asset)
+    // ── Governance System ───────────────────────────────────────────────────
+
+    /// Create a new governance proposal
+    pub fn create_governance_proposal(
+        env: Env,
+        proposer: Address,
+        proposal_type: governance_types::ProposalType,
+        description: Symbol,
+        voting_period: u64,
+    ) -> Result<u64, SwapTradeError> {
+        governance_system::GovernanceSystem::create_proposal(
+            &env,
+            &proposer,
+            proposal_type,
+            description,
+            voting_period,
+        )
+    }
+
+    /// Cast a vote on a proposal
+    pub fn cast_governance_vote(
+        env: Env,
+        voter: Address,
+        proposal_id: u64,
+        support: governance_types::VoteOption,
+    ) -> Result<(), SwapTradeError> {
+        governance_system::GovernanceSystem::cast_vote(
+            &env,
+            &voter,
+            proposal_id,
+            support,
+        )
+    }
+
+    /// Execute a passed proposal
+    pub fn execute_governance_proposal(
+        env: Env,
+        executor: Address,
+        proposal_id: u64,
+    ) -> Result<(), SwapTradeError> {
+        governance_system::GovernanceSystem::execute_proposal(
+            &env,
+            &executor,
+            proposal_id,
+        )
+    }
+
+    /// Get a proposal's details
+    pub fn get_governance_proposal(
+        env: Env,
+        proposal_id: u64,
+    ) -> Result<governance_types::Proposal, SwapTradeError> {
+        governance_system::GovernanceSystem::get_proposal(&env, proposal_id)
+    }
+
+    // ── Risk Management ─────────────────────────────────────────────────────
+
+    /// Check if concentration limit is exceeded for a user
+    pub fn check_concentration_limit(env: Env, user: Address) -> bool {
+        let portfolio: Portfolio = env
+            .storage()
+            .instance()
+            .get(&())
+            .unwrap_or_else(|| Portfolio::new(&env));
+        risk_management::ConcentrationRisk::check_concentration_limit(&env, &portfolio, &user)
+    }
+
+    /// Get circuit breaker status
+    pub fn get_circuit_breaker_status(env: Env) -> risk_management::CircuitBreakerState {
+        risk_management::CircuitBreaker::get_circuit_breaker_state(&env)
+    }
+
+    /// Check if a position increase would exceed limits
+    pub fn check_risk_limits(
+        env: Env,
+        user: Address,
+        asset: Symbol,
+        additional_amount: i128,
+    ) -> bool {
+        let portfolio: Portfolio = env
+            .storage()
+            .instance()
+            .get(&())
+            .unwrap_or_else(|| Portfolio::new(&env));
+        let asset_type = if asset == symbol_short!("XLM") {
+            Asset::XLM
+        } else {
+            Asset::Custom(asset)
+        };
+        risk_management::PositionLimits::check_position_limits(
+            &env,
+            &portfolio,
+            &user,
+            &asset_type,
+            additional_amount,
+        )
+        .is_err()
+    }
 }
 
 mod governance_tests;
 #[cfg(all(test, feature = "experimental"))]
 mod migration_tests;
+#[cfg(test)]
 mod risk_management_tests;

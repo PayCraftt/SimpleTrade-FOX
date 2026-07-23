@@ -35,6 +35,7 @@ pub struct PoolRegistry {
     pair_to_pool: Map<(Symbol, Symbol), u64>,
     next_pool_id: u64,
     lp_balances: Map<(u64, Address), i128>,
+    max_hops: u32,
 }
 
 impl PoolRegistry {
@@ -44,7 +45,16 @@ impl PoolRegistry {
             pair_to_pool: Map::new(env),
             next_pool_id: 1,
             lp_balances: Map::new(env),
+            max_hops: 2,
         }
+    }
+
+    pub fn set_max_hops(&mut self, max_hops: u32) {
+        self.max_hops = max_hops;
+    }
+
+    pub fn get_max_hops(&self) -> u32 {
+        self.max_hops
     }
 
     fn normalize_pair(token_a: Symbol, token_b: Symbol) -> (Symbol, Symbol) {
@@ -404,11 +414,14 @@ impl PoolRegistry {
         token_in: Symbol,
         token_out: Symbol,
         amount_in: i128,
+        max_hops: u32,
     ) -> Option<Route> {
+        let effective_max_hops = max_hops.min(self.max_hops).min(3);
+
         let (norm_in, norm_out) = Self::normalize_pair(token_in.clone(), token_out.clone());
         if let Some(pool_id) = self.pair_to_pool.get((norm_in, norm_out)) {
             if let Some(pool) = self.pools.get(pool_id) {
-                let output = self.calculate_output(&pool, token_in.clone(), amount_in)?;
+                let output = self.calculate_output(&pool, token_in.clone(), amount_in).ok()?;
                 let impact = self.calculate_price_impact(&pool, token_in.clone(), amount_in);
                 let mut pools = Vec::new(env);
                 pools.push_back(pool_id);
@@ -473,6 +486,7 @@ impl PoolRegistry {
                 }
             }
         }
+
         best_route
     }
 

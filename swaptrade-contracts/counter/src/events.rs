@@ -140,6 +140,13 @@ impl Events {
         env.events()
             .publish((Symbol::new(env, "AdminResumed"), admin), (timestamp,));
     }
+
+    pub fn faucet_claimed(env: &Env, user: Address, asset: Symbol, amount: i128, timestamp: u64) {
+        env.events().publish(
+            (Symbol::new(env, "FaucetClaimed"), user, asset),
+            (amount, timestamp),
+        );
+    }
 }
 
 /// Emitted whenever an alert fires. Carries enough metadata for an
@@ -344,6 +351,26 @@ pub fn emergency_fee_override_deactivated(env: &Env, timestamp: u64) {
     );
 }
 
+/// Emitted when the volume-threshold circuit breaker trips and pauses trading.
+///
+/// Off-chain indexers can subscribe to this event to trigger notifications,
+/// webhook calls, or dashboard alerts for the emergency-recovery workflow.
+///
+/// Topic  : ("CircuitBreakerTripped",)
+/// Payload: (current_volume, threshold, window_secs, timestamp)
+pub fn circuit_breaker_tripped(
+    env: &Env,
+    current_volume: i128,
+    threshold: i128,
+    window_secs: u64,
+    timestamp: u64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "CircuitBreakerTripped"),),
+        (current_volume, threshold, window_secs, timestamp),
+    );
+}
+
 /// Emitted when fee adjustment configuration is updated.
 /// Used for audit trail of configuration changes.
 ///
@@ -372,5 +399,161 @@ pub fn fee_statistics_report(
     env.events().publish(
         (Symbol::new(env, "FeeStatisticsReport"),),
         (avg_fee_bps, min_fee_bps, max_fee_bps, volatility, timestamp),
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Order, Staking & Flash Loan Events
+// ---------------------------------------------------------------------------
+
+/// Emitted when any order is placed.
+///
+/// Topic  : ("OrderPlaced", user, order_id)
+/// Payload: (order_type, token_in, token_out, amount_in, timestamp)
+pub fn order_placed(
+    env: &Env,
+    user: Address,
+    order_id: i128,
+    order_type: Symbol,
+    token_in: Symbol,
+    token_out: Symbol,
+    amount_in: i128,
+    timestamp: i64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "OrderPlaced"), user, order_id),
+        (order_type, token_in, token_out, amount_in, timestamp),
+    );
+}
+
+/// Emitted when an order is cancelled.
+///
+/// Topic  : ("OrderCancelled", user, order_id)
+/// Payload: (timestamp,)
+pub fn order_cancelled(env: &Env, user: Address, order_id: i128, timestamp: i64) {
+    env.events().publish(
+        (Symbol::new(env, "OrderCancelled"), user, order_id),
+        (timestamp,),
+    );
+}
+
+/// Emitted when an order is filled.
+///
+/// Topic  : ("OrderFilled", user, order_id)
+/// Payload: (amount_filled, price, timestamp)
+pub fn order_filled(
+    env: &Env,
+    user: Address,
+    order_id: i128,
+    amount_filled: i128,
+    price: i128,
+    timestamp: i64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "OrderFilled"), user, order_id),
+        (amount_filled, price, timestamp),
+    );
+}
+
+/// Emitted when a user stakes tokens.
+///
+/// Topic  : ("StakeCreated", user, stake_id)
+/// Payload: (amount, duration_days, timestamp)
+pub fn stake_created(
+    env: &Env,
+    user: Address,
+    stake_id: i128,
+    amount: i128,
+    duration_days: u32,
+    timestamp: i64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "StakeCreated"), user, stake_id),
+        (amount, duration_days, timestamp),
+    );
+}
+
+/// Emitted when a stake is claimed.
+///
+/// Topic  : ("StakeClaimed", user, stake_id)
+/// Payload: (amount, timestamp)
+pub fn stake_claimed(
+    env: &Env,
+    user: Address,
+    stake_id: i128,
+    amount: i128,
+    timestamp: i64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "StakeClaimed"), user, stake_id),
+        (amount, timestamp),
+    );
+}
+
+/// Emitted when bonuses are claimed.
+///
+/// Topic  : ("BonusClaimed", user)
+/// Payload: (total_bonus, timestamp)
+pub fn bonus_claimed(env: &Env, user: Address, total_bonus: i128, timestamp: i64) {
+    env.events().publish(
+        (Symbol::new(env, "BonusClaimed"), user),
+        (total_bonus, timestamp),
+    );
+}
+
+/// Emitted at the start of a flash loan.
+///
+/// Topic  : ("FlashLoanInitiated", receiver, pool_id)
+/// Payload: (asset, amount, fee, timestamp)
+pub fn flash_loan_initiated(
+    env: &Env,
+    receiver: Address,
+    pool_id: i128,
+    asset: Symbol,
+    amount: i128,
+    fee: i128,
+    timestamp: i64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "FlashLoanInitiated"), receiver, pool_id),
+        (asset, amount, fee, timestamp),
+    );
+}
+
+/// Emitted when a flash loan is repaid.
+///
+/// Topic  : ("FlashLoanCompleted", receiver, pool_id)
+/// Payload: (asset, amount_repaid, fee_collected, timestamp)
+pub fn flash_loan_completed(
+    env: &Env,
+    receiver: Address,
+    pool_id: i128,
+    asset: Symbol,
+    amount_repaid: i128,
+    fee_collected: i128,
+    timestamp: i64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "FlashLoanCompleted"), receiver, pool_id),
+        (asset, amount_repaid, fee_collected, timestamp),
+    );
+}
+
+/// Emitted when the best swap route is found.
+///
+/// Topic  : ("RouteFound",)
+/// Payload: (token_in, token_out, amount_in, expected_output, num_hops, timestamp)
+pub fn route_found(
+    env: &Env,
+    token_in: Symbol,
+    token_out: Symbol,
+    amount_in: i128,
+    expected_output: i128,
+    num_hops: u32,
+    timestamp: i64,
+) {
+    env.events().publish(
+        (Symbol::new(env, "RouteFound"),),
+        (token_in, token_out, amount_in, expected_output, num_hops, timestamp),
     );
 }
