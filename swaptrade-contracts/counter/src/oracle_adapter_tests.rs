@@ -21,7 +21,7 @@ fn test_initialize_oracle() {
     setup_oracle(&env, pair.clone());
 
     let (config, state) = OracleAdapter::get_oracle_info(&env, pair).unwrap();
-    
+
     assert!(config.is_active);
     assert_eq!(config.staleness_threshold, 300);
     assert_eq!(config.circuit_breaker_threshold_bps, 1000);
@@ -61,7 +61,7 @@ fn test_circuit_breaker_triggers_on_large_deviation() {
     // Try to update price by 15% (exceeds 10% threshold)
     let new_price = (PRECISION as u128).saturating_mul(11_500) / 10_000;
     let result = OracleAdapter::update_price(&env, pair.clone(), new_price);
-    
+
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContractError::CircuitBreakerTriggered);
 
@@ -133,7 +133,7 @@ fn test_twap_calculation() {
         // Advance time for each observation
         let mut ledger = env.ledger();
         ledger.set_timestamp(env.ledger().timestamp() + 10);
-        
+
         if i == 0 {
             // First update is already done in setup
             continue;
@@ -143,11 +143,11 @@ fn test_twap_calculation() {
 
     // Get price should return TWAP
     let twap_price = OracleAdapter::get_price(&env, pair).unwrap();
-    
+
     // TWAP should be average of all observations
     // Expected average is approximately 5.4% increase
     let expected_avg = PRECISION.saturating_mul(10_540) / 10_000;
-    
+
     // Allow small rounding difference
     assert!(twap_price >= expected_avg - 1_000_000);
     assert!(twap_price <= expected_avg + 1_000_000);
@@ -166,13 +166,14 @@ fn test_update_config() {
     OracleAdapter::update_config(
         &env,
         pair.clone(),
-        Some(600),           // 10 minutes staleness
-        Some(500),           // 5% circuit breaker
-        Some(20),            // TWAP window of 20
-    ).unwrap();
+        Some(600), // 10 minutes staleness
+        Some(500), // 5% circuit breaker
+        Some(20),  // TWAP window of 20
+    )
+    .unwrap();
 
     let (config, _) = OracleAdapter::get_oracle_info(&env, pair).unwrap();
-    
+
     assert_eq!(config.staleness_threshold, 600);
     assert_eq!(config.circuit_breaker_threshold_bps, 500);
     assert_eq!(config.twap_window_size, 20);
@@ -188,14 +189,8 @@ fn test_invalid_config_rejected() {
     setup_oracle(&env, pair.clone());
 
     // Try to set invalid TWAP window size (0)
-    let result = OracleAdapter::update_config(
-        &env,
-        pair.clone(),
-        None,
-        None,
-        Some(0),
-    );
-    
+    let result = OracleAdapter::update_config(&env, pair.clone(), None, None, Some(0));
+
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContractError::InvalidConfig);
 }
@@ -286,7 +281,7 @@ fn test_circuit_breaker_deactivates_on_stable_price() {
 #[test]
 fn test_deviation_calculation() {
     let old_price = PRECISION;
-    
+
     // 10% deviation = 1000 bps
     let new_price_10pct = (PRECISION as u128).saturating_mul(11_000) / 10_000;
     let deviation = OracleAdapter::calculate_deviation_bps(old_price, new_price_10pct);

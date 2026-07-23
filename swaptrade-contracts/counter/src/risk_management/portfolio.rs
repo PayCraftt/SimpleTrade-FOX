@@ -1,34 +1,32 @@
-use soroban_sdk::{Env, Symbol, Map, Address};
 use crate::portfolio::Portfolio;
-use crate::risk_management::{RiskMetrics, ConcentrationRisk, CircuitBreaker, RiskConfig};
+use crate::risk_management::{CircuitBreaker, ConcentrationRisk, RiskConfig, RiskMetrics};
+use soroban_sdk::{Address, Env, Map, Symbol};
 
 /// Portfolio risk assessment
 pub struct PortfolioRisk;
 
 impl PortfolioRisk {
     /// Calculate comprehensive risk metrics for a user
-    pub fn calculate_risk_metrics(
-        env: &Env,
-        portfolio: &Portfolio,
-        user: &Address,
-    ) -> RiskMetrics {
+    pub fn calculate_risk_metrics(env: &Env, portfolio: &Portfolio, user: &Address) -> RiskMetrics {
         let config = Self::get_risk_config(env);
 
         // Calculate individual risk components
-        let concentration_risk = ConcentrationRisk::calculate_concentration_risk(env, portfolio, user);
+        let concentration_risk =
+            ConcentrationRisk::calculate_concentration_risk(env, portfolio, user);
         let position_size_risk = Self::calculate_position_size_risk(env, portfolio, user);
         let volatility_risk = Self::calculate_volatility_risk(env);
 
         // Calculate overall risk score using weighted average
-        let overall_risk_score = (
-            (concentration_risk as u32 * config.risk_weights.concentration_weight) +
-            (position_size_risk as u32 * config.risk_weights.position_size_weight) +
-            (volatility_risk as u32 * config.risk_weights.volatility_weight)
-        ) / 100;
+        let overall_risk_score = ((concentration_risk as u32
+            * config.risk_weights.concentration_weight)
+            + (position_size_risk as u32 * config.risk_weights.position_size_weight)
+            + (volatility_risk as u32 * config.risk_weights.volatility_weight))
+            / 100;
 
         // Calculate exposure and other metrics
         let total_exposure_usd = Self::calculate_total_exposure(env, portfolio, user);
-        let largest_position_pct = ConcentrationRisk::get_largest_position_percentage(env, portfolio, user);
+        let largest_position_pct =
+            ConcentrationRisk::get_largest_position_percentage(env, portfolio, user);
         let positions_over_limit = Self::count_positions_over_limit(env, portfolio, user);
         let circuit_breaker_active = CircuitBreaker::is_circuit_breaker_active(env);
 
@@ -46,11 +44,7 @@ impl PortfolioRisk {
     }
 
     /// Calculate position size risk (0-100)
-    fn calculate_position_size_risk(
-        env: &Env,
-        portfolio: &Portfolio,
-        user: &Address,
-    ) -> u32 {
+    fn calculate_position_size_risk(env: &Env, portfolio: &Portfolio, user: &Address) -> u32 {
         let config = Self::get_risk_config(env);
         let user_tier = portfolio.get_user_tier(env, user.clone());
 
@@ -60,7 +54,9 @@ impl PortfolioRisk {
 
         for (_, size) in positions.iter() {
             let size_abs = if size < 0 { -size } else { *size };
-            let max_allowed = crate::risk_management::PositionLimits::get_tier_position_limit(&config, &user_tier);
+            let max_allowed = crate::risk_management::PositionLimits::get_tier_position_limit(
+                &config, &user_tier,
+            );
 
             if max_allowed > 0 {
                 let utilization = (size_abs * 100) / max_allowed;
@@ -102,30 +98,28 @@ impl PortfolioRisk {
     }
 
     /// Calculate total exposure in USD
-    fn calculate_total_exposure(
-        env: &Env,
-        portfolio: &Portfolio,
-        user: &Address,
-    ) -> i128 {
+    fn calculate_total_exposure(env: &Env, portfolio: &Portfolio, user: &Address) -> i128 {
         // Simple calculation - in production should use oracle prices
         let xlm_balance = portfolio.balance_of(env, crate::portfolio::Asset::XLM, user.clone());
-        let usdc_balance = portfolio.balance_of(env, crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+        let usdc_balance = portfolio.balance_of(
+            env,
+            crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")),
+            user.clone(),
+        );
 
         // Assume 1 XLM = 1 USD for simulation
         xlm_balance + usdc_balance
     }
 
     /// Count positions that exceed limits
-    fn count_positions_over_limit(
-        env: &Env,
-        portfolio: &Portfolio,
-        user: &Address,
-    ) -> u32 {
+    fn count_positions_over_limit(env: &Env, portfolio: &Portfolio, user: &Address) -> u32 {
         let positions = Self::get_user_positions(env, portfolio, user);
         let mut over_limit = 0u32;
 
         for (asset, _) in positions.iter() {
-            if let Err(_) = crate::risk_management::PositionLimits::check_position_limits(env, portfolio, user, &asset, 0) {
+            if let Err(_) = crate::risk_management::PositionLimits::check_position_limits(
+                env, portfolio, user, &asset, 0,
+            ) {
                 over_limit += 1;
             }
         }
@@ -142,13 +136,20 @@ impl PortfolioRisk {
         let mut positions = Map::new(env);
 
         let xlm_balance = portfolio.balance_of(env, crate::portfolio::Asset::XLM, user.clone());
-        let usdc_balance = portfolio.balance_of(env, crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+        let usdc_balance = portfolio.balance_of(
+            env,
+            crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")),
+            user.clone(),
+        );
 
         if xlm_balance != 0 {
             positions.set(crate::portfolio::Asset::XLM, xlm_balance);
         }
         if usdc_balance != 0 {
-            positions.set(crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")), usdc_balance);
+            positions.set(
+                crate::portfolio::Asset::Custom(Symbol::short("USDCSIM")),
+                usdc_balance,
+            );
         }
 
         positions

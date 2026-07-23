@@ -529,7 +529,8 @@ impl NFTLoan {
         let days_elapsed = elapsed / 86400;
         // Use saturating arithmetic to prevent overflow
         // Scale to u128 for precision, then convert back
-        let scaled_principal = (self.loan_amount as u128).saturating_mul(1_000_000_000_000_000_000u128);
+        let scaled_principal =
+            (self.loan_amount as u128).saturating_mul(1_000_000_000_000_000_000u128);
         let daily_interest_rate = self.interest_rate_bps as u128;
         let daily_interest_scaled = scaled_principal
             .saturating_mul(daily_interest_rate)

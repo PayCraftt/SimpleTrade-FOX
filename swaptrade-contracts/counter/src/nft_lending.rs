@@ -211,7 +211,8 @@ pub fn fund_loan(env: &Env, lender: Address, loan_id: u64) -> Result<(), NFTErro
     let current_time = env.ledger().timestamp();
 
     // Calculate repayment amount using scaled arithmetic to prevent precision loss
-    let scaled_principal = (loan.loan_amount as u128).checked_mul(INTEREST_PRECISION)
+    let scaled_principal = (loan.loan_amount as u128)
+        .checked_mul(INTEREST_PRECISION)
         .ok_or(NFTError::InterestOverflow)?;
     let daily_interest_rate = loan.interest_rate_bps as u128;
     let daily_interest_scaled = scaled_principal
@@ -224,7 +225,8 @@ pub fn fund_loan(env: &Env, lender: Address, loan_id: u64) -> Result<(), NFTErro
         .checked_mul(days)
         .ok_or(NFTError::InterestOverflow)?;
     let total_interest = (total_interest_scaled / INTEREST_PRECISION) as i128;
-    loan.repayment_amount = loan.loan_amount
+    loan.repayment_amount = loan
+        .loan_amount
         .checked_add(total_interest as i128)
         .ok_or(NFTError::AmountOverflow)?;
 

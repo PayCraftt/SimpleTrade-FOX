@@ -115,8 +115,7 @@ mod tests {
 
     #[test]
     fn test_execute_with_validation_failure() {
-        let result =
-            StateConsistencyChecker::execute_with_validation(|| 42, |value| *value == 100);
+        let result = StateConsistencyChecker::execute_with_validation(|| 42, |value| *value == 100);
         assert!(result.is_err());
     }
 

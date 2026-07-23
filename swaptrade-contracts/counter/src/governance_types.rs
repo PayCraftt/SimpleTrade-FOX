@@ -1,5 +1,5 @@
-use soroban_sdk::{contracttype, Address, Env, Symbol, Vec, Map};
 use crate::errors::SwapTradeError;
+use soroban_sdk::{contracttype, Address, Env, Map, Symbol, Vec};
 
 /// Governance proposal types
 #[contracttype]
@@ -11,18 +11,11 @@ pub enum ProposalType {
         new_value: i128,
     },
     /// Upgrade admin address
-    AdminUpgrade {
-        new_admin: Address,
-    },
+    AdminUpgrade { new_admin: Address },
     /// Emergency pause/unpause
-    EmergencyAction {
-        pause: bool,
-    },
+    EmergencyAction { pause: bool },
     /// Custom proposal with description
-    Custom {
-        title: Symbol,
-        description: Symbol,
-    },
+    Custom { title: Symbol, description: Symbol },
 }
 
 /// Governance proposal status
@@ -133,12 +126,12 @@ pub enum ParamKey {
 impl Default for GovernanceConfig {
     fn default() -> Self {
         Self {
-            min_voting_period: 86400,     // 1 day
-            max_voting_period: 604800,    // 7 days
-            quorum_threshold: 2000,       // 20%
-            approval_threshold: 5000,     // 50%
-            execution_delay: 172800,      // 2 days
-            proposal_cooldown: 3600,      // 1 hour
+            min_voting_period: 86400,  // 1 day
+            max_voting_period: 604800, // 7 days
+            quorum_threshold: 2000,    // 20%
+            approval_threshold: 5000,  // 50%
+            execution_delay: 172800,   // 2 days
+            proposal_cooldown: 3600,   // 1 hour
         }
     }
 }

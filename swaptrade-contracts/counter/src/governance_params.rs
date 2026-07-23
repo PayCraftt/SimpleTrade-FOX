@@ -163,9 +163,10 @@ impl GovernanceParams {
         }
 
         // Commit only the targeted parameter — isolated write (#156).
-        env.storage()
-            .persistent()
-            .set(&GovParamStorageKey::ParamValue(update.param.clone()), &update.new_value);
+        env.storage().persistent().set(
+            &GovParamStorageKey::ParamValue(update.param.clone()),
+            &update.new_value,
+        );
 
         update.executed = true;
         env.storage()
@@ -247,13 +248,7 @@ mod tests {
     fn test_propose_and_execute_after_timelock() {
         let (env, contract_id, admin) = setup();
         env.as_contract(&contract_id, || {
-            let id = GovernanceParams::propose_update(
-                &env,
-                &admin,
-                ParamKey::FeeBps,
-                300,
-            )
-            .unwrap();
+            let id = GovernanceParams::propose_update(&env, &admin, ParamKey::FeeBps, 300).unwrap();
 
             // Execution before delay must fail.
             assert_eq!(
@@ -319,8 +314,14 @@ mod tests {
             GovernanceParams::execute_update(&env, &admin, id).unwrap();
 
             // MaxSwapAmount must remain unset — no side effects.
-            assert_eq!(GovernanceParams::get_param(&env, ParamKey::MaxSwapAmount), None);
-            assert_eq!(GovernanceParams::get_param(&env, ParamKey::FeeBps), Some(200));
+            assert_eq!(
+                GovernanceParams::get_param(&env, ParamKey::MaxSwapAmount),
+                None
+            );
+            assert_eq!(
+                GovernanceParams::get_param(&env, ParamKey::FeeBps),
+                Some(200)
+            );
         });
     }
 }

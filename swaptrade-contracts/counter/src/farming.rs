@@ -1,9 +1,9 @@
+use crate::errors::SwapTradeError;
 /// Yield Farming / Liquidity Mining Module
 ///
 /// Rewards users for staking LP tokens over time using an accumulator-per-share
 /// pattern that ensures proportional reward distribution.
 use soroban_sdk::{contracttype, symbol_short, Address, Env, Map};
-use crate::errors::SwapTradeError;
 
 // ────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -78,7 +78,8 @@ impl FarmingManager {
 
     /// Get the current admin address
     fn get_admin(env: &Env) -> Address {
-        env.storage().persistent()
+        env.storage()
+            .persistent()
             .get(&FarmingKey::Admin)
             .expect("Farming module not initialized")
     }
@@ -89,7 +90,9 @@ impl FarmingManager {
 
     /// Update the pool's reward accumulator - must be called before any state changes
     fn update_pool_accumulator(env: &Env, pool_id: u64) -> Result<(), SwapTradeError> {
-        let mut pool_state = env.storage().persistent()
+        let mut pool_state = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::PoolState(pool_id))
             .unwrap_or_else(|| PoolFarmState {
                 total_staked_lp: 0,
@@ -102,48 +105,61 @@ impl FarmingManager {
         if pool_state.total_staked_lp == 0 || pool_state.emission_rate == 0 {
             // No stakers or no emissions, just update the timestamp
             pool_state.last_update_timestamp = env.ledger().timestamp();
-            env.storage().persistent().set(&FarmingKey::PoolState(pool_id), &pool_state);
+            env.storage()
+                .persistent()
+                .set(&FarmingKey::PoolState(pool_id), &pool_state);
             return Ok(());
         }
 
         let current_timestamp = env.ledger().timestamp();
         let time_elapsed = current_timestamp - pool_state.last_update_timestamp;
-        
+
         if time_elapsed == 0 {
             return Ok(());
         }
 
         // Calculate rewards generated during this period
         let new_rewards = (time_elapsed as i128) * pool_state.emission_rate;
-        
+
         // Calculate the additional reward per share (scaled to maintain precision)
-        let reward_per_share_increase = (new_rewards * Self::SCALE_FACTOR) / pool_state.total_staked_lp;
-        
+        let reward_per_share_increase =
+            (new_rewards * Self::SCALE_FACTOR) / pool_state.total_staked_lp;
+
         // Update the accumulator
         pool_state.reward_per_share_accumulator += reward_per_share_increase;
         pool_state.last_update_timestamp = current_timestamp;
         pool_state.total_rewards_distributed += new_rewards;
 
         // Save the updated pool state
-        env.storage().persistent().set(&FarmingKey::PoolState(pool_id), &pool_state);
+        env.storage()
+            .persistent()
+            .set(&FarmingKey::PoolState(pool_id), &pool_state);
 
         // Update global total
-        let mut global_total: i128 = env.storage().persistent()
+        let mut global_total: i128 = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::TotalRewardsDistributed)
             .unwrap_or(0);
         global_total += new_rewards;
-        env.storage().persistent().set(&FarmingKey::TotalRewardsDistributed, &global_total);
+        env.storage()
+            .persistent()
+            .set(&FarmingKey::TotalRewardsDistributed, &global_total);
 
         Ok(())
     }
 
     /// Update a user's pending rewards based on the current pool accumulator
     fn update_user_position(env: &Env, pool_id: u64, user: Address) -> Result<(), SwapTradeError> {
-        let pool_state = env.storage().persistent()
+        let pool_state = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::PoolState(pool_id))
             .ok_or(SwapTradeError::LPPositionNotFound)?;
 
-        let mut user_position = env.storage().persistent()
+        let mut user_position = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::UserPosition(pool_id, user.clone()))
             .unwrap_or_else(|| UserFarmPosition {
                 staked_lp_amount: 0,
@@ -155,15 +171,19 @@ impl FarmingManager {
 
         if user_position.staked_lp_amount > 0 {
             // Calculate the accumulated rewards since last update
-            let accumulated_rewards = ((pool_state.reward_per_share_accumulator - user_position.reward_per_share_debt) 
-                * user_position.staked_lp_amount) / Self::SCALE_FACTOR;
+            let accumulated_rewards = ((pool_state.reward_per_share_accumulator
+                - user_position.reward_per_share_debt)
+                * user_position.staked_lp_amount)
+                / Self::SCALE_FACTOR;
             user_position.pending_rewards += accumulated_rewards;
         }
 
         // Update the user's debt to the current pool accumulator
         user_position.reward_per_share_debt = pool_state.reward_per_share_accumulator;
-        
-        env.storage().persistent().set(&FarmingKey::UserPosition(pool_id, user), &user_position);
+
+        env.storage()
+            .persistent()
+            .set(&FarmingKey::UserPosition(pool_id, user), &user_position);
 
         Ok(())
     }
@@ -186,7 +206,9 @@ impl FarmingManager {
         Self::update_user_position(env, pool_id, user.clone())?;
 
         // Get and update pool state
-        let mut pool_state = env.storage().persistent()
+        let mut pool_state = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::PoolState(pool_id))
             .unwrap_or_else(|| PoolFarmState {
                 total_staked_lp: 0,
@@ -197,7 +219,9 @@ impl FarmingManager {
             });
 
         // Get and update user position
-        let mut user_position = env.storage().persistent()
+        let mut user_position = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::UserPosition(pool_id, user.clone()))
             .unwrap_or_else(|| UserFarmPosition {
                 staked_lp_amount: 0,
@@ -213,8 +237,13 @@ impl FarmingManager {
         user_position.is_active = true;
 
         // Save updated states
-        env.storage().persistent().set(&FarmingKey::PoolState(pool_id), &pool_state);
-        env.storage().persistent().set(&FarmingKey::UserPosition(pool_id, user.clone()), &user_position);
+        env.storage()
+            .persistent()
+            .set(&FarmingKey::PoolState(pool_id), &pool_state);
+        env.storage().persistent().set(
+            &FarmingKey::UserPosition(pool_id, user.clone()),
+            &user_position,
+        );
 
         // Emit event
         env.events().publish(
@@ -243,7 +272,9 @@ impl FarmingManager {
         Self::update_user_position(env, pool_id, user.clone())?;
 
         // Get user position
-        let mut user_position = env.storage().persistent()
+        let mut user_position = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::UserPosition(pool_id, user.clone()))
             .ok_or(SwapTradeError::LPPositionNotFound)?;
 
@@ -252,21 +283,28 @@ impl FarmingManager {
         }
 
         // Get and update pool state
-        let mut pool_state = env.storage().persistent()
+        let mut pool_state = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::PoolState(pool_id))
             .ok_or(SwapTradeError::LPPositionNotFound)?;
 
         // Update totals
         pool_state.total_staked_lp -= amount;
         user_position.staked_lp_amount -= amount;
-        
+
         if user_position.staked_lp_amount == 0 {
             user_position.is_active = false;
         }
 
         // Save updated states
-        env.storage().persistent().set(&FarmingKey::PoolState(pool_id), &pool_state);
-        env.storage().persistent().set(&FarmingKey::UserPosition(pool_id, user.clone()), &user_position);
+        env.storage()
+            .persistent()
+            .set(&FarmingKey::PoolState(pool_id), &pool_state);
+        env.storage().persistent().set(
+            &FarmingKey::UserPosition(pool_id, user.clone()),
+            &user_position,
+        );
 
         // Emit event
         env.events().publish(
@@ -290,7 +328,9 @@ impl FarmingManager {
         Self::update_user_position(env, pool_id, user.clone())?;
 
         // Get user position
-        let mut user_position = env.storage().persistent()
+        let mut user_position = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::UserPosition(pool_id, user.clone()))
             .ok_or(SwapTradeError::LPPositionNotFound)?;
 
@@ -303,7 +343,10 @@ impl FarmingManager {
         user_position.pending_rewards = 0; // Zero out pending rewards after claim
 
         // Save the updated position
-        env.storage().persistent().set(&FarmingKey::UserPosition(pool_id, user.clone()), &user_position);
+        env.storage().persistent().set(
+            &FarmingKey::UserPosition(pool_id, user.clone()),
+            &user_position,
+        );
 
         // Emit event
         env.events().publish(
@@ -325,7 +368,9 @@ impl FarmingManager {
         Self::update_pool_accumulator(env, pool_id)?;
         Self::update_user_position(env, pool_id, user.clone())?;
 
-        let user_position = env.storage().persistent()
+        let user_position = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::UserPosition(pool_id, user))
             .ok_or(SwapTradeError::LPPositionNotFound)?;
 
@@ -340,7 +385,7 @@ impl FarmingManager {
         admin: Address,
     ) -> Result<(), SwapTradeError> {
         admin.require_auth();
-        
+
         let current_admin = Self::get_admin(env);
         if admin != current_admin {
             return Err(SwapTradeError::NotAdmin);
@@ -355,7 +400,9 @@ impl FarmingManager {
         Self::update_pool_accumulator(env, pool_id)?;
 
         // Get and update pool state
-        let mut pool_state = env.storage().persistent()
+        let mut pool_state = env
+            .storage()
+            .persistent()
             .get(&FarmingKey::PoolState(pool_id))
             .unwrap_or_else(|| PoolFarmState {
                 total_staked_lp: 0,
@@ -367,7 +414,9 @@ impl FarmingManager {
 
         let old_rate = pool_state.emission_rate;
         pool_state.emission_rate = new_emission_rate;
-        env.storage().persistent().set(&FarmingKey::PoolState(pool_id), &pool_state);
+        env.storage()
+            .persistent()
+            .set(&FarmingKey::PoolState(pool_id), &pool_state);
 
         // Emit event
         env.events().publish(
@@ -382,8 +431,9 @@ impl FarmingManager {
     pub fn get_pool_state(env: &Env, pool_id: u64) -> Result<PoolFarmState, SwapTradeError> {
         // Update before returning to ensure latest state
         Self::update_pool_accumulator(env, pool_id)?;
-        
-        env.storage().persistent()
+
+        env.storage()
+            .persistent()
             .get(&FarmingKey::PoolState(pool_id))
             .ok_or(SwapTradeError::LPPositionNotFound)
     }

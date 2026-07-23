@@ -35,7 +35,7 @@ fn test_two_hop_swap_execution() {
     // Execute multi-hop swap
     let min_out = (r.expected_output as u128).saturating_mul(9500) / 10000; // 5% slippage
     let result = client.execute_multi_hop_swap(&r, &100, &min_out, &trader);
-    
+
     assert!(result > 0);
 }
 
@@ -64,7 +64,7 @@ fn test_multi_hop_respects_slippage_tolerance() {
     // Try to execute with very tight slippage (should fail)
     let tight_min_out = r.expected_output + 1000; // Unrealistic expectation
     let result = client.try_execute_multi_hop_swap(&r, &500, &tight_min_out, &trader);
-    
+
     // Should fail due to slippage
     assert!(result.is_err());
 }
@@ -87,7 +87,7 @@ fn test_multi_hop_atomic_execution() {
 
     // Try to find route (should not find 2-hop route)
     let route = client.find_best_route(&xlm, &btc, &100);
-    
+
     // Route should be None since second pool doesn't exist
     if route.is_none() {
         // Test passes - route discovery prevents invalid execution
@@ -97,7 +97,7 @@ fn test_multi_hop_atomic_execution() {
     // If route exists but pool is invalid, execution should fail
     let r = route.unwrap();
     let result = client.try_execute_multi_hop_swap(&r, &100, &0, &trader);
-    
+
     // Should fail due to missing pool
     assert!(result.is_err());
 }
@@ -155,7 +155,7 @@ fn test_single_hop_swap_via_route() {
     // Execute via multi-hop function (should work for single hop too)
     let min_out = (r.expected_output as u128).saturating_mul(9500) / 10000;
     let result = client.execute_multi_hop_swap(&r, &100, &min_out, &trader);
-    
+
     assert!(result > 0);
 }
 
@@ -222,7 +222,7 @@ fn test_three_hop_route_execution() {
 
     // Find route from XLM to ETH
     let route = client.find_best_route(&xlm, &eth, &100);
-    
+
     // Note: Current find_best_route only supports up to 2 hops
     // This test validates that the execution function can handle it if route is provided
     if route.is_some() {

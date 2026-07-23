@@ -19,7 +19,11 @@ mod tests {
         assert!(register_referral(&env, referrer.clone(), referred.clone()).is_ok());
 
         // Verify referrer is set
-        let stored_referrer = env.storage().instance().get::<_, Address>(&DataKey::Referrer(referred.clone())).unwrap();
+        let stored_referrer = env
+            .storage()
+            .instance()
+            .get::<_, Address>(&DataKey::Referrer(referred.clone()))
+            .unwrap();
         assert_eq!(stored_referrer, referrer);
 
         // Verify stats are updated
@@ -32,7 +36,10 @@ mod tests {
     fn test_self_referral_prevention() {
         let (env, user, _, _) = setup_test_env();
 
-        assert_eq!(register_referral(&env, user.clone(), user.clone()), Err(SwapTradeError::SelfReferral));
+        assert_eq!(
+            register_referral(&env, user.clone(), user.clone()),
+            Err(SwapTradeError::SelfReferral)
+        );
     }
 
     #[test]
@@ -43,7 +50,10 @@ mod tests {
         assert!(register_referral(&env, referrer1.clone(), referred.clone()).is_ok());
 
         // Second referral should fail
-        assert_eq!(register_referral(&env, referrer2.clone(), referred.clone()), Err(SwapTradeError::AlreadyReferred));
+        assert_eq!(
+            register_referral(&env, referrer2.clone(), referred.clone()),
+            Err(SwapTradeError::AlreadyReferred)
+        );
     }
 
     #[test]
@@ -54,7 +64,10 @@ mod tests {
         assert!(register_referral(&env, user_a.clone(), user_b.clone()).is_ok());
 
         // Try circular referral: B refers A
-        assert_eq!(register_referral(&env, user_b.clone(), user_a.clone()), Err(SwapTradeError::CircularReferral));
+        assert_eq!(
+            register_referral(&env, user_b.clone(), user_a.clone()),
+            Err(SwapTradeError::CircularReferral)
+        );
     }
 
     #[test]
@@ -68,7 +81,10 @@ mod tests {
         assert!(register_referral(&env, user_b.clone(), user_c.clone()).is_ok());
 
         // Try C refers A (should fail - indirect circular)
-        assert_eq!(register_referral(&env, user_c.clone(), user_a.clone()), Err(SwapTradeError::CircularReferral));
+        assert_eq!(
+            register_referral(&env, user_c.clone(), user_a.clone()),
+            Err(SwapTradeError::CircularReferral)
+        );
     }
 
     #[test]
@@ -97,7 +113,9 @@ mod tests {
         let (env, indirect_referrer, direct_referrer, trader) = setup_test_env();
 
         // Set up two-level referral: indirect -> direct -> trader
-        assert!(register_referral(&env, indirect_referrer.clone(), direct_referrer.clone()).is_ok());
+        assert!(
+            register_referral(&env, indirect_referrer.clone(), direct_referrer.clone()).is_ok()
+        );
         assert!(register_referral(&env, direct_referrer.clone(), trader.clone()).is_ok());
 
         // Simulate fee collection
@@ -125,17 +143,17 @@ mod tests {
     #[test]
     fn test_tier_upgrade() {
         let env = Env::default();
-        
+
         // Test tier 1 (default)
         let tier_1 = get_tier_for_volume(&env, 1000);
         assert_eq!(tier_1.direct_commission_bps, 50);
         assert_eq!(tier_1.indirect_commission_bps, 20);
-        
+
         // Test tier 2
         let tier_2 = get_tier_for_volume(&env, 15000);
         assert_eq!(tier_2.direct_commission_bps, 75);
         assert_eq!(tier_2.indirect_commission_bps, 30);
-        
+
         // Test tier 3
         let tier_3 = get_tier_for_volume(&env, 60000);
         assert_eq!(tier_3.direct_commission_bps, 100);
@@ -216,7 +234,11 @@ mod tests {
         assert!(register_referral(&env, referrer.clone(), referred.clone()).is_ok());
 
         // Check referral info
-        let referral_info = env.storage().instance().get::<_, ReferralInfo>(&DataKey::ReferralInfo(referred.clone())).unwrap();
+        let referral_info = env
+            .storage()
+            .instance()
+            .get::<_, ReferralInfo>(&DataKey::ReferralInfo(referred.clone()))
+            .unwrap();
         assert_eq!(referral_info.referrer, referrer);
         assert_eq!(referral_info.level, ReferralLevel::Direct);
         assert!(referral_info.registration_timestamp > 0);

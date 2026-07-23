@@ -23,7 +23,8 @@ fn test_place_limit_order() {
         1000,
         PRECISION, // 1:1 price
         None,      // No expiry
-    ).unwrap();
+    )
+    .unwrap();
 
     assert_eq!(order_id, 1);
 
@@ -56,7 +57,8 @@ fn test_place_stop_loss() {
         500,
         trigger_price,
         None,
-    ).unwrap();
+    )
+    .unwrap();
 
     assert_eq!(order_id, 1);
 
@@ -74,15 +76,9 @@ fn test_cancel_order() {
     let usdc = symbol_short!("USDC");
 
     // Place order
-    let order_id = OrderManager::place_limit_order(
-        &env,
-        user.clone(),
-        xlm,
-        usdc,
-        1000,
-        PRECISION,
-        None,
-    ).unwrap();
+    let order_id =
+        OrderManager::place_limit_order(&env, user.clone(), xlm, usdc, 1000, PRECISION, None)
+            .unwrap();
 
     // Cancel order
     OrderManager::cancel_order(&env, order_id, user.clone()).unwrap();
@@ -101,15 +97,9 @@ fn test_cancel_order_wrong_owner() {
     let usdc = symbol_short!("USDC");
 
     // Place order with user1
-    let order_id = OrderManager::place_limit_order(
-        &env,
-        user1.clone(),
-        xlm,
-        usdc,
-        1000,
-        PRECISION,
-        None,
-    ).unwrap();
+    let order_id =
+        OrderManager::place_limit_order(&env, user1.clone(), xlm, usdc, 1000, PRECISION, None)
+            .unwrap();
 
     // Try to cancel with user2 (should fail)
     let result = OrderManager::cancel_order(&env, order_id, user2);
@@ -124,8 +114,26 @@ fn test_get_user_orders() {
     let usdc = symbol_short!("USDC");
 
     // Place multiple orders
-    OrderManager::place_limit_order(&env, user.clone(), xlm.clone(), usdc.clone(), 1000, PRECISION, None).unwrap();
-    OrderManager::place_stop_loss(&env, user.clone(), xlm.clone(), usdc.clone(), 500, PRECISION, None).unwrap();
+    OrderManager::place_limit_order(
+        &env,
+        user.clone(),
+        xlm.clone(),
+        usdc.clone(),
+        1000,
+        PRECISION,
+        None,
+    )
+    .unwrap();
+    OrderManager::place_stop_loss(
+        &env,
+        user.clone(),
+        xlm.clone(),
+        usdc.clone(),
+        500,
+        PRECISION,
+        None,
+    )
+    .unwrap();
 
     // Get user orders
     let orders = OrderManager::get_user_orders(&env, user);
@@ -149,7 +157,8 @@ fn test_order_with_expiry() {
         1000,
         PRECISION,
         Some(expiry),
-    ).unwrap();
+    )
+    .unwrap();
 
     let order = OrderManager::get_order(&env, order_id).unwrap();
     assert_eq!(order.expires_at, Some(expiry));
@@ -175,15 +184,8 @@ fn test_invalid_order_amount() {
     assert!(result.is_err());
 
     // Try to place order with negative amount
-    let result = OrderManager::place_stop_loss(
-        &env,
-        user.clone(),
-        xlm,
-        usdc,
-        -100,
-        PRECISION,
-        None,
-    );
+    let result =
+        OrderManager::place_stop_loss(&env, user.clone(), xlm, usdc, -100, PRECISION, None);
     assert!(result.is_err());
 }
 
@@ -207,15 +209,7 @@ fn test_invalid_order_price() {
     assert!(result.is_err());
 
     // Try to place stop-loss with zero trigger
-    let result = OrderManager::place_stop_loss(
-        &env,
-        user,
-        xlm,
-        usdc,
-        500,
-        0,
-        None,
-    );
+    let result = OrderManager::place_stop_loss(&env, user, xlm, usdc, 500, 0, None);
     assert!(result.is_err());
 }
 
@@ -227,9 +221,36 @@ fn test_order_id_increment() {
     let usdc = symbol_short!("USDC");
 
     // Place multiple orders
-    let id1 = OrderManager::place_limit_order(&env, user.clone(), xlm.clone(), usdc.clone(), 100, PRECISION, None).unwrap();
-    let id2 = OrderManager::place_limit_order(&env, user.clone(), xlm.clone(), usdc.clone(), 200, PRECISION, None).unwrap();
-    let id3 = OrderManager::place_stop_loss(&env, user.clone(), xlm.clone(), usdc.clone(), 300, PRECISION, None).unwrap();
+    let id1 = OrderManager::place_limit_order(
+        &env,
+        user.clone(),
+        xlm.clone(),
+        usdc.clone(),
+        100,
+        PRECISION,
+        None,
+    )
+    .unwrap();
+    let id2 = OrderManager::place_limit_order(
+        &env,
+        user.clone(),
+        xlm.clone(),
+        usdc.clone(),
+        200,
+        PRECISION,
+        None,
+    )
+    .unwrap();
+    let id3 = OrderManager::place_stop_loss(
+        &env,
+        user.clone(),
+        xlm.clone(),
+        usdc.clone(),
+        300,
+        PRECISION,
+        None,
+    )
+    .unwrap();
 
     assert_eq!(id1, 1);
     assert_eq!(id2, 2);
@@ -252,15 +273,17 @@ fn test_match_pending_orders() {
         1000,
         PRECISION,
         None,
-    ).unwrap();
+    )
+    .unwrap();
 
     // Match orders with current price at or below limit
     let current_price = (PRECISION as u128).saturating_mul(9_900) / 10_000; // 1% below limit
-    let executed = OrderManager::match_pending_orders(&env, xlm.clone(), usdc.clone(), current_price).unwrap();
+    let executed =
+        OrderManager::match_pending_orders(&env, xlm.clone(), usdc.clone(), current_price).unwrap();
 
     // Order should be executed
     assert!(executed.len() > 0);
-    
+
     let order = OrderManager::get_order(&env, order_id).unwrap();
     assert_eq!(order.status, OrderStatus::Filled);
 }

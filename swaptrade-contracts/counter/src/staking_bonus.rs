@@ -1,3 +1,4 @@
+use crate::errors::SwapTradeError;
 /// Staking Bonus System
 ///
 /// Provides long-term staking bonuses with:
@@ -12,7 +13,6 @@
 /// - 90 days:  20% bonus
 /// - 365 days: 50% bonus
 use soroban_sdk::{contracttype, symbol_short, Address, Env, Vec};
-use crate::errors::SwapTradeError;
 
 // ────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -254,7 +254,11 @@ impl StakingBonusManager {
     ///
     /// # Returns
     /// Result with (principal_returned, penalty) or error
-    pub fn unstake_early(env: &Env, user: Address, stake_id: u32) -> Result<(i128, i128), SwapTradeError> {
+    pub fn unstake_early(
+        env: &Env,
+        user: Address,
+        stake_id: u32,
+    ) -> Result<(i128, i128), SwapTradeError> {
         let mut stakes: Vec<StakeRecord> = env
             .storage()
             .persistent()
