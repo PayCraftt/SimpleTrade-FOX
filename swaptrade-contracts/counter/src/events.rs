@@ -99,6 +99,43 @@ impl Events {
             .publish((Symbol::new(env, "AdminPaused"), admin), (timestamp,));
     }
 
+    pub fn fees_collected(env: &Env, token: Symbol, amount: i128, pool_id: u64) {
+        env.events().publish(
+            (Symbol::new(env, "FeesCollected"), token, pool_id),
+            (amount, env.ledger().timestamp()),
+        );
+    }
+
+    pub fn fee_parameters_updated(
+        env: &Env,
+        pool_id: u64,
+        new_fee_rate: u32,
+        new_treasury: Option<Address>,
+    ) {
+        env.events().publish(
+            (Symbol::new(env, "FeeParametersUpdated"), pool_id),
+            (new_fee_rate, new_treasury, env.ledger().timestamp()),
+        );
+    }
+
+    pub fn fees_distributed(
+        env: &Env,
+        pool_id: u64,
+        token: Symbol,
+        amount: i128,
+        recipient: Address,
+    ) {
+        env.events().publish(
+            (
+                Symbol::new(env, "FeesDistributed"),
+                token,
+                pool_id,
+                recipient,
+            ),
+            (amount, env.ledger().timestamp()),
+        );
+    }
+
     pub fn admin_resumed(env: &Env, admin: Address, timestamp: i64) {
         env.events()
             .publish((Symbol::new(env, "AdminResumed"), admin), (timestamp,));
