@@ -637,7 +637,7 @@ impl KYCSystem {
 #[cfg(test)]
 mod mxllv_tests {
     use super::*;
-    use crate::set_admin;
+    use crate::admin::set_admin;
     use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env};
 
     fn setup() -> (Env, Address, Address, Address, Address) {
@@ -648,7 +648,7 @@ mod mxllv_tests {
         let operator = Address::generate(&env);
         let user = Address::generate(&env);
         env.as_contract(&contract_id, || {
-            set_admin(env.clone(), admin.clone()).unwrap();
+            set_admin(&env, &admin);
             KYCSystem::add_operator(&env, &admin, operator.clone()).unwrap();
         });
         (env, contract_id, admin, operator, user)

@@ -45,7 +45,7 @@ pub struct RiskConfig {
     /// Maximum position size per asset per user (absolute amount)
     pub max_position_per_asset: i128,
     /// Concentration warning threshold (basis points, 3000 = 30%)
-    pub concentration_warning_threshold: u32,
+    pub concentration_warn_threshold: u32,
     /// Concentration limit threshold (basis points, 5000 = 50%)
     pub concentration_limit_threshold: u32,
     /// Circuit breaker threshold (basis points, 1500 = 15%)

@@ -50,7 +50,7 @@ impl GovernanceSystem {
             id: proposal_id,
             proposer: proposer.clone(),
             proposal_type,
-            description,
+            description: description.clone(),
             start_time: current_time,
             end_time: current_time + voting_period,
             execution_time: None,
@@ -424,7 +424,7 @@ impl GovernanceSystem {
         Ok(())
     }
 
-    fn get_voting_power(env: &Env, voter: &Address) -> u128 {
+    pub(crate) fn get_voting_power(env: &Env, voter: &Address) -> u128 {
         // For now, voting power is based on staked tokens
         // In production, this could be more complex (LP tokens, etc.)
         crate::staking_bonus::StakingBonusManager::get_user_total_staked(env, voter.clone()) as u128

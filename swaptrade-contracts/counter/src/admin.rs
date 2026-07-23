@@ -18,3 +18,15 @@ pub fn require_admin(env: &Env, caller: &Address) -> Result<(), SwapTradeError> 
         Err(SwapTradeError::NotAdmin)
     }
 }
+pub fn get_admin(env: &Env) -> Address {
+    env.storage()
+        .persistent()
+        .get::<_, Address>(&ADMIN_KEY)
+        .expect("Admin not initialized")
+}
+
+pub fn set_admin(env: &Env, new_admin: &Address) {
+    env.storage()
+        .persistent()
+        .set(&ADMIN_KEY, new_admin);
+}

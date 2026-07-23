@@ -13,7 +13,7 @@ mod integration_tests {
         let trader = Address::generate(&env);
 
         // Initialize contract
-        CounterContract::initialize(env.clone(), admin.clone());
+        CounterContract::initialize(env.clone());
 
         // Register referral
         assert!(
@@ -45,7 +45,7 @@ mod integration_tests {
         let user = Address::generate(&env);
 
         // Initialize contract
-        CounterContract::initialize(env.clone(), admin.clone());
+        CounterContract::initialize(env.clone());
 
         // Test that all referral functions are accessible and return expected defaults
         let stats = CounterContract::get_referral_stats(env.clone(), user.clone());

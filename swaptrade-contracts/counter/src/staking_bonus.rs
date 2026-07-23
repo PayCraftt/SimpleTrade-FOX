@@ -601,6 +601,14 @@ impl StakingBonusManager {
             .unwrap_or(0)
     }
 
+    /// Get total staked amount globally
+    pub fn get_total_staked(env: &Env) -> i128 {
+        env.storage()
+            .persistent()
+            .get(&StakingBonusKey::TotalStaked)
+            .unwrap_or(0)
+    }
+
     /// Get total earned bonuses for a user
     pub fn get_user_earned_bonuses(env: &Env, user: Address) -> i128 {
         let stakes = Self::get_user_stakes(env, user.clone());

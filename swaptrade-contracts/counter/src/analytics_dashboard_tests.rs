@@ -3,6 +3,7 @@
 use super::*;
 use soroban_sdk::testutils::Address as _;
 use soroban_sdk::{symbol_short, Env};
+use crate::portfolio::TradeRecord;
 
 #[test]
 fn test_record_trade_with_pnl() {
@@ -367,7 +368,7 @@ fn test_trade_history_storage() {
             symbol_short!("USDC"),
             1000 + i * 100,
             1100 + i * 100,
-            1000 + i,
+            (1000 + i) as u64,
         );
     }
 

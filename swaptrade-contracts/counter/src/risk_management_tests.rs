@@ -141,7 +141,7 @@ mod risk_management_tests {
         let env = Env::default();
         let reason = symbol_short!("TEST");
 
-        CircuitBreaker::trigger_circuit_breaker(&env, reason, 2000); // 20% change
+        CircuitBreaker::trigger_circuit_breaker(&env, reason.clone(), 2000); // 20% change
 
         let active = CircuitBreaker::is_circuit_breaker_active(&env);
         assert!(active);

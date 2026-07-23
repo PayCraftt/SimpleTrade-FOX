@@ -6,10 +6,7 @@ use soroban_sdk::{contracttype, Address, Env, Map, Symbol, Vec};
 #[derive(Clone, Debug, PartialEq)]
 pub enum ProposalType {
     /// Change protocol parameters (fees, limits, etc.)
-    ParameterChange {
-        param_key: ParamKey,
-        new_value: i128,
-    },
+    ParameterChange(ParamKey, i128),
     /// Upgrade admin address
     AdminUpgrade { new_admin: Address },
     /// Emergency pause/unpause
