@@ -19,6 +19,14 @@ pub enum SwapTradeError {
     NotAdmin = 1,
     NotAuthorized = 2,
     InvalidAddress = 3,
+    InvalidMultiSigConfig = 4,
+    MultiSigNotConfigured = 5,
+
+    // ── Governance ──────────────────────────────────────────────────────────
+    ProposalNotFound = 90,
+    ProposalAlreadyExecuted = 91,
+    AlreadyApproved = 92,
+    InsufficientApprovals = 93,
 
     // ── Trading / contract state ────────────────────────────────────────────
     TradingPaused = 10,
