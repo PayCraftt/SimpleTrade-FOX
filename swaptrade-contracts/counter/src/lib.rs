@@ -52,6 +52,11 @@ mod orders;
 mod orders_tests;
 mod risk_management;
 
+mod governance_system;
+
+#[cfg(test)]
+mod governance_system_tests;
+
 pub use governance_params::{GovernanceParams, ParamKey, PendingParamUpdate};
 pub use nonce::NonceGuard;
 pub use rate_limit::SensitiveRateLimiter;
@@ -183,40 +188,88 @@ fn require_authenticated_verified_user(env: &Env, user: &Address) -> Result<(), 
     require_verified_user(env, user)
 }
 
-pub fn pause_trading(env: Env, caller: Address) -> Result<bool, SwapTradeError> {
-    caller.require_auth();
-    crate::admin::require_admin(&env, &caller)?;
+// pub fn pause_trading(env: Env, caller: Address) -> Result<bool, SwapTradeError> {
+//     caller.require_auth();
+//     crate::admin::require_admin(&env, &caller)?;
+//     env.storage().persistent().set(&PAUSED_KEY, &true);
+//     Ok(true)
+// }
+
+// pub fn resume_trading(env: Env, caller: Address) -> Result<bool, SwapTradeError> {
+//     caller.require_auth();
+//     crate::admin::require_admin(&env, &caller)?;
+//     env.storage().persistent().set(&PAUSED_KEY, &false);
+//     Ok(true)
+// }
+
+// pub fn set_admin(env: Env, caller: Address, new_admin: Address) -> Result<(), SwapTradeError> {
+//     caller.require_auth();
+//     crate::admin::require_admin(&env, &caller)?;
+//     env.storage().persistent().set(&ADMIN_KEY, &new_admin);
+//     Ok(())
+// }
+
+// pub fn set_treasury(
+//     env: Env,
+//     caller: Address,
+//     new_treasury: Address,
+// ) -> Result<(), SwapTradeError> {
+//     caller.require_auth();
+//     crate::admin::require_admin(&env, &caller)?;
+//     env.storage()
+//         .persistent()
+//         .set(&crate::storage::DEFAULT_TREASURY_KEY, &new_treasury);
+//     crate::events::fee_parameters_updated(&env, 0, 0, Some(new_treasury));
+//     Ok(())
+// }
+
+pub fn pause_trading(env: Env) -> Result<bool, SwapTradeError> {
     env.storage().persistent().set(&PAUSED_KEY, &true);
     Ok(true)
 }
 
-pub fn resume_trading(env: Env, caller: Address) -> Result<bool, SwapTradeError> {
-    caller.require_auth();
-    crate::admin::require_admin(&env, &caller)?;
+pub fn resume_trading(env: Env) -> Result<bool, SwapTradeError> {
     env.storage().persistent().set(&PAUSED_KEY, &false);
     Ok(true)
 }
 
-pub fn set_admin(env: Env, caller: Address, new_admin: Address) -> Result<(), SwapTradeError> {
-    caller.require_auth();
-    crate::admin::require_admin(&env, &caller)?;
+pub fn set_admin(env: Env, new_admin: Address) -> Result<(), SwapTradeError> {
     env.storage().persistent().set(&ADMIN_KEY, &new_admin);
     Ok(())
 }
 
-pub fn set_treasury(
-    env: Env,
-    caller: Address,
-    new_treasury: Address,
-) -> Result<(), SwapTradeError> {
-    caller.require_auth();
-    crate::admin::require_admin(&env, &caller)?;
+pub fn set_treasury(env: Env, new_treasury: Address) -> Result<(), SwapTradeError> {
     env.storage()
         .persistent()
         .set(&crate::storage::DEFAULT_TREASURY_KEY, &new_treasury);
     crate::events::fee_parameters_updated(&env, 0, 0, Some(new_treasury));
     Ok(())
 }
+
+pub fn create_proposal(
+    env: Env,
+    caller: Address,
+    action: governance_system::ProposalAction,
+) -> Result<u64, SwapTradeError> {
+    governance_system::create_proposal(&env, caller, action)
+}
+
+pub fn approve_proposal(
+    env: Env,
+    caller: Address,
+    proposal_id: u64,
+) -> Result<(), SwapTradeError> {
+    governance_system::approve_proposal(&env, caller, proposal_id)
+}
+
+pub fn execute_proposal(
+    env: Env,
+    caller: Address,
+    proposal_id: u64,
+) -> Result<(), SwapTradeError> {
+    governance_system::execute_proposal(&env, caller, proposal_id)
+}
+
 
 pub fn update_pool_fee_tier(
     env: Env,
