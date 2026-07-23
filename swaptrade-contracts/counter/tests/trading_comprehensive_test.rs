@@ -1,4 +1,4 @@
-#![cfg(test)]
+"""#![cfg(test)]
 
 use counter::{CounterContract, CounterContractClient};
 use soroban_sdk::{
@@ -30,7 +30,7 @@ fn test_swap_basic_xlm_to_usdc() {
     let (client, user, xlm, usdc) = setup_test_portfolio(&env);
 
     client.mint(&xlm, &user, &1000);
-    let out = client.swap(&xlm, &usdc, &100, &user);
+    let out = client.swap(&xlm, &usdc, &100, &0, &user, &env.ledger().timestamp() + 100);
 
     assert_eq!(out, 100); // 1:1 default
     assert_eq!(client.get_balance(&xlm, &user), 900);
@@ -44,7 +44,7 @@ fn test_swap_basic_usdc_to_xlm() {
     let (client, user, xlm, usdc) = setup_test_portfolio(&env);
 
     client.mint(&usdc, &user, &1000);
-    let out = client.swap(&usdc, &xlm, &200, &user);
+    let out = client.swap(&usdc, &xlm, &200, &0, &user, &env.ledger().timestamp() + 100);
 
     assert_eq!(out, 200); // 1:1 default
     assert_eq!(client.get_balance(&usdc, &user), 800);
@@ -61,7 +61,7 @@ fn test_swap_zero_amount() {
     let (client, user, xlm, usdc) = setup_test_portfolio(&env);
 
     client.mint(&xlm, &user, &1000);
-    client.swap(&xlm, &usdc, &0, &user);
+    client.swap(&xlm, &usdc, &0, &0, &user, &env.ledger().timestamp() + 100);
 }
 
 #[test]
@@ -72,7 +72,7 @@ fn test_swap_insufficient_balance() {
     let (client, user, xlm, usdc) = setup_test_portfolio(&env);
 
     client.mint(&xlm, &user, &50);
-    client.swap(&xlm, &usdc, &100, &user);
+    client.swap(&xlm, &usdc, &100, &0, &user, &env.ledger().timestamp() + 100);
 }
 
 #[test]
@@ -83,7 +83,7 @@ fn test_swap_same_token() {
     let (client, user, xlm, _) = setup_test_portfolio(&env);
 
     client.mint(&xlm, &user, &1000);
-    client.swap(&xlm, &xlm, &100, &user);
+    client.swap(&xlm, &xlm, &100, &0, &user, &env.ledger().timestamp() + 100);
 }
 
 #[test]
@@ -93,7 +93,7 @@ fn test_swap_1_satoshi() {
     let (client, user, xlm, usdc) = setup_test_portfolio(&env);
 
     client.mint(&xlm, &user, &1000);
-    let out = client.swap(&xlm, &usdc, &1, &user);
+    let out = client.swap(&xlm, &usdc, &1, &0, &user, &env.ledger().timestamp() + 100);
 
     assert_eq!(out, 1);
     assert_eq!(client.get_balance(&xlm, &user), 999);
@@ -112,7 +112,7 @@ fn test_swap_invalid_token() {
     let doge = symbol_short!("DOGE"); // Not XLM or USDCSIM
 
     client.mint(&xlm, &user, &1000);
-    client.swap(&doge, &xlm, &100, &user);
+    client.swap(&doge, &xlm, &100, &0, &user, &env.ledger().timestamp() + 100);
 }
 
 // --- 4. State Consistency Tests ---
@@ -131,7 +131,7 @@ fn test_swap_state_consistency() {
     assert_eq!(txs_before.len(), 0);
 
     // Perform Swap
-    client.swap(&xlm, &usdc, &100, &user);
+    client.swap(&xlm, &usdc, &100, &0, &user, &env.ledger().timestamp() + 100);
 
     // Post Check
     let metrics_after = client.get_metrics();
@@ -178,7 +178,7 @@ fn test_swap_rounding() {
     // Wait, the logic is: theoretical_out = (amount * price) / PRECISION
     // out = (3 * 2.5e18) / 1e18 = 7.5 -> 7 in integer div?
 
-    let out = client.swap(&xlm, &usdc, &3, &user);
+    let out = client.swap(&xlm, &usdc, &3, &0, &user, &env.ledger().timestamp() + 100);
     assert_eq!(out, 7);
 }
 
@@ -193,14 +193,14 @@ fn test_swap_sequential() {
     client.mint(&xlm, &user, &5000);
 
     // Trade 1
-    client.swap(&xlm, &usdc, &1000, &user);
+    client.swap(&xlm, &usdc, &1000, &0, &user, &env.ledger().timestamp() + 100);
     assert_eq!(client.get_balance(&xlm, &user), 4000);
     // Fee is 0.3% (30bps) of 1000 = 3.
     // Swap amount = 997. 1:1 rate -> 997 USDC.
     assert_eq!(client.get_balance(&usdc, &user), 997);
 
     // Trade 2: Swap another 1000 XLM
-    client.swap(&xlm, &usdc, &1000, &user);
+    client.swap(&xlm, &usdc, &1000, &0, &user, &env.ledger().timestamp() + 100);
     assert_eq!(client.get_balance(&xlm, &user), 3000);
     // User Tier Upgraded to Trader (Volume >= 100). Fee drops to 0.25% (25bps).
     // Fee = 1000 * 25 / 10000 = 2.
@@ -212,7 +212,7 @@ fn test_swap_sequential() {
     // Fee = 500 * 25 / 10000 = 1 (Integer division 1.25 -> 1).
     // Swap amt = 499.
     // XLM out = 499.
-    client.swap(&usdc, &xlm, &500, &user);
+    client.swap(&usdc, &xlm, &500, &0, &user, &env.ledger().timestamp() + 100);
     assert_eq!(client.get_balance(&usdc, &user), 1495); // 1995 - 500
     assert_eq!(client.get_balance(&xlm, &user), 3499); // 3000 + 499
 
@@ -233,7 +233,7 @@ fn test_tier_fees_novice() {
 
     // Novice (0 trades) -> 30 bps (0.3%)
     client.mint(&xlm, &user, &10000);
-    client.swap(&xlm, &usdc, &1000, &user);
+    client.swap(&xlm, &usdc, &1000, &0, &user, &env.ledger().timestamp() + 100);
 
     // Fee = 3. Out = 997.
     assert_eq!(client.get_balance(&usdc, &user), 997);
@@ -254,7 +254,7 @@ fn test_tier_fees_trader() {
             info.timestamp += 3601;
             env.ledger().set(info);
         }
-        client.swap(&xlm, &usdc, &10, &user);
+        client.swap(&xlm, &usdc, &10, &0, &user, &env.ledger().timestamp() + 100);
     }
 
     // Advance time again for the test swap
@@ -264,7 +264,7 @@ fn test_tier_fees_trader() {
 
     // Now should be Trader (25 bps)
     let balance_before = client.get_balance(&usdc, &user);
-    client.swap(&xlm, &usdc, &1000, &user);
+    client.swap(&xlm, &usdc, &1000, &0, &user, &env.ledger().timestamp() + 100);
     let balance_after = client.get_balance(&usdc, &user);
 
     assert_eq!(balance_after - balance_before, 998);
@@ -283,7 +283,7 @@ fn test_tier_fees_expert() {
             info.timestamp += 3601;
             env.ledger().set(info);
         }
-        client.swap(&xlm, &usdc, &100, &user);
+        client.swap(&xlm, &usdc, &100, &0, &user, &env.ledger().timestamp() + 100);
     }
 
     let mut info = env.ledger().get();
@@ -291,7 +291,7 @@ fn test_tier_fees_expert() {
     env.ledger().set(info);
 
     let balance_before = client.get_balance(&usdc, &user);
-    client.swap(&xlm, &usdc, &1000, &user);
+    client.swap(&xlm, &usdc, &1000, &0, &user, &env.ledger().timestamp() + 100);
     let balance_after = client.get_balance(&usdc, &user);
 
     assert_eq!(balance_after - balance_before, 998);
@@ -310,7 +310,7 @@ fn test_tier_fees_whale() {
             info.timestamp += 3601;
             env.ledger().set(info);
         }
-        client.swap(&xlm, &usdc, &100, &user);
+        client.swap(&xlm, &usdc, &100, &0, &user, &env.ledger().timestamp() + 100);
     }
 
     let mut info = env.ledger().get();
@@ -318,7 +318,7 @@ fn test_tier_fees_whale() {
     env.ledger().set(info);
 
     let balance_before = client.get_balance(&usdc, &user);
-    client.swap(&xlm, &usdc, &1000, &user);
+    client.swap(&xlm, &usdc, &1000, &0, &user, &env.ledger().timestamp() + 100);
     let balance_after = client.get_balance(&usdc, &user);
 
     assert_eq!(balance_after - balance_before, 999); // 15 bps -> 1.5 -> 1. Out 999.
@@ -340,7 +340,7 @@ fn test_swap_overflow_fee_calculation() {
 
     let max = i128::MAX;
     client.mint(&xlm, &user, &max);
-    client.swap(&xlm, &usdc, &max, &user);
+    client.swap(&xlm, &usdc, &max, &0, &user, &env.ledger().timestamp() + 100);
 }
 
 #[test]
@@ -356,7 +356,7 @@ fn test_swap_large_safe_amount() {
     let safe_max = 100_000_000_000_000_000_000; // 1e20
     client.mint(&xlm, &user, &100_000_000_000_000_000_000_000); // Mint plenty (1e23)
 
-    client.swap(&xlm, &usdc, &safe_max, &user);
+    client.swap(&xlm, &usdc, &safe_max, &0, &user, &env.ledger().timestamp() + 100);
     // Should succeed.
 }
 
@@ -373,7 +373,7 @@ macro_rules! test_swap_amount {
             client.mint(&xlm, &user, &1000000000); // Mint plenty
 
             // Check swap succeeds
-            let out = client.swap(&xlm, &usdc, &$amount, &user);
+            let out = client.swap(&xlm, &usdc, &$amount, &0, &user, &env.ledger().timestamp() + 100);
 
             // Basic sanity check: output roughly matches input (1:1 minus fee 0.3%)
             // Fee is 0.3%. out = amt * 0.997 roughly.
@@ -421,7 +421,7 @@ macro_rules! test_swap_reverse {
 
             client.mint(&usdc, &user, &1000000000);
 
-            let out = client.swap(&usdc, &xlm, &$amount, &user);
+            let out = client.swap(&usdc, &xlm, &$amount, &0, &user, &env.ledger().timestamp() + 100);
             let fee = ($amount * 30) / 10000;
             let expected = $amount - fee;
             assert_eq!(out, expected);
@@ -435,3 +435,26 @@ test_swap_reverse!(test_swap_rev_500, 500);
 test_swap_reverse!(test_swap_rev_1000, 1000);
 test_swap_reverse!(test_swap_rev_5000, 5000);
 test_swap_reverse!(test_swap_rev_10000, 10000);
+
+#[test]
+#[should_panic(expected = "Expired")]
+fn test_swap_expired() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let (client, user, xlm, usdc) = setup_test_portfolio(&env);
+
+    client.mint(&xlm, &user, &1000);
+    client.swap(&xlm, &usdc, &100, &0, &user, &env.ledger().timestamp() - 1);
+}
+
+#[test]
+#[should_panic(expected = "SlippageExceeded")]
+fn test_swap_slippage() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let (client, user, xlm, usdc) = setup_test_portfolio(&env);
+
+    client.mint(&xlm, &user, &1000);
+    client.swap(&xlm, &usdc, &100, &101, &user, &env.ledger().timestamp() + 100);
+}
+""

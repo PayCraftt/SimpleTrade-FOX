@@ -572,10 +572,14 @@ impl CounterContract {
     }
 
     /// Non-panicking swap that counts failed orders and returns 0 on failure
-    pub fn safe_swap(env: Env, from: Symbol, to: Symbol, amount: i128, user: Address) -> i128 {
+    pub fn safe_swap(env: Env, from: Symbol, to: Symbol, amount: i128, user: Address, deadline: u64) -> i128 {
+        if env.ledger().timestamp() > deadline {
+            return 0;
+        }
         if require_authenticated_verified_user(&env, &user).is_err() {
             return 0;
         }
+
 
         let mut portfolio: Portfolio = env
             .storage()
