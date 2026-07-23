@@ -1,7 +1,7 @@
-use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
-use crate::portfolio::{Portfolio, Asset};
-use crate::tiers::{UserTier, calculate_user_tier};
+use crate::portfolio::{Asset, Portfolio};
 use crate::risk_management::RiskConfig;
+use crate::tiers::{calculate_user_tier, UserTier};
+use soroban_sdk::{contracttype, Address, Env, Map, Symbol, Vec};
 
 /// Position limit enforcement
 pub struct PositionLimits;
@@ -49,20 +49,20 @@ impl PositionLimits {
     /// Get position limit based on user tier
     pub fn get_tier_position_limit(config: &RiskConfig, tier: &UserTier) -> i128 {
         match tier {
-            UserTier::Novice => config.max_position_per_asset / 10,     // 10% of base
-            UserTier::Trader => config.max_position_per_asset / 4,      // 25% of base
-            UserTier::Expert => config.max_position_per_asset / 2,      // 50% of base
-            UserTier::Whale => config.max_position_per_asset,           // 100% of base
+            UserTier::Novice => config.max_position_per_asset / 10, // 10% of base
+            UserTier::Trader => config.max_position_per_asset / 4,  // 25% of base
+            UserTier::Expert => config.max_position_per_asset / 2,  // 50% of base
+            UserTier::Whale => config.max_position_per_asset,       // 100% of base
         }
     }
 
     /// Get portfolio limit based on user tier
     pub fn get_tier_portfolio_limit(config: &RiskConfig, tier: &UserTier) -> i128 {
         match tier {
-            UserTier::Novice => config.max_position_per_user / 10,     // 10% of base
-            UserTier::Trader => config.max_position_per_user / 4,      // 25% of base
-            UserTier::Expert => config.max_position_per_user / 2,      // 50% of base
-            UserTier::Whale => config.max_position_per_user,           // 100% of base
+            UserTier::Novice => config.max_position_per_user / 10, // 10% of base
+            UserTier::Trader => config.max_position_per_user / 4,  // 25% of base
+            UserTier::Expert => config.max_position_per_user / 2,  // 50% of base
+            UserTier::Whale => config.max_position_per_user,       // 100% of base
         }
     }
 
@@ -75,7 +75,8 @@ impl PositionLimits {
         // For simplicity, sum all balances (assuming same decimals)
         // In production, this should convert to USD value using oracles
         let xlm_balance = portfolio.balance_of(env, Asset::XLM, user.clone());
-        let usdc_balance = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+        let usdc_balance =
+            portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
 
         xlm_balance + usdc_balance
     }
@@ -94,7 +95,9 @@ impl PositionLimits {
         if !config.risk_weights.validate() {
             panic!("Risk weights must sum to 100");
         }
-        env.storage().instance().set(&Symbol::short("risk_cfg"), config);
+        env.storage()
+            .instance()
+            .set(&Symbol::short("risk_cfg"), config);
     }
 }
 

@@ -1,11 +1,10 @@
 #[cfg(test)]
 mod governance_tests {
     use super::*;
-    use crate::CounterContract;
-    use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env, Symbol, symbol_short};
-    use crate::governance_types::*;
     use crate::governance_system::GovernanceSystem;
+    use crate::governance_types::*;
     use crate::staking_bonus::StakingBonusManager;
+    use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, Symbol};
 
     // ===== GOVERNANCE PROPOSAL TESTS =====
 
@@ -47,13 +46,8 @@ mod governance_tests {
         let proposal_type = ProposalType::ParameterChange(ParamKey::FeeBps, 25);
         let description = Symbol::new(&env, "test_proposal");
 
-        let result = GovernanceSystem::create_proposal(
-            &env,
-            &proposer,
-            proposal_type,
-            description,
-            86400,
-        );
+        let result =
+            GovernanceSystem::create_proposal(&env, &proposer, proposal_type, description, 86400);
 
         assert!(result.is_err());
     }
@@ -99,15 +93,11 @@ mod governance_tests {
             proposal_type,
             symbol_short!("test"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Cast vote
-        let result = GovernanceSystem::cast_vote(
-            &env,
-            &voter,
-            proposal_id,
-            VoteOption::For,
-        );
+        let result = GovernanceSystem::cast_vote(&env, &voter, proposal_id, VoteOption::For);
 
         assert!(result.is_ok());
 
@@ -137,7 +127,8 @@ mod governance_tests {
             ProposalType::ParameterChange(ParamKey::FeeBps, 25),
             symbol_short!("test"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Cast first vote
         GovernanceSystem::cast_vote(&env, &voter, proposal_id, VoteOption::For).unwrap();
@@ -167,7 +158,8 @@ mod governance_tests {
             ProposalType::ParameterChange(ParamKey::FeeBps, 25),
             Symbol::new(&env, "fee_change"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Cast votes - 800 + 700 = 1500 votes for (>50% of 2000 total)
         GovernanceSystem::cast_vote(&env, &voter1, proposal_id, VoteOption::For).unwrap();
@@ -206,7 +198,8 @@ mod governance_tests {
             ProposalType::ParameterChange(ParamKey::FeeBps, 25),
             Symbol::new(&env, "fee_change"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Cast votes - not enough for quorum (20% required)
         GovernanceSystem::cast_vote(&env, &voter1, proposal_id, VoteOption::For).unwrap();
@@ -235,7 +228,8 @@ mod governance_tests {
             ProposalType::ParameterChange(ParamKey::FeeBps, 25),
             symbol_short!("test"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Cancel by proposer
         let result = GovernanceSystem::cancel_proposal(&env, &proposer, proposal_id);
@@ -270,7 +264,8 @@ mod governance_tests {
             ProposalType::ParameterChange(ParamKey::FeeBps, 50),
             Symbol::new(&env, "fee_change"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Vote for
         GovernanceSystem::cast_vote(&env, &voter, proposal_id, VoteOption::For).unwrap();
@@ -280,7 +275,11 @@ mod governance_tests {
         GovernanceSystem::execute_proposal(&env, &executor, proposal_id).unwrap();
 
         // Verify fee was changed
-        let new_fee: u32 = env.storage().instance().get(&symbol_short!("fee_bps")).unwrap_or(30);
+        let new_fee: u32 = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("fee_bps"))
+            .unwrap_or(30);
         assert_eq!(new_fee, 50);
     }
 
@@ -300,10 +299,13 @@ mod governance_tests {
         let proposal_id = GovernanceSystem::create_proposal(
             &env,
             &proposer,
-            ProposalType::AdminUpgrade(new_admin.clone()),
-            Symbol::new(&env, "admin_upgrade"),
+            ProposalType::AdminUpgrade {
+                new_admin: new_admin.clone(),
+            },
+            symbol_short!("admin_upgrade"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Vote for
         GovernanceSystem::cast_vote(&env, &voter, proposal_id, VoteOption::For).unwrap();
@@ -379,7 +381,8 @@ mod governance_tests {
             ProposalType::ParameterChange(ParamKey::MaxSwapAmount, 1000000),
             Symbol::new(&env, "increase_max_swap"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // 2. Cast votes (3500 for, 800 abstain = 72% participation, 87% approval)
         CounterContract::cast_governance_vote(
@@ -387,38 +390,42 @@ mod governance_tests {
             voter1.clone(),
             proposal_id,
             VoteOption::For,
-        ).unwrap();
+        )
+        .unwrap();
 
         CounterContract::cast_governance_vote(
             env.clone(),
             voter2.clone(),
             proposal_id,
             VoteOption::For,
-        ).unwrap();
+        )
+        .unwrap();
 
         CounterContract::cast_governance_vote(
             env.clone(),
             voter3.clone(),
             proposal_id,
             VoteOption::Abstain,
-        ).unwrap();
+        )
+        .unwrap();
 
         // 3. Fast forward past voting period
         env.ledger().set_timestamp(env.ledger().timestamp() + 86500);
 
         // 4. Execute proposal
-        CounterContract::execute_governance_proposal(
-            env.clone(),
-            executor.clone(),
-            proposal_id,
-        ).unwrap();
+        CounterContract::execute_governance_proposal(env.clone(), executor.clone(), proposal_id)
+            .unwrap();
 
         // 5. Verify execution
         let proposal = CounterContract::get_governance_proposal(env.clone(), proposal_id).unwrap();
         assert_eq!(proposal.status, ProposalStatus::Executed);
 
         // 6. Verify parameter change
-        let max_swap: i128 = env.storage().instance().get(&symbol_short!("max_swap")).unwrap_or(0);
+        let max_swap: i128 = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("max_swap"))
+            .unwrap_or(0);
         assert_eq!(max_swap, 1000000);
     }
 
@@ -440,7 +447,8 @@ mod governance_tests {
             ProposalType::EmergencyAction(true),
             Symbol::new(&env, "emergency_pause"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Cast vote (only 9% participation)
         CounterContract::cast_governance_vote(
@@ -448,7 +456,8 @@ mod governance_tests {
             voter.clone(),
             proposal_id,
             VoteOption::For,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Fast forward and try to execute
         env.ledger().set_timestamp(env.ledger().timestamp() + 86500);
@@ -476,7 +485,8 @@ mod governance_tests {
             ProposalType::ParameterChange(ParamKey::FeeBps, 20),
             symbol_short!("proposal1"),
             86400,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Try to create another proposal immediately - should fail
         let result = CounterContract::create_governance_proposal(

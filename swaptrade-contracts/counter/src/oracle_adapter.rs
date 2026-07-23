@@ -91,8 +91,12 @@ impl OracleAdapter {
             fallback_price: initial_price,
         };
 
-        env.storage().instance().set(&Self::config_key(&pair), &config);
-        env.storage().instance().set(&Self::state_key(&pair), &state);
+        env.storage()
+            .instance()
+            .set(&Self::config_key(&pair), &config);
+        env.storage()
+            .instance()
+            .set(&Self::state_key(&pair), &state);
 
         Ok(())
     }
@@ -100,7 +104,7 @@ impl OracleAdapter {
     /// Get price with TWAP validation and staleness checks
     pub fn get_price(env: &Env, pair: (Symbol, Symbol)) -> Result<u128, ContractError> {
         let config = Self::get_config(env, &pair)?;
-        
+
         if !config.is_active {
             return Err(ContractError::OracleNotActive);
         }
@@ -153,15 +157,17 @@ impl OracleAdapter {
         // Circuit breaker check: reject if deviation > threshold
         if state.current_price > 0 {
             let deviation_bps = Self::calculate_deviation_bps(state.current_price, new_price);
-            
+
             if deviation_bps > config.circuit_breaker_threshold_bps {
                 // Activate circuit breaker
                 state.circuit_breaker_active = true;
                 state.fallback_price = state.current_price;
-                
+
                 // Store updated state
-                env.storage().instance().set(&Self::state_key(&pair), &state);
-                
+                env.storage()
+                    .instance()
+                    .set(&Self::state_key(&pair), &state);
+
                 return Err(ContractError::CircuitBreakerTriggered);
             }
         }
@@ -182,7 +188,7 @@ impl OracleAdapter {
         // Update state
         state.current_price = new_price;
         state.last_update = current_time;
-        
+
         // Deactivate circuit breaker if price is stable
         if state.circuit_breaker_active {
             let deviation_bps = Self::calculate_deviation_bps(state.fallback_price, new_price);
@@ -192,7 +198,9 @@ impl OracleAdapter {
             }
         }
 
-        env.storage().instance().set(&Self::state_key(&pair), &state);
+        env.storage()
+            .instance()
+            .set(&Self::state_key(&pair), &state);
 
         Ok(())
     }
@@ -285,15 +293,23 @@ impl OracleAdapter {
             }
         }
 
-        env.storage().instance().set(&Self::config_key(&pair), &config);
+        env.storage()
+            .instance()
+            .set(&Self::config_key(&pair), &config);
         Ok(())
     }
 
     /// Activate or deactivate oracle
-    pub fn set_oracle_active(env: &Env, pair: (Symbol, Symbol), active: bool) -> Result<(), ContractError> {
+    pub fn set_oracle_active(
+        env: &Env,
+        pair: (Symbol, Symbol),
+        active: bool,
+    ) -> Result<(), ContractError> {
         let mut config = Self::get_config(env, &pair)?;
         config.is_active = active;
-        env.storage().instance().set(&Self::config_key(&pair), &config);
+        env.storage()
+            .instance()
+            .set(&Self::config_key(&pair), &config);
         Ok(())
     }
 
@@ -301,12 +317,17 @@ impl OracleAdapter {
     pub fn reset_circuit_breaker(env: &Env, pair: (Symbol, Symbol)) -> Result<(), ContractError> {
         let mut state = Self::get_state(env, &pair)?;
         state.circuit_breaker_active = false;
-        env.storage().instance().set(&Self::state_key(&pair), &state);
+        env.storage()
+            .instance()
+            .set(&Self::state_key(&pair), &state);
         Ok(())
     }
 
     /// Get oracle state information
-    pub fn get_oracle_info(env: &Env, pair: (Symbol, Symbol)) -> Result<(OracleConfig, OracleState), ContractError> {
+    pub fn get_oracle_info(
+        env: &Env,
+        pair: (Symbol, Symbol),
+    ) -> Result<(OracleConfig, OracleState), ContractError> {
         let config = Self::get_config(env, &pair)?;
         let state = Self::get_state(env, &pair)?;
         Ok((config, state))

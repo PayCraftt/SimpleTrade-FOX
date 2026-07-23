@@ -1,7 +1,7 @@
-use soroban_sdk::{contracttype, Address, Env, Symbol, Vec, Map};
 use crate::errors::SwapTradeError;
-use crate::governance_types::*;
 use crate::events::Events;
+use crate::governance_types::*;
+use soroban_sdk::{contracttype, Address, Env, Map, Symbol, Vec};
 
 /// On-chain governance system for SwapTrade
 pub struct GovernanceSystem;
@@ -26,7 +26,8 @@ impl GovernanceSystem {
         }
 
         // Check proposal cooldown
-        let last_proposal_time = env.storage()
+        let last_proposal_time = env
+            .storage()
             .persistent()
             .get(&GovernanceKey::VoterLastProposal(proposer.clone()))
             .unwrap_or(0u64);
@@ -58,7 +59,8 @@ impl GovernanceSystem {
             votes_against: 0,
             votes_abstain: 0,
             total_voting_power: Self::get_total_voting_power(env),
-            quorum_required: (config.quorum_threshold as u128 * Self::get_total_voting_power(env)) / 10000,
+            quorum_required: (config.quorum_threshold as u128 * Self::get_total_voting_power(env))
+                / 10000,
             approval_threshold: config.approval_threshold,
             executed: false,
         };
@@ -69,9 +71,10 @@ impl GovernanceSystem {
             .set(&GovernanceKey::Proposal(proposal_id), &proposal);
 
         // Update last proposal time
-        env.storage()
-            .persistent()
-            .set(&GovernanceKey::VoterLastProposal(proposer.clone()), &current_time);
+        env.storage().persistent().set(
+            &GovernanceKey::VoterLastProposal(proposer.clone()),
+            &current_time,
+        );
 
         // Emit event
         env.events().publish(
@@ -105,7 +108,8 @@ impl GovernanceSystem {
 
         // Check if voter already voted
         let votes_key = GovernanceKey::ProposalVotes(proposal_id);
-        let mut votes: Map<Address, Vote> = env.storage()
+        let mut votes: Map<Address, Vote> = env
+            .storage()
             .persistent()
             .get(&votes_key)
             .unwrap_or_else(|| Map::new(env));
@@ -139,7 +143,9 @@ impl GovernanceSystem {
 
         // Store updated data
         env.storage().persistent().set(&votes_key, &votes);
-        env.storage().persistent().set(&GovernanceKey::Proposal(proposal_id), &proposal);
+        env.storage()
+            .persistent()
+            .set(&GovernanceKey::Proposal(proposal_id), &proposal);
 
         // Emit event
         env.events().publish(
@@ -192,7 +198,9 @@ impl GovernanceSystem {
         } else {
             // Set execution time if not set
             proposal.execution_time = Some(current_time + config.execution_delay);
-            env.storage().persistent().set(&GovernanceKey::Proposal(proposal_id), &proposal);
+            env.storage()
+                .persistent()
+                .set(&GovernanceKey::Proposal(proposal_id), &proposal);
             return Err(SwapTradeError::InvalidAmount); // Not ready for execution yet
         }
 
@@ -202,7 +210,9 @@ impl GovernanceSystem {
         // Mark as executed
         proposal.executed = true;
         proposal.status = ProposalStatus::Executed;
-        env.storage().persistent().set(&GovernanceKey::Proposal(proposal_id), &proposal);
+        env.storage()
+            .persistent()
+            .set(&GovernanceKey::Proposal(proposal_id), &proposal);
 
         // Emit event
         env.events().publish(
@@ -235,7 +245,9 @@ impl GovernanceSystem {
         }
 
         proposal.status = ProposalStatus::Cancelled;
-        env.storage().persistent().set(&GovernanceKey::Proposal(proposal_id), &proposal);
+        env.storage()
+            .persistent()
+            .set(&GovernanceKey::Proposal(proposal_id), &proposal);
 
         // Emit event
         env.events().publish(
@@ -271,7 +283,11 @@ impl GovernanceSystem {
     }
 
     /// Set governance configuration (admin only)
-    pub fn set_config(env: &Env, admin: &Address, config: &GovernanceConfig) -> Result<(), SwapTradeError> {
+    pub fn set_config(
+        env: &Env,
+        admin: &Address,
+        config: &GovernanceConfig,
+    ) -> Result<(), SwapTradeError> {
         admin.require_auth();
         crate::admin::require_admin(env, admin)?;
 
@@ -283,7 +299,9 @@ impl GovernanceSystem {
             return Err(SwapTradeError::InvalidAmount);
         }
 
-        env.storage().persistent().set(&GovernanceKey::Config, config);
+        env.storage()
+            .persistent()
+            .set(&GovernanceKey::Config, config);
         Ok(())
     }
 
@@ -333,27 +351,41 @@ impl GovernanceSystem {
         }
     }
 
-    fn execute_parameter_change(env: &Env, param_key: &ParamKey, new_value: i128) -> Result<(), SwapTradeError> {
+    fn execute_parameter_change(
+        env: &Env,
+        param_key: &ParamKey,
+        new_value: i128,
+    ) -> Result<(), SwapTradeError> {
         match param_key {
             ParamKey::MaxSwapAmount => {
                 // Update max swap amount
-                env.storage().instance().set(&Symbol::short("max_swap"), &new_value);
+                env.storage()
+                    .instance()
+                    .set(&Symbol::short("max_swap"), &new_value);
             }
             ParamKey::FeeBps => {
                 // Update fee
-                env.storage().instance().set(&Symbol::short("fee_bps"), &(new_value as u32));
+                env.storage()
+                    .instance()
+                    .set(&Symbol::short("fee_bps"), &(new_value as u32));
             }
             ParamKey::RateLimitWindow => {
                 // Update rate limit window
-                env.storage().instance().set(&Symbol::short("rate_win"), &new_value);
+                env.storage()
+                    .instance()
+                    .set(&Symbol::short("rate_win"), &new_value);
             }
             ParamKey::MaxSlippageBps => {
                 // Update max slippage
-                env.storage().instance().set(&Symbol::short("max_slip"), &(new_value as u32));
+                env.storage()
+                    .instance()
+                    .set(&Symbol::short("max_slip"), &(new_value as u32));
             }
             ParamKey::EmergencyPause => {
                 // Emergency pause/unpause
-                env.storage().instance().set(&Symbol::short("paused"), &(new_value != 0));
+                env.storage()
+                    .instance()
+                    .set(&Symbol::short("paused"), &(new_value != 0));
             }
             ParamKey::RiskConfigMaxPosition => {
                 // Update risk config
@@ -389,7 +421,9 @@ impl GovernanceSystem {
     }
 
     fn execute_emergency_action(env: &Env, pause: bool) -> Result<(), SwapTradeError> {
-        env.storage().instance().set(&Symbol::short("paused"), &pause);
+        env.storage()
+            .instance()
+            .set(&Symbol::short("paused"), &pause);
         Ok(())
     }
 
@@ -405,7 +439,8 @@ impl GovernanceSystem {
     }
 
     fn get_next_proposal_id(env: &Env) -> u64 {
-        let current_id: u64 = env.storage()
+        let current_id: u64 = env
+            .storage()
             .persistent()
             .get(&GovernanceKey::NextProposalId)
             .unwrap_or(1);

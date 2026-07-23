@@ -1,6 +1,6 @@
-use soroban_sdk::{contracttype, Address, Env, Map, Vec, Symbol, symbol_short};
-use crate::storage::DataKey;
 use crate::errors::SwapTradeError;
+use crate::storage::DataKey;
+use soroban_sdk::{contracttype, symbol_short, Address, Env, Map, Symbol, Vec};
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -30,7 +30,7 @@ pub struct ReferralStats {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TierConfig {
     pub volume_threshold: i128,
-    pub direct_commission_bps: u32,  // basis points (1/100 of percent)
+    pub direct_commission_bps: u32, // basis points (1/100 of percent)
     pub indirect_commission_bps: u32,
 }
 
@@ -53,7 +53,11 @@ const DEFAULT_TIER_3: TierConfig = TierConfig {
     indirect_commission_bps: 40, // 0.4%
 };
 
-pub fn register_referral(env: &Env, referrer: Address, referred: Address) -> Result<(), SwapTradeError> {
+pub fn register_referral(
+    env: &Env,
+    referrer: Address,
+    referred: Address,
+) -> Result<(), SwapTradeError> {
     // Authentication
     referred.require_auth();
 
@@ -82,7 +86,7 @@ pub fn register_referral(env: &Env, referrer: Address, referred: Address) -> Res
         level: ReferralLevel::Direct,
         registration_timestamp: env.ledger().timestamp(),
     };
-    
+
     let info_key = DataKey::ReferralInfo(referred.clone());
     env.storage().instance().set(&info_key, &referral_info);
 
@@ -91,8 +95,8 @@ pub fn register_referral(env: &Env, referrer: Address, referred: Address) -> Res
 
     // Emit event
     env.events().publish(
-        (Symbol::new(env, "referral_registered"),),
-        (referrer, referred, ReferralLevel::Direct)
+        symbol_short!("referral_registered"),
+        (referrer, referred, ReferralLevel::Direct),
     );
 
     Ok(())
@@ -100,16 +104,24 @@ pub fn register_referral(env: &Env, referrer: Address, referred: Address) -> Res
 
 fn is_circular_referral(env: &Env, referrer: &Address, referred: &Address) -> bool {
     // Check if referrer is already referred by the referred user (direct circular)
-    if let Some(existing_referrer) = env.storage().instance().get::<_, Address>(&DataKey::Referrer(referrer.clone())) {
+    if let Some(existing_referrer) = env
+        .storage()
+        .instance()
+        .get::<_, Address>(&DataKey::Referrer(referrer.clone()))
+    {
         if existing_referrer == *referred {
             return true;
         }
     }
-    
+
     // Check for indirect circular references up to 2 levels
     let mut current_referrer = referrer.clone();
     for _ in 0..2 {
-        if let Some(next_referrer) = env.storage().instance().get::<_, Address>(&DataKey::Referrer(current_referrer.clone())) {
+        if let Some(next_referrer) = env
+            .storage()
+            .instance()
+            .get::<_, Address>(&DataKey::Referrer(current_referrer.clone()))
+        {
             if next_referrer == *referred {
                 return true;
             }
@@ -118,18 +130,18 @@ fn is_circular_referral(env: &Env, referrer: &Address, referred: &Address) -> bo
             break;
         }
     }
-    
+
     false
 }
 
 fn update_referrer_stats(env: &Env, referrer: &Address, level: ReferralLevel) {
     let mut stats = get_referral_stats(env, referrer.clone());
-    
+
     match level {
         ReferralLevel::Direct => stats.direct_referrals += 1,
         ReferralLevel::Indirect => stats.indirect_referrals += 1,
     }
-    
+
     let stats_key = DataKey::ReferralStats(referrer.clone());
     env.storage().instance().set(&stats_key, &stats);
 }
@@ -170,33 +182,46 @@ pub fn calculate_and_distribute_commission(env: &Env, trader: Address, fee_amoun
     update_user_trading_volume(env, trader.clone(), fee_amount);
 
     // Get direct referrer
-    if let Some(direct_referrer) = env.storage().instance().get::<_, Address>(&DataKey::Referrer(trader.clone())) {
+    if let Some(direct_referrer) = env
+        .storage()
+        .instance()
+        .get::<_, Address>(&DataKey::Referrer(trader.clone()))
+    {
         // Calculate direct commission
         let direct_commission = (fee_amount * tier_config.direct_commission_bps as i128) / 10000;
-        
+
         if direct_commission > 0 {
             add_commission_balance(env, direct_referrer.clone(), direct_commission);
-            
+
             // Update stats
             let mut stats = get_referral_stats(env, direct_referrer.clone());
             stats.total_commission_earned += direct_commission;
             stats.total_referee_volume += fee_amount;
-            env.storage().instance().set(&DataKey::ReferralStats(direct_referrer.clone()), &stats);
+            env.storage()
+                .instance()
+                .set(&DataKey::ReferralStats(direct_referrer.clone()), &stats);
         }
 
         // Get indirect referrer (referrer's referrer)
-        if let Some(indirect_referrer) = env.storage().instance().get::<_, Address>(&DataKey::Referrer(direct_referrer.clone())) {
+        if let Some(indirect_referrer) = env
+            .storage()
+            .instance()
+            .get::<_, Address>(&DataKey::Referrer(direct_referrer.clone()))
+        {
             // Calculate indirect commission
-            let indirect_commission = (fee_amount * tier_config.indirect_commission_bps as i128) / 10000;
-            
+            let indirect_commission =
+                (fee_amount * tier_config.indirect_commission_bps as i128) / 10000;
+
             if indirect_commission > 0 {
                 add_commission_balance(env, indirect_referrer.clone(), indirect_commission);
-                
+
                 // Update stats
                 let mut stats = get_referral_stats(env, indirect_referrer.clone());
                 stats.total_commission_earned += indirect_commission;
                 stats.total_referee_volume += fee_amount;
-                env.storage().instance().set(&DataKey::ReferralStats(indirect_referrer.clone()), &stats);
+                env.storage()
+                    .instance()
+                    .set(&DataKey::ReferralStats(indirect_referrer.clone()), &stats);
             }
         }
     }
@@ -211,7 +236,10 @@ fn get_user_trading_volume(env: &Env, user: Address) -> i128 {
 
 fn update_user_trading_volume(env: &Env, user: Address, additional_volume: i128) {
     let current_volume = get_user_trading_volume(env, user.clone());
-    env.storage().instance().set(&DataKey::TradingVolume(user), &(current_volume + additional_volume));
+    env.storage().instance().set(
+        &DataKey::TradingVolume(user),
+        &(current_volume + additional_volume),
+    );
 }
 
 fn add_commission_balance(env: &Env, user: Address, amount: i128) {
@@ -220,8 +248,11 @@ fn add_commission_balance(env: &Env, user: Address, amount: i128) {
         .instance()
         .get(&DataKey::CommissionBalance(user.clone()))
         .unwrap_or(0);
-    
-    env.storage().instance().set(&DataKey::CommissionBalance(user), &(current_balance + amount));
+
+    env.storage().instance().set(
+        &DataKey::CommissionBalance(user),
+        &(current_balance + amount),
+    );
 }
 
 pub fn withdraw_commission(env: &Env, user: Address) -> i128 {
@@ -238,13 +269,13 @@ pub fn withdraw_commission(env: &Env, user: Address) -> i128 {
     }
 
     // Reset balance to zero before transfer (security best practice)
-    env.storage().instance().set(&DataKey::CommissionBalance(user.clone()), &0);
+    env.storage()
+        .instance()
+        .set(&DataKey::CommissionBalance(user.clone()), &0);
 
     // Emit event
-    env.events().publish(
-        (Symbol::new(env, "commission_withdrawn"),),
-        (user, balance)
-    );
+    env.events()
+        .publish(symbol_short!("commission_withdrawn"), (user, balance));
 
     balance
 }
@@ -255,3 +286,8 @@ pub fn get_commission_balance(env: &Env, user: Address) -> i128 {
         .get(&DataKey::CommissionBalance(user))
         .unwrap_or(0)
 }
+
+#[cfg(test)]
+mod referral_integration_test;
+#[cfg(test)]
+mod referral_system_tests;

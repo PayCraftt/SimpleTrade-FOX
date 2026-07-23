@@ -15,6 +15,8 @@ pub struct LiquidityPool {
     pub reserve_b: i128,
     pub total_lp_tokens: i128,
     pub fee_tier: u32,
+    pub accumulated_fees_a: i128,
+    pub accumulated_fees_b: i128,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -112,6 +114,8 @@ impl PoolRegistry {
                 reserve_b,
                 total_lp_tokens: initial_lp,
                 fee_tier,
+                accumulated_fees_a: 0,
+                accumulated_fees_b: 0,
             },
         );
         self.pair_to_pool.set((norm_a, norm_b), pool_id);
@@ -182,6 +186,100 @@ impl PoolRegistry {
         Ok(lp_tokens)
     }
 
+    pub fn claim_fees(
+        &mut self,
+        env: &Env,
+        pool_id: u64,
+        provider: Address,
+    ) -> Result<(i128, i128), ContractError> {
+        let pool = self
+            .pools
+            .get(pool_id)
+            .ok_or(ContractError::LPPositionNotFound)?;
+        let key = (pool_id, provider.clone());
+        let lp_balance = self.lp_balances.get(key.clone()).unwrap_or(0);
+        if lp_balance <= 0 {
+            return Err(ContractError::InsufficientLPTokens);
+        }
+
+        // Calculate proportional share of accumulated fees
+        let share = (lp_balance as u128) / (pool.total_lp_tokens as u128);
+        let fees_a = ((pool.accumulated_fees_a as u128) * share) as i128;
+        let fees_b = ((pool.accumulated_fees_b as u128) * share) as i128;
+
+        // Update accumulated fees (subtract claimed amount)
+        let mut updated_pool = pool.clone();
+        updated_pool.accumulated_fees_a = pool.accumulated_fees_a - fees_a;
+        updated_pool.accumulated_fees_b = pool.accumulated_fees_b - fees_b;
+        self.pools.set(pool_id, updated_pool);
+
+        // Publish events
+        if fees_a > 0 {
+            crate::events::fees_distributed(env, pool_id, pool.token_a, fees_a, provider.clone());
+        }
+        if fees_b > 0 {
+            crate::events::fees_distributed(env, pool_id, pool.token_b, fees_b, provider);
+        }
+
+        Ok((fees_a, fees_b))
+    }
+
+    pub fn withdraw_treasury_fees(
+        &mut self,
+        env: &Env,
+        pool_id: u64,
+        treasury: Address,
+    ) -> Result<(i128, i128), ContractError> {
+        treasury.require_auth();
+        let mut pool = self
+            .pools
+            .get(pool_id)
+            .ok_or(ContractError::LPPositionNotFound)?;
+
+        let fees_a = pool.accumulated_fees_a;
+        let fees_b = pool.accumulated_fees_b;
+
+        // Reset accumulated fees
+        pool.accumulated_fees_a = 0;
+        pool.accumulated_fees_b = 0;
+        self.pools.set(pool_id, pool);
+
+        // Publish events
+        if fees_a > 0 {
+            crate::events::fees_distributed(env, pool_id, pool.token_a, fees_a, treasury.clone());
+        }
+        if fees_b > 0 {
+            crate::events::fees_distributed(env, pool_id, pool.token_b, fees_b, treasury);
+        }
+
+        Ok((fees_a, fees_b))
+    }
+
+    pub fn update_fee_tier(
+        &mut self,
+        env: &Env,
+        pool_id: u64,
+        new_fee_tier: u32,
+        admin: Address,
+    ) -> Result<(), ContractError> {
+        admin.require_auth();
+        crate::admin::require_admin(env, &admin)?;
+
+        if ![1, 5, 30].contains(&new_fee_tier) {
+            return Err(ContractError::InvalidAmount);
+        }
+
+        let mut pool = self
+            .pools
+            .get(pool_id)
+            .ok_or(ContractError::LPPositionNotFound)?;
+        pool.fee_tier = new_fee_tier;
+        self.pools.set(pool_id, pool);
+
+        crate::events::fee_parameters_updated(env, pool_id, new_fee_tier, None);
+        Ok(())
+    }
+
     pub fn remove_liquidity(
         &mut self,
         env: &Env,
@@ -189,6 +287,9 @@ impl PoolRegistry {
         lp_tokens: i128,
         provider: Address,
     ) -> Result<(i128, i128), ContractError> {
+        // First claim any pending fees before removing liquidity
+        self.claim_fees(env, pool_id, provider.clone())?;
+
         let mut pool = self
             .pools
             .get(pool_id)
@@ -246,18 +347,19 @@ impl PoolRegistry {
             return Err(ContractError::InvalidAmount);
         }
 
-        let (reserve_in, reserve_out) = if token_in == pool.token_a {
-            (pool.reserve_a, pool.reserve_b)
+        let (reserve_in, reserve_out, is_token_a) = if token_in == pool.token_a {
+            (pool.reserve_a, pool.reserve_b, true)
         } else if token_in == pool.token_b {
-            (pool.reserve_b, pool.reserve_a)
+            (pool.reserve_b, pool.reserve_a, false)
         } else {
             return Err(ContractError::InvalidTokenSymbol);
         };
 
-        let amount_in_with_fee = (amount_in as u128)
-            .checked_mul(10000 - pool.fee_tier as u128)
-            .ok_or(ContractError::AmountOverflow)?
-            / 10000;
+        // Calculate fee and amount after fee
+        let fee_amount = ((amount_in as u128) * (pool.fee_tier as u128) / 10000) as i128;
+        let amount_in_after_fee = amount_in - fee_amount;
+
+        let amount_in_with_fee = amount_in_after_fee as u128;
         let numerator = (reserve_out as u128)
             .checked_mul(amount_in_with_fee)
             .ok_or(ContractError::AmountOverflow)?;
@@ -270,25 +372,38 @@ impl PoolRegistry {
             return Err(ContractError::SlippageExceeded);
         }
 
-        if token_in == pool.token_a {
+        // Accumulate fees
+        if is_token_a {
+            pool.accumulated_fees_a = pool
+                .accumulated_fees_a
+                .checked_add(fee_amount)
+                .ok_or(ContractError::AmountOverflow)?;
             pool.reserve_a = pool
                 .reserve_a
-                .checked_add(amount_in)
+                .checked_add(amount_in_after_fee)
                 .ok_or(ContractError::AmountOverflow)?;
             pool.reserve_b = pool
                 .reserve_b
                 .checked_sub(amount_out)
                 .ok_or(ContractError::InsufficientBalance)?;
         } else {
+            pool.accumulated_fees_b = pool
+                .accumulated_fees_b
+                .checked_add(fee_amount)
+                .ok_or(ContractError::AmountOverflow)?;
             pool.reserve_b = pool
                 .reserve_b
-                .checked_add(amount_in)
+                .checked_add(amount_in_after_fee)
                 .ok_or(ContractError::AmountOverflow)?;
             pool.reserve_a = pool
                 .reserve_a
                 .checked_sub(amount_out)
                 .ok_or(ContractError::InsufficientBalance)?;
         }
+
+        // Publish fees collected event
+        crate::events::fees_collected(env, token_in, fee_amount, pool_id);
+
         self.pools.set(pool_id, pool);
         Ok(amount_out)
     }
@@ -338,9 +453,9 @@ impl PoolRegistry {
                         if let Some(pool2_id) = self.pair_to_pool.get((norm_int, norm_out)) {
                             if let Some(pool2) = self.pools.get(pool2_id) {
                                 let out1 =
-                                     self.calculate_output(&pool1, token_in.clone(), amount_in).ok()?;
+                                    self.calculate_output(&pool1, token_in.clone(), amount_in)?;
                                 let out2 =
-                                     self.calculate_output(&pool2, intermediate.clone(), out1).ok()?;
+                                    self.calculate_output(&pool2, intermediate.clone(), out1)?;
                                 let impact1 = self.calculate_price_impact(
                                     &pool1,
                                     token_in.clone(),
@@ -375,31 +490,12 @@ impl PoolRegistry {
         best_route
     }
 
-    pub fn simulate_route(
+    fn calculate_output(
         &self,
-        route: &Route,
+        pool: &LiquidityPool,
+        token_in: Symbol,
         amount_in: i128,
-    ) -> Option<(i128, u32)> {
-        if route.pools.len() == 0 || route.tokens.len() < 2 {
-            return None;
-        }
-        let mut current_amount = amount_in;
-        let mut total_fees_bps: u32 = 0;
-
-        for idx in 0..route.pools.len() {
-            let pool_id = route.pools.get(idx)?;
-            let pool = self.pools.get(pool_id)?;
-            let token_in = route.tokens.get(idx)?;
-
-            let output = self.calculate_output(&pool, token_in, current_amount).ok()?;
-            total_fees_bps = total_fees_bps.saturating_add(pool.fee_tier);
-            current_amount = output;
-        }
-
-        Some((current_amount, total_fees_bps))
-    }
-
-    fn calculate_output(&self, pool: &LiquidityPool, token_in: Symbol, amount_in: i128) -> Result<i128, ContractError> {
+    ) -> Result<i128, ContractError> {
         let (reserve_in, reserve_out) = if token_in == pool.token_a {
             (pool.reserve_a, pool.reserve_b)
         } else {

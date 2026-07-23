@@ -1,5 +1,5 @@
-use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
 use crate::portfolio::Asset;
+use soroban_sdk::{contracttype, Address, Env, Map, Symbol, Vec};
 
 /// Risk metrics returned by get_risk_metrics()
 #[contracttype]
@@ -69,11 +69,11 @@ impl Default for RiskConfig {
     fn default() -> Self {
         Self {
             max_position_per_user: 1000000000000, // 1M tokens (with 6 decimals)
-            max_position_per_asset: 500000000000,  // 500K tokens per asset
-            concentration_warn_threshold: 3000, // 30%
-            concentration_limit_threshold: 5000,   // 50%
-            circuit_breaker_threshold: 1500,       // 15%
-            circuit_breaker_window: 3600,          // 1 hour
+            max_position_per_asset: 500000000000, // 500K tokens per asset
+            concentration_warning_threshold: 3000, // 30%
+            concentration_limit_threshold: 5000,  // 50%
+            circuit_breaker_threshold: 1500,      // 15%
+            circuit_breaker_window: 3600,         // 1 hour
             risk_weights: RiskWeights {
                 concentration_weight: 40,
                 position_size_weight: 35,

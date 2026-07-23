@@ -1,8 +1,9 @@
 #[cfg(test)]
 mod integration_tests {
-use soroban_sdk::{Env, Address};
-    use soroban_sdk::testutils::{Address as _, Ledger as _};
+    use super::*;
     use crate::CounterContract;
+    use soroban_sdk::testutils::{Address as _, Ledger as _};
+    use soroban_sdk::Address;
 
     #[test]
     fn test_referral_integration_with_swap() {
@@ -10,12 +11,15 @@ use soroban_sdk::{Env, Address};
         let admin = Address::generate(&env);
         let referrer = Address::generate(&env);
         let trader = Address::generate(&env);
-        
+
         // Initialize contract
         CounterContract::initialize(env.clone());
 
         // Register referral
-        assert!(CounterContract::register_referral(env.clone(), referrer.clone(), trader.clone()).is_ok());
+        assert!(
+            CounterContract::register_referral(env.clone(), referrer.clone(), trader.clone())
+                .is_ok()
+        );
 
         // Check initial stats
         let stats = CounterContract::get_referral_stats(env.clone(), referrer.clone());
@@ -24,9 +28,10 @@ use soroban_sdk::{Env, Address};
 
         // Set up some basic liquidity for swap (this would normally be done through liquidity pools)
         // For this test, we'll just verify the referral system integration points
-        
+
         // Verify commission balance starts at zero
-        let commission_balance = CounterContract::get_commission_balance(env.clone(), referrer.clone());
+        let commission_balance =
+            CounterContract::get_commission_balance(env.clone(), referrer.clone());
         assert_eq!(commission_balance, 0);
 
         // The actual swap integration would be tested in the full integration test suite
@@ -38,7 +43,7 @@ use soroban_sdk::{Env, Address};
         let env = Env::default();
         let admin = Address::generate(&env);
         let user = Address::generate(&env);
-        
+
         // Initialize contract
         CounterContract::initialize(env.clone());
 

@@ -1,6 +1,6 @@
-use soroban_sdk::{contracttype, Env, Map, Symbol, Vec, Address};
 use crate::oracle::{get_stored_price, ContractError};
-use crate::risk_management::{RiskConfig, CircuitBreakerState};
+use crate::risk_management::{CircuitBreakerState, RiskConfig};
+use soroban_sdk::{contracttype, Address, Env, Map, Symbol, Vec};
 
 /// Circuit breaker for extreme market moves
 pub struct CircuitBreaker;
@@ -82,19 +82,24 @@ impl CircuitBreaker {
         let mut prices = Vec::new(env);
 
         // Try to get current price
-        if let Some(current_data) = get_stored_price(env, (asset_symbol.clone(), Symbol::short("USD"))) {
+        if let Some(current_data) =
+            get_stored_price(env, (asset_symbol.clone(), Symbol::short("USD")))
+        {
             if current_data.timestamp >= start_time && current_data.timestamp <= end_time {
                 prices.push_back((current_data.timestamp, current_data.price));
             }
         }
 
         // Try inverse pair
-        if let Some(current_data) = get_stored_price(env, (Symbol::short("USD"), asset_symbol.clone())) {
+        if let Some(current_data) =
+            get_stored_price(env, (Symbol::short("USD"), asset_symbol.clone()))
+        {
             if current_data.timestamp >= start_time && current_data.timestamp <= end_time {
                 // Invert price
                 if current_data.price > 0 {
-                    let inverted = (1_000_000_000_000_000_000u128 * 1_000_000_000_000_000_000u128) / current_data.price;
-                    prices.push_back((current_data.timestamp, inverted));
+                    let inverted = (1_000_000_000_000_000_000u128 * 1_000_000_000_000_000_000u128)
+                        / current_data.price;
+                    prices.push((current_data.timestamp, inverted));
                 }
             }
         }

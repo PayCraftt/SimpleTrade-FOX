@@ -10,7 +10,7 @@
 //! - Use local variables for state reads
 //! - Validate before commit
 
-use soroban_sdk::{contracttype, Env, Address, Symbol};
+use soroban_sdk::{contracttype, Address, Env, Symbol};
 
 /// Snapshot of critical state for validation
 #[contracttype]
@@ -47,7 +47,10 @@ impl StateSnapshotManager {
 
     /// Get next snapshot ID
     fn get_next_snapshot_id(env: &Env) -> u64 {
-        let key = (soroban_sdk::symbol_short!("snap"), soroban_sdk::symbol_short!("id"));
+        let key = (
+            soroban_sdk::symbol_short!("snap"),
+            soroban_sdk::symbol_short!("id"),
+        );
         let current_id: u64 = env.storage().temporary().get(&key).unwrap_or(0);
         let next_id = current_id + 1;
         env.storage().temporary().set(&key, &next_id);
@@ -60,7 +63,7 @@ pub struct AtomicOperation;
 
 impl AtomicOperation {
     /// Execute an atomic operation with state validation
-    /// 
+    ///
     /// This function ensures that:
     /// 1. All state is read before any mutations
     /// 2. State is validated before committing changes
@@ -123,9 +126,9 @@ impl StateConsistencyChecker {
         new_state: &T,
         allowed_transitions: &[(T, T)],
     ) -> bool {
-        allowed_transitions.iter().any(|(from, to)| {
-            from == old_state && to == new_state
-        })
+        allowed_transitions
+            .iter()
+            .any(|(from, to)| from == old_state && to == new_state)
     }
 
     /// Validate that all required preconditions are met before state mutation
@@ -137,10 +140,7 @@ impl StateConsistencyChecker {
     }
 
     /// Execute state mutation with pre and post validation
-    pub fn execute_with_validation<F, R, V>(
-        operation: F,
-        validator: V,
-    ) -> Result<R, &'static str>
+    pub fn execute_with_validation<F, R, V>(operation: F, validator: V) -> Result<R, &'static str>
     where
         F: FnOnce() -> R,
         V: FnOnce(&R) -> bool,

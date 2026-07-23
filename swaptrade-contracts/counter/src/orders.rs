@@ -6,21 +6,20 @@ use crate::errors::ContractError;
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub enum OrderType {
-    Market,      // Execute immediately at best available price
-    Limit,       // Execute only at specified price or better
-    StopLoss,    // Execute when price reaches trigger (becomes market order)
-    StopLimit,   // Execute when price reaches trigger (becomes limit order)
-    Recurring,   // DCA / recurring order executed on a schedule
+    Market,    // Execute immediately at best available price
+    Limit,     // Execute only at specified price or better
+    StopLoss,  // Execute when price reaches trigger (becomes market order)
+    StopLimit, // Execute when price reaches trigger (becomes limit order)
 }
 
 /// Order status
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub enum OrderStatus {
-    Pending,    // Order is active and waiting to be filled
-    Filled,     // Order has been completely filled
-    Cancelled,  // Order was cancelled by user
-    Expired,    // Order expired without being filled
+    Pending,         // Order is active and waiting to be filled
+    Filled,          // Order has been completely filled
+    Cancelled,       // Order was cancelled by user
+    Expired,         // Order expired without being filled
     PartiallyFilled, // Order is partially executed
     Scheduled,  // Recurring order is between executions, waiting for next run
 }
@@ -36,11 +35,11 @@ pub struct Order {
     pub token_out: Symbol,
     pub amount_in: i128,
     pub amount_filled: i128,
-    pub limit_price: Option<u128>,      // For limit orders: minimum acceptable price
-    pub trigger_price: Option<u128>,    // For stop orders: price that triggers execution
+    pub limit_price: Option<u128>, // For limit orders: minimum acceptable price
+    pub trigger_price: Option<u128>, // For stop orders: price that triggers execution
     pub status: OrderStatus,
     pub created_at: u64,
-    pub expires_at: Option<u64>,        // None means no expiry
+    pub expires_at: Option<u64>, // None means no expiry
     pub filled_at: Option<u64>,
     pub interval_secs: Option<u64>,         // For recurring: seconds between executions
     pub remaining_occurrences: Option<u64>, // For recurring: how many more times to execute
@@ -52,8 +51,8 @@ pub struct Order {
 #[derive(Clone, Debug, PartialEq)]
 pub struct OrderBook {
     pub token_pair: (Symbol, Symbol),
-    pub buy_orders: Vec<u64>,   // Order IDs for buy orders
-    pub sell_orders: Vec<u64>,  // Order IDs for sell orders
+    pub buy_orders: Vec<u64>,  // Order IDs for buy orders
+    pub sell_orders: Vec<u64>, // Order IDs for sell orders
 }
 
 /// Order manager - handles order lifecycle
@@ -164,10 +163,10 @@ impl OrderManager {
     ) -> Result<Vec<u64>, ContractError> {
         let mut executed_orders = Vec::new(env);
         let pair_key = Self::order_book_key(&(token_in.clone(), token_out.clone()));
-        
+
         // Get order book for this pair
         let order_book: Option<OrderBook> = env.storage().instance().get(&pair_key);
-        
+
         if order_book.is_none() {
             return Ok(executed_orders);
         }
@@ -189,7 +188,9 @@ impl OrderManager {
                     }
 
                     // Check if order can be executed
-                    if order.status == OrderStatus::Pending || order.status == OrderStatus::PartiallyFilled {
+                    if order.status == OrderStatus::Pending
+                        || order.status == OrderStatus::PartiallyFilled
+                    {
                         let should_execute = match order.order_type {
                             OrderType::Limit => {
                                 // Execute if current price is at or below limit
@@ -220,7 +221,12 @@ impl OrderManager {
                             // Emit execution event
                             env.events().publish(
                                 (symbol_short!("ofill"), order_id),
-                                (order.owner, token_in.clone(), token_out.clone(), current_price),
+                                (
+                                    order.owner,
+                                    token_in.clone(),
+                                    token_out.clone(),
+                                    current_price,
+                                ),
                             );
                         }
                     }
@@ -243,13 +249,16 @@ impl OrderManager {
     /// Get user's active orders
     pub fn get_user_orders(env: &Env, user: Address) -> Vec<Order> {
         let mut orders = Vec::new(env);
-        let user_order_ids: Option<Vec<u64>> = env.storage().instance().get(&Self::user_orders_key(&user));
+        let user_order_ids: Option<Vec<u64>> =
+            env.storage().instance().get(&Self::user_orders_key(&user));
 
         if let Some(order_ids) = user_order_ids {
             for i in 0..order_ids.len() {
                 if let Some(order_id) = order_ids.get(i) {
                     if let Ok(order) = Self::get_order(env, order_id) {
-                        if order.status == OrderStatus::Pending || order.status == OrderStatus::PartiallyFilled || order.status == OrderStatus::Scheduled {
+                        if order.status == OrderStatus::Pending
+                            || order.status == OrderStatus::PartiallyFilled
+                        {
                             orders.push_back(order);
                         }
                     }
@@ -273,8 +282,12 @@ impl OrderManager {
         expires_at: Option<u64>,
     ) -> Result<u64, ContractError> {
         // Generate order ID
-        let next_id: u64 = env.storage().instance().get(&symbol_short!("next_oid")).unwrap_or(1);
-        
+        let next_id: u64 = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("next_oid"))
+            .unwrap_or(1);
+
         let order = Order {
             order_id: next_id,
             owner: owner.clone(),
@@ -298,23 +311,36 @@ impl OrderManager {
         Self::save_order(env, &order);
 
         // Add to user's order list
-        let mut user_orders: Vec<u64> = env.storage()
+        let mut user_orders: Vec<u64> = env
+            .storage()
             .instance()
             .get(&Self::user_orders_key(&owner))
             .unwrap_or_else(|| Vec::new(env));
         user_orders.push_back(next_id);
-        env.storage().instance().set(&Self::user_orders_key(&owner), &user_orders);
+        env.storage()
+            .instance()
+            .set(&Self::user_orders_key(&owner), &user_orders);
 
         // Add to order book
         Self::add_to_order_book(env, token_in.clone(), token_out.clone(), next_id);
 
         // Increment next order ID
-        env.storage().instance().set(&symbol_short!("next_oid"), &(next_id + 1));
+        env.storage()
+            .instance()
+            .set(&symbol_short!("next_oid"), &(next_id + 1));
 
         // Emit order placement event
         env.events().publish(
             (symbol_short!("order_new"), next_id),
-            (owner, order_type, token_in, token_out, amount_in, limit_price, trigger_price),
+            (
+                owner,
+                order_type,
+                token_in,
+                token_out,
+                amount_in,
+                limit_price,
+                trigger_price,
+            ),
         );
 
         Ok(next_id)
@@ -494,8 +520,9 @@ impl OrderManager {
     fn add_to_order_book(env: &Env, token_in: Symbol, token_out: Symbol, order_id: u64) {
         let pair = (token_in.clone(), token_out.clone());
         let pair_key = Self::order_book_key(&pair);
-        
-        let mut book: OrderBook = env.storage()
+
+        let mut book: OrderBook = env
+            .storage()
             .instance()
             .get(&pair_key)
             .unwrap_or(OrderBook {

@@ -17,6 +17,8 @@ use soroban_sdk::contracterror;
 pub enum SwapTradeError {
     // ── Admin / access control ──────────────────────────────────────────────
     NotAdmin = 1,
+    NotAuthorized = 2,
+    InvalidAddress = 3,
 
     // ── Trading / contract state ────────────────────────────────────────────
     TradingPaused = 10,

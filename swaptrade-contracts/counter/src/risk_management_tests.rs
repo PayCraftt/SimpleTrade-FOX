@@ -1,15 +1,13 @@
 #[cfg(test)]
 mod risk_management_tests {
     use super::*;
-    use crate::CounterContract;
-    use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env, Symbol, symbol_short};
-    use crate::portfolio::{Portfolio, Asset};
-    use crate::tiers::UserTier;
+    use crate::portfolio::{Asset, Portfolio};
     use crate::risk_management::{
-        RiskConfig, RiskMetrics, CircuitBreakerState,
-        PositionLimits, ConcentrationRisk, CircuitBreaker, PortfolioRisk,
-        PositionLimitError,
+        CircuitBreaker, CircuitBreakerState, ConcentrationRisk, PortfolioRisk, PositionLimitError,
+        PositionLimits, RiskConfig, RiskMetrics,
     };
+    use crate::tiers::UserTier;
+    use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, Symbol};
 
     // ===== POSITION LIMITS TESTS =====
 
@@ -79,7 +77,12 @@ mod risk_management_tests {
 
         // Balanced portfolio: 50% XLM, 50% USDC
         portfolio.credit(&env, Asset::XLM, user.clone(), 500);
-        portfolio.credit(&env, Asset::Custom(symbol_short!("USDCSIM")), user.clone(), 500);
+        portfolio.credit(
+            &env,
+            Asset::Custom(symbol_short!("USDCSIM")),
+            user.clone(),
+            500,
+        );
 
         let risk = ConcentrationRisk::calculate_concentration_risk(&env, &portfolio, &user);
         assert!(risk < 30); // Should be low risk
@@ -93,7 +96,12 @@ mod risk_management_tests {
 
         // Highly concentrated: 95% XLM, 5% USDC
         portfolio.credit(&env, Asset::XLM, user.clone(), 950);
-        portfolio.credit(&env, Asset::Custom(symbol_short!("USDCSIM")), user.clone(), 50);
+        portfolio.credit(
+            &env,
+            Asset::Custom(symbol_short!("USDCSIM")),
+            user.clone(),
+            50,
+        );
 
         let risk = ConcentrationRisk::calculate_concentration_risk(&env, &portfolio, &user);
         assert!(risk > 70); // Should be high risk
@@ -107,7 +115,12 @@ mod risk_management_tests {
 
         // 35% concentration (above 30% threshold)
         portfolio.credit(&env, Asset::XLM, user.clone(), 700);
-        portfolio.credit(&env, Asset::Custom(symbol_short!("USDCSIM")), user.clone(), 300);
+        portfolio.credit(
+            &env,
+            Asset::Custom(symbol_short!("USDCSIM")),
+            user.clone(),
+            300,
+        );
 
         let warning = ConcentrationRisk::check_concentration_warning(&env, &portfolio, &user);
         assert!(warning);
@@ -161,7 +174,12 @@ mod risk_management_tests {
 
         // Set up a test portfolio
         portfolio.credit(&env, Asset::XLM, user.clone(), 600);
-        portfolio.credit(&env, Asset::Custom(symbol_short!("USDCSIM")), user.clone(), 400);
+        portfolio.credit(
+            &env,
+            Asset::Custom(symbol_short!("USDCSIM")),
+            user.clone(),
+            400,
+        );
 
         let metrics = PortfolioRisk::calculate_risk_metrics(&env, &portfolio, &user);
 
@@ -202,12 +220,8 @@ mod risk_management_tests {
         let to = symbol_short!("USDCSIM");
         let amount = 100; // Small amount should be OK
 
-        let would_exceed = CounterContract::check_risk_limits(
-            env.clone(),
-            user.clone(),
-            to,
-            amount,
-        );
+        let would_exceed =
+            CounterContract::check_risk_limits(env.clone(), user.clone(), to, amount);
 
         assert!(!would_exceed);
     }
@@ -220,7 +234,12 @@ mod risk_management_tests {
 
         // Create highly concentrated portfolio
         portfolio.credit(&env, Asset::XLM, user.clone(), 900);
-        portfolio.credit(&env, Asset::Custom(symbol_short!("USDCSIM")), user.clone(), 100);
+        portfolio.credit(
+            &env,
+            Asset::Custom(symbol_short!("USDCSIM")),
+            user.clone(),
+            100,
+        );
 
         // Save portfolio to storage for contract functions
         env.storage().instance().set(&(), &portfolio);

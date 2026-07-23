@@ -5,10 +5,10 @@ use soroban_sdk::{
 
 // Bring in modules from parent directory
 mod admin;
-mod bridge;
 #[cfg(test)]
 mod alert_tests;
 mod alerts;
+mod bridge;
 mod errors;
 mod events;
 mod faucet;
@@ -18,39 +18,38 @@ mod kyc;
 mod kyc_tests;
 mod liquidity_pool;
 mod rate_limit;
+mod referral_system;
 mod state_snapshot;
 #[cfg(test)]
 mod state_snapshot_tests;
 mod storage;
-mod referral_system;
 mod batch {
     include!("../batch.rs");
 }
 mod tiers {
     include!("../tiers.rs");
 }
+#[cfg(test)]
+mod analytics_dashboard_tests;
 #[cfg(all(test, feature = "experimental"))]
 mod batch_event_tests;
 #[cfg(all(test, feature = "experimental"))]
 mod batch_opt_simple_test;
 #[cfg(all(test, feature = "experimental"))]
 mod batch_performance_tests;
-mod oracle;
-mod oracle_adapter;
-mod orders;
-mod flash_loan;
-#[cfg(test)]
-mod orders_tests;
-#[cfg(test)]
-mod analytics_dashboard_tests;
-#[cfg(test)]
-mod oracle_adapter_tests;
+mod governance_params;
+mod governance_system;
+mod governance_types;
 #[cfg(test)]
 mod multihop_swap_tests;
-mod governance_types;
-mod governance_system;
-mod governance_params;
 mod nonce;
+mod oracle;
+mod oracle_adapter;
+#[cfg(test)]
+mod oracle_adapter_tests;
+mod orders;
+#[cfg(test)]
+mod orders_tests;
 mod risk_management;
 
 pub use governance_params::{GovernanceParams, ParamKey, PendingParamUpdate};
@@ -203,6 +202,66 @@ pub fn set_admin(env: Env, caller: Address, new_admin: Address) -> Result<(), Sw
     crate::admin::require_admin(&env, &caller)?;
     env.storage().persistent().set(&ADMIN_KEY, &new_admin);
     Ok(())
+}
+
+pub fn set_treasury(
+    env: Env,
+    caller: Address,
+    new_treasury: Address,
+) -> Result<(), SwapTradeError> {
+    caller.require_auth();
+    crate::admin::require_admin(&env, &caller)?;
+    env.storage()
+        .persistent()
+        .set(&crate::storage::DEFAULT_TREASURY_KEY, &new_treasury);
+    crate::events::fee_parameters_updated(&env, 0, 0, Some(new_treasury));
+    Ok(())
+}
+
+pub fn update_pool_fee_tier(
+    env: Env,
+    caller: Address,
+    pool_id: u64,
+    new_fee_tier: u32,
+) -> Result<(), ContractError> {
+    caller.require_auth();
+    let mut registry = load_pool_registry(&env);
+    registry.update_fee_tier(&env, pool_id, new_fee_tier, caller)?;
+    save_pool_registry(&env, &registry);
+    Ok(())
+}
+
+pub fn claim_pool_fees(
+    env: Env,
+    caller: Address,
+    pool_id: u64,
+) -> Result<(i128, i128), ContractError> {
+    caller.require_auth();
+    let mut registry = load_pool_registry(&env);
+    let fees = registry.claim_fees(&env, pool_id, caller)?;
+    save_pool_registry(&env, &registry);
+    Ok(fees)
+}
+
+pub fn withdraw_treasury_fees(
+    env: Env,
+    caller: Address,
+    pool_id: u64,
+) -> Result<(i128, i128), ContractError> {
+    caller.require_auth();
+    // Verify caller is the treasury
+    let treasury: Address = env
+        .storage()
+        .persistent()
+        .get(&crate::storage::DEFAULT_TREASURY_KEY)
+        .ok_or(ContractError::InvalidAddress)?;
+    if caller != treasury {
+        return Err(ContractError::NotAuthorized);
+    }
+    let mut registry = load_pool_registry(&env);
+    let fees = registry.withdraw_treasury_fees(&env, pool_id, caller)?;
+    save_pool_registry(&env, &registry);
+    Ok(fees)
 }
 
 // Batch imports
@@ -368,11 +427,13 @@ impl CounterContract {
     }
 
     /// Swap tokens using simplified AMM (1:1 XLM <-> USDC-SIM)
-    pub fn swap(env: Env, from: Symbol, to: Symbol, amount: i128, min_amount_out: i128, user: Address, deadline: u64) -> Result<i128, ContractError> {
-        if env.ledger().timestamp() > deadline {
-            return Err(ContractError::Expired);
-        }
-
+    pub fn swap(
+        env: Env,
+        from: Symbol,
+        to: Symbol,
+        amount: i128,
+        user: Address,
+    ) -> Result<i128, ContractError> {
         require_authenticated_verified_user(&env, &user)?;
 
         // Oracle validation
@@ -468,7 +529,11 @@ impl CounterContract {
             portfolio.collect_fee(fee_amount);
 
             // Distribute referral commissions
-            crate::referral_system::calculate_and_distribute_commission(&env, user.clone(), fee_amount);
+            crate::referral_system::calculate_and_distribute_commission(
+                &env,
+                user.clone(),
+                fee_amount,
+            );
         }
 
         let out_amount = perform_swap(
@@ -780,7 +845,7 @@ impl CounterContract {
 
         // Extract caller from first operation for authentication and rate limiting
         let caller = match operations.get(0) {
-            Some(BatchOperation::Swap(_, _, _, user)) 
+            Some(BatchOperation::Swap(_, _, _, user))
             | Some(BatchOperation::AddLiquidity(_, _, user))
             | Some(BatchOperation::RemoveLiquidity(_, _, user)) => Some(user.clone()),
             Some(BatchOperation::MintToken(_, _, _)) => None,
@@ -807,7 +872,10 @@ impl CounterContract {
         if let Some(caller_addr) = &caller {
             let user_tier = portfolio.get_user_tier(&env, caller_addr.clone());
             // Count swap operations in batch
-            let swap_count = operations.iter().filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _))).count();
+            let swap_count = operations
+                .iter()
+                .filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _)))
+                .count();
             if swap_count > 0 {
                 // Apply rate limit check for batch swaps
                 if RateLimiter::check_swap_limit(&env, caller_addr, &user_tier).is_err() {
@@ -823,13 +891,20 @@ impl CounterContract {
         match result {
             Ok(res) => {
                 env.storage().instance().set(&(), &portfolio);
-                
+
                 // Record rate limit usage for executed swaps
                 if let Some(caller_addr) = &caller {
-                    let swap_count = operations.iter().filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _))).count();
+                    let swap_count = operations
+                        .iter()
+                        .filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _)))
+                        .count();
                     if swap_count > 0 && res.operations_executed > 0 {
                         for _ in 0..res.operations_executed {
-                            RateLimiter::record_swap(&env, caller_addr, env.ledger().timestamp());
+                            RateLimiter::record_swap_op(
+                                &env,
+                                caller_addr,
+                                env.ledger().timestamp(),
+                            );
                         }
                     }
                 }
@@ -856,7 +931,7 @@ impl CounterContract {
 
         // Extract caller from first operation for authentication and rate limiting
         let caller = match operations.get(0) {
-            Some(BatchOperation::Swap(_, _, _, user)) 
+            Some(BatchOperation::Swap(_, _, _, user))
             | Some(BatchOperation::AddLiquidity(_, _, user))
             | Some(BatchOperation::RemoveLiquidity(_, _, user)) => Some(user.clone()),
             Some(BatchOperation::MintToken(_, _, _)) => None,
@@ -883,7 +958,10 @@ impl CounterContract {
         if let Some(caller_addr) = &caller {
             let user_tier = portfolio.get_user_tier(&env, caller_addr.clone());
             // Count swap operations in batch
-            let swap_count = operations.iter().filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _))).count();
+            let swap_count = operations
+                .iter()
+                .filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _)))
+                .count();
             if swap_count > 0 {
                 // Apply rate limit check for batch swaps
                 if RateLimiter::check_swap_limit(&env, caller_addr, &user_tier).is_err() {
@@ -899,13 +977,20 @@ impl CounterContract {
         match result {
             Ok(res) => {
                 env.storage().instance().set(&(), &portfolio);
-                
+
                 // Record rate limit usage for executed swaps
                 if let Some(caller_addr) = &caller {
-                    let swap_count = operations.iter().filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _))).count();
+                    let swap_count = operations
+                        .iter()
+                        .filter(|op| matches!(op, BatchOperation::Swap(_, _, _, _)))
+                        .count();
                     if swap_count > 0 && res.operations_executed > 0 {
                         for _ in 0..res.operations_executed {
-                            RateLimiter::record_swap(&env, caller_addr, env.ledger().timestamp());
+                            RateLimiter::record_swap_op(
+                                &env,
+                                caller_addr,
+                                env.ledger().timestamp(),
+                            );
                         }
                     }
                 }
@@ -930,7 +1015,12 @@ impl CounterContract {
 
     /// Add liquidity to the pool and mint LP tokens
     /// Returns the number of LP tokens minted
-    pub fn add_liquidity(env: Env, xlm_amount: i128, usdc_amount: i128, user: Address) -> Result<i128, ContractError> {
+    pub fn add_liquidity(
+        env: Env,
+        xlm_amount: i128,
+        usdc_amount: i128,
+        user: Address,
+    ) -> Result<i128, ContractError> {
         require_authenticated_verified_user(&env, &user)?;
 
         if xlm_amount <= 0 || usdc_amount <= 0 {
@@ -1061,7 +1151,11 @@ impl CounterContract {
 
     /// Remove liquidity from the pool by burning LP tokens
     /// Returns (xlm_amount, usdc_amount) returned to user
-    pub fn remove_liquidity(env: Env, lp_tokens: i128, user: Address) -> Result<(i128, i128), ContractError> {
+    pub fn remove_liquidity(
+        env: Env,
+        lp_tokens: i128,
+        user: Address,
+    ) -> Result<(i128, i128), ContractError> {
         require_authenticated_verified_user(&env, &user)?;
 
         if lp_tokens <= 0 {
@@ -1194,9 +1288,10 @@ impl CounterContract {
         require_verified_user(&env, &provider)?;
 
         let mut registry = load_pool_registry(&env);
-        let lp_tokens = registry.add_liquidity(&env, pool_id, amount_a, amount_b, provider.clone())?;
+        let lp_tokens =
+            registry.add_liquidity(&env, pool_id, amount_a, amount_b, provider.clone())?;
         save_pool_registry(&env, &registry);
-        
+
         // Emit LiquidityAdded event with correct signature
         env.events().publish(
             (
@@ -1206,7 +1301,7 @@ impl CounterContract {
             ),
             (amount_a, amount_b, lp_tokens, env.ledger().timestamp()),
         );
-        
+
         Ok(lp_tokens)
     }
 
@@ -1220,9 +1315,10 @@ impl CounterContract {
         require_verified_user(&env, &provider)?;
 
         let mut registry = load_pool_registry(&env);
-        let (amount_a, amount_b) = registry.remove_liquidity(&env, pool_id, lp_tokens, provider.clone())?;
+        let (amount_a, amount_b) =
+            registry.remove_liquidity(&env, pool_id, lp_tokens, provider.clone())?;
         save_pool_registry(&env, &registry);
-        
+
         // Emit LiquidityRemoved event with correct signature
         env.events().publish(
             (
@@ -1232,7 +1328,7 @@ impl CounterContract {
             ),
             (amount_a, amount_b, lp_tokens, env.ledger().timestamp()),
         );
-        
+
         Ok((amount_a, amount_b))
     }
 
@@ -1299,7 +1395,7 @@ impl CounterContract {
     ) -> Result<i128, ContractError> {
         trader.require_auth();
         require_verified_user(&env, &trader)?;
-        
+
         trading::execute_multihop_swap(&env, &route, amount_in, min_amount_out, &trader)
     }
 
@@ -1382,7 +1478,12 @@ impl CounterContract {
 
     /// Stake tokens for a specified duration to earn bonuses
     /// Supports: 30, 60, 90, or 365-day stakes
-    pub fn stake(env: Env, user: Address, amount: i128, duration_days: u32) -> Result<u32, ContractError> {
+    pub fn stake(
+        env: Env,
+        user: Address,
+        amount: i128,
+        duration_days: u32,
+    ) -> Result<u32, ContractError> {
         require_authenticated_verified_user(&env, &user)?;
         let result = StakingBonusManager::stake(&env, user, amount, duration_days)?;
         invalidate_query_cache(&env);
@@ -1409,7 +1510,11 @@ impl CounterContract {
 
     /// Unstake early before lock period (incurs 10% penalty)
     /// Returns (principal_after_penalty, penalty_amount)
-    pub fn unstake_early(env: Env, user: Address, stake_id: u32) -> Result<(i128, i128), ContractError> {
+    pub fn unstake_early(
+        env: Env,
+        user: Address,
+        stake_id: u32,
+    ) -> Result<(i128, i128), ContractError> {
         require_authenticated_verified_user(&env, &user)?;
         let result = StakingBonusManager::unstake_early(&env, user, stake_id)?;
         invalidate_query_cache(&env);
@@ -1422,7 +1527,11 @@ impl CounterContract {
     }
 
     /// Get specific stake details
-    pub fn get_stake_details(env: Env, user: Address, stake_id: u32) -> Result<StakeRecord, ContractError> {
+    pub fn get_stake_details(
+        env: Env,
+        user: Address,
+        stake_id: u32,
+    ) -> Result<StakeRecord, ContractError> {
         StakingBonusManager::get_stake_details(&env, user, stake_id)
     }
 
@@ -1466,7 +1575,15 @@ impl CounterContract {
         user: Address,
     ) -> Result<u64, ContractError> {
         require_authenticated_verified_user(&env, &user)?;
-        orders::OrderManager::place_limit_order(&env, user, token_in, token_out, amount_in, limit_price, expires_at)
+        orders::OrderManager::place_limit_order(
+            &env,
+            user,
+            token_in,
+            token_out,
+            amount_in,
+            limit_price,
+            expires_at,
+        )
     }
 
     /// Place a stop-loss order that executes when price reaches trigger_price
@@ -1480,7 +1597,15 @@ impl CounterContract {
         user: Address,
     ) -> Result<u64, ContractError> {
         require_authenticated_verified_user(&env, &user)?;
-        orders::OrderManager::place_stop_loss(&env, user, token_in, token_out, amount_in, trigger_price, expires_at)
+        orders::OrderManager::place_stop_loss(
+            &env,
+            user,
+            token_in,
+            token_out,
+            amount_in,
+            trigger_price,
+            expires_at,
+        )
     }
 
     /// Cancel an existing order
@@ -1566,12 +1691,20 @@ impl CounterContract {
     // ────────────────────────────────────────────────────────────────────────
 
     /// Add a KYC operator (admin only)
-    pub fn kyc_add_operator(env: Env, admin: Address, operator: Address) -> Result<(), ContractError> {
+    pub fn kyc_add_operator(
+        env: Env,
+        admin: Address,
+        operator: Address,
+    ) -> Result<(), ContractError> {
         kyc::KYCSystem::add_operator(&env, &admin, operator)
     }
 
     /// Remove a KYC operator (admin only)
-    pub fn kyc_remove_operator(env: Env, admin: Address, operator: Address) -> Result<(), ContractError> {
+    pub fn kyc_remove_operator(
+        env: Env,
+        admin: Address,
+        operator: Address,
+    ) -> Result<(), ContractError> {
         kyc::KYCSystem::remove_operator(&env, &admin, operator)
     }
 
@@ -1612,7 +1745,11 @@ impl CounterContract {
     }
 
     /// Set timelock duration for governance overrides (admin only)
-    pub fn kyc_set_timelock_duration(env: Env, admin: Address, duration: u64) -> Result<(), ContractError> {
+    pub fn kyc_set_timelock_duration(
+        env: Env,
+        admin: Address,
+        duration: u64,
+    ) -> Result<(), ContractError> {
         kyc::KYCSystem::set_timelock_duration(&env, &admin, duration)
     }
 
@@ -1622,7 +1759,11 @@ impl CounterContract {
     }
 
     /// Set pending KYC expiry duration (admin only)
-    pub fn kyc_set_pending_expiry_duration(env: Env, admin: Address, duration: u64) -> Result<(), ContractError> {
+    pub fn kyc_set_pending_expiry_duration(
+        env: Env,
+        admin: Address,
+        duration: u64,
+    ) -> Result<(), ContractError> {
         kyc::KYCSystem::set_pending_expiry_duration(&env, &admin, duration)
     }
 
@@ -1643,7 +1784,11 @@ impl CounterContract {
     }
 
     /// Execute governance override after timelock (admin only)
-    pub fn kyc_execute_override(env: Env, admin: Address, override_id: u64) -> Result<(), ContractError> {
+    pub fn kyc_execute_override(
+        env: Env,
+        admin: Address,
+        override_id: u64,
+    ) -> Result<(), ContractError> {
         kyc::KYCSystem::execute_override(&env, &admin, override_id)
     }
 
@@ -1655,7 +1800,11 @@ impl CounterContract {
     // ── Referral System ─────────────────────────────────────────────────────
 
     /// Register a referral relationship
-    pub fn register_referral(env: Env, referrer: Address, referred: Address) -> Result<(), ContractError> {
+    pub fn register_referral(
+        env: Env,
+        referrer: Address,
+        referred: Address,
+    ) -> Result<(), ContractError> {
         referral_system::register_referral(&env, referrer, referred)
     }
 
@@ -1824,13 +1973,8 @@ impl CounterContract {
     }
 }
 
+mod governance_tests;
 #[cfg(all(test, feature = "experimental"))]
 mod migration_tests;
 #[cfg(test)]
 mod risk_management_tests;
-#[cfg(test)]
-mod governance_tests;
-#[cfg(test)]
-mod referral_system_tests;
-#[cfg(test)]
-mod referral_integration_test;

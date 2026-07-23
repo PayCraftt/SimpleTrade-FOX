@@ -280,7 +280,6 @@ impl KYCSystem {
         }
     }
 
-
     // ===== KYC RECORD MANAGEMENT =====
 
     /// Get KYC record for a user
@@ -400,7 +399,7 @@ impl KYCSystem {
 
         let timestamp = env.ledger().timestamp();
         let expiry_duration = Self::get_pending_expiry_duration(env);
-        
+
         let mut new_record = record;
         new_record.status = KYCStatus::Pending;
         new_record.updated_at = timestamp;
@@ -742,6 +741,9 @@ mod mxllv_tests {
     fn test_validate_helpers_are_private() {
         // `validate_reason` and `validate_symbol_length` are module-private (`fn`).
         // Attempting to call them from outside the module would fail to compile.
-        assert!(true, "internal validation helpers are private by construction");
+        assert!(
+            true,
+            "internal validation helpers are private by construction"
+        );
     }
 }

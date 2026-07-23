@@ -1,6 +1,6 @@
-use soroban_sdk::{Env, Symbol, Address, Map};
-use crate::portfolio::{Portfolio, Asset};
-use crate::risk_management::{PositionLimits, PositionLimitError};
+use crate::portfolio::{Asset, Portfolio};
+use crate::risk_management::{PositionLimitError, PositionLimits};
+use soroban_sdk::{Address, Env, Map, Symbol};
 
 /// Position management and limits
 pub struct PositionManager;
@@ -37,7 +37,8 @@ impl PositionManager {
 
         // For now, just XLM and USDC positions
         let xlm_balance = portfolio.balance_of(env, Asset::XLM, user.clone());
-        let usdc_balance = portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
+        let usdc_balance =
+            portfolio.balance_of(env, Asset::Custom(Symbol::short("USDCSIM")), user.clone());
 
         if xlm_balance != 0 {
             positions.set(Asset::XLM, xlm_balance);
@@ -50,11 +51,7 @@ impl PositionManager {
     }
 
     /// Check if user has exceeded position limits
-    pub fn has_exceeded_limits(
-        env: &Env,
-        portfolio: &Portfolio,
-        user: &Address,
-    ) -> bool {
+    pub fn has_exceeded_limits(env: &Env, portfolio: &Portfolio, user: &Address) -> bool {
         let positions = Self::get_user_positions(env, portfolio, user);
 
         for (asset, size) in positions.iter() {
