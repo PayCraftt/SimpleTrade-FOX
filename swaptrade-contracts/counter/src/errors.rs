@@ -32,6 +32,7 @@ pub enum SwapTradeError {
     TradingPaused = 10,
     UserFrozen = 11,
     CircuitBreakerTripped = 12,
+    InvalidPrivateTransaction = 13,
 
     // ── Validation ──────────────────────────────────────────────────────────
     InvalidAmount = 100,
