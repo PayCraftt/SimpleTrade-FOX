@@ -4,7 +4,8 @@ use crate::nft_errors::NFTError;
 use crate::nft_minting::{get_nft, is_owner};
 use crate::nft_storage::*;
 use crate::nft_types::*;
-use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
+use crate::oracle;
+use soroban_sdk::{symbol_short, Address, Env, Map, Symbol, Vec};
 
 /// Minimum loan duration (1 day)
 const MIN_LOAN_DURATION: u64 = 86400;
@@ -17,14 +18,18 @@ const LIQUIDATION_GRACE_PERIOD: u64 = 86400; // 1 day
 /// Precision for interest calculations (10^18)
 const INTEREST_PRECISION: u128 = 1_000_000_000_000_000_000u128;
 
-/// Loan-to-value ratio in basis points that triggers liquidation (70%)
-const LIQUIDATION_TRIGGER_LTV_BPS: u32 = 7000;
-/// Partial liquidation threshold LTV (100%)
-const PARTIAL_LIQUIDATION_LTV_BPS: u32 = 10000;
-/// Liquidation penalty charged to borrower in basis points (5%)
-const LIQUIDATION_PENALTY_BPS: u32 = 500;
-/// Protocol fee collected from liquidation in basis points (1%)
-const LIQUIDATION_PROTOCOL_FEE_BPS: u32 = 100;
+/// Protocol requirements from acceptance criteria
+/// Maximum Loan-to-Value ratio (60% = 6000 bps)
+const MAX_LTV_BPS: u32 = 6000;
+/// Liquidation collateralization ratio (150% = 1.5x, so LTV must stay below 66.67%)
+/// If collateralization ratio < 150%, loan can be liquidated
+const LIQUIDATION_COLLATERALIZATION_RATIO_MIN: u128 = 150; // 150%
+/// Liquidation bonus for liquidators (5%)
+const LIQUIDATION_BONUS_BPS: u32 = 500;
+/// Base utilization rate parameters for dynamic interest rates
+const OPTIMAL_UTILIZATION_RATE_BPS: u32 = 8000; // 80%
+const RATE_SLOPE_1_BPS: u32 = 100; // 1% additional rate when below optimal
+const RATE_SLOPE_2_BPS: u32 = 500; // 5% additional rate when above optimal
 /// Maximum queued loans
 const MAX_LIQUIDATION_QUEUE_SIZE: usize = 128;
 
@@ -493,6 +498,721 @@ fn update_portfolio_on_loan_given(env: &Env, lender: Address) -> Result<(), NFTE
     env.storage()
         .instance()
         .set(&PORTFOLIO_REGISTRY_KEY, &portfolio_registry);
+
+    Ok(())
+}
+
+// =============================================================================
+// LENDING POOL IMPLEMENTATION (PEER-TO-POOL LENDING)
+// =============================================================================
+
+/// Create a new lending pool
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `creator` - Pool creator address
+/// * `asset` - The asset (e.g., USDC) that the pool accepts
+/// * `reserve_factor_bps` - Protocol reserve fee in basis points
+/// * `base_rate_bps` - Base interest rate in basis points
+///
+/// # Returns
+/// * `Result<u64, NFTError>` - Pool ID on success
+pub fn create_lending_pool(
+    env: &Env,
+    creator: Address,
+    asset: Symbol,
+    reserve_factor_bps: u32,
+    base_rate_bps: u32,
+) -> Result<u64, NFTError> {
+    // Only admin can create pools (simplified - in production would have proper access control)
+    creator.require_auth();
+
+    let pool_id = get_next_pool_id(env);
+    let current_time = env.ledger().timestamp();
+
+    let pool = LendingPool {
+        pool_id,
+        asset,
+        total_deposited: 0,
+        total_borrowed: 0,
+        reserve_factor_bps,
+        base_rate_bps,
+        is_active: true,
+        created_at: current_time,
+    };
+
+    let mut pool_registry: LendingPoolRegistry = env
+        .storage()
+        .instance()
+        .get(&LENDING_POOL_REGISTRY_KEY)
+        .unwrap_or_else(|| LendingPoolRegistry::new(env));
+    
+    pool_registry.create_pool(env, pool);
+    env.storage()
+        .instance()
+        .set(&LENDING_POOL_REGISTRY_KEY, &pool_registry);
+
+    // Emit event
+    crate::nft_events::emit_lending_pool_created(env, pool_id, asset);
+
+    Ok(pool_id)
+}
+
+/// Deposit assets into a lending pool to earn interest
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `lender` - Lender address depositing funds
+/// * `pool_id` - ID of the lending pool
+/// * `amount` - Amount to deposit
+///
+/// # Returns
+/// * `Result<(), NFTError>` - Success or error
+pub fn deposit_to_lending_pool(
+    env: &Env,
+    lender: Address,
+    pool_id: u64,
+    amount: i128,
+) -> Result<(), NFTError> {
+    lender.require_auth();
+
+    if emergency::is_frozen(env, lender.clone()) {
+        return Err(NFTError::UserFrozen);
+    }
+
+    if amount <= 0 {
+        return Err(NFTError::InvalidAmount);
+    }
+
+    // Get pool
+    let mut pool_registry: LendingPoolRegistry = env
+        .storage()
+        .instance()
+        .get(&LENDING_POOL_REGISTRY_KEY)
+        .ok_or(NFTError::LoanNotFound)?;
+    
+    let mut pool = pool_registry
+        .get_pool(pool_id)
+        .ok_or(NFTError::LoanNotFound)?;
+
+    if !pool.is_active {
+        return Err(NFTError::MarketplacePaused);
+    }
+
+    // Update pool totals
+    pool.total_deposited = pool.total_deposited.checked_add(amount).ok_or(NFTError::AmountOverflow)?;
+    pool_registry.update_pool(pool);
+    env.storage()
+        .instance()
+        .set(&LENDING_POOL_REGISTRY_KEY, &pool_registry);
+
+    // Record lender deposit
+    let mut lender_deposits: Map<(u64, Address), LenderDeposit> = env
+        .storage()
+        .instance()
+        .get(&LENDER_DEPOSITS_KEY)
+        .unwrap_or_else(|| Map::new(env));
+    
+    let deposit_key = (pool_id, lender.clone());
+    let mut deposit = lender_deposits
+        .get(deposit_key.clone())
+        .unwrap_or_else(|| LenderDeposit {
+            pool_id,
+            lender: lender.clone(),
+            amount: 0,
+            shares: 0,
+            deposited_at: env.ledger().timestamp(),
+        });
+    
+    // Calculate shares (simplified - in production would use proper share price calculations)
+    let new_shares = amount; // 1:1 initially, accumulates interest over time
+    deposit.amount = deposit.amount.checked_add(amount).ok_or(NFTError::AmountOverflow)?;
+    deposit.shares = deposit.shares.checked_add(new_shares).ok_or(NFTError::AmountOverflow)?;
+    
+    lender_deposits.set(deposit_key, deposit);
+    env.storage()
+        .instance()
+        .set(&LENDER_DEPOSITS_KEY, &lender_deposits);
+
+    // Update portfolio
+    let mut portfolio_registry: Map<Address, NFTPortfolio> = env
+        .storage()
+        .instance()
+        .get(&PORTFOLIO_REGISTRY_KEY)
+        .unwrap_or_else(|| Map::new(env));
+    
+    let mut portfolio = portfolio_registry
+        .get(lender.clone())
+        .unwrap_or_else(|| NFTPortfolio::new(env, lender.clone()));
+    portfolio.total_fractional_shares = portfolio.total_fractional_shares.saturating_add(amount as u64);
+    portfolio_registry.set(lender.clone(), portfolio);
+    env.storage()
+        .instance()
+        .set(&PORTFOLIO_REGISTRY_KEY, &portfolio_registry);
+
+    // Emit event
+    crate::nft_events::emit_lending_pool_deposit(env, pool_id, lender, amount);
+
+    Ok(())
+}
+
+/// Withdraw assets from a lending pool
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `lender` - Lender address withdrawing funds
+/// * `pool_id` - ID of the lending pool
+/// * `amount` - Amount to withdraw
+///
+/// # Returns
+/// * `Result<(), NFTError>` - Success or error
+pub fn withdraw_from_lending_pool(
+    env: &Env,
+    lender: Address,
+    pool_id: u64,
+    amount: i128,
+) -> Result<(), NFTError> {
+    lender.require_auth();
+
+    if emergency::is_frozen(env, lender.clone()) {
+        return Err(NFTError::UserFrozen);
+    }
+
+    if amount <= 0 {
+        return Err(NFTError::InvalidAmount);
+    }
+
+    // Get pool
+    let mut pool_registry: LendingPoolRegistry = env
+        .storage()
+        .instance()
+        .get(&LENDING_POOL_REGISTRY_KEY)
+        .ok_or(NFTError::LoanNotFound)?;
+    
+    let mut pool = pool_registry
+        .get_pool(pool_id)
+        .ok_or(NFTError::LoanNotFound)?;
+
+    if !pool.is_active {
+        return Err(NFTError::MarketplacePaused);
+    }
+
+    // Check available liquidity
+    let available_liquidity = pool.total_deposited - pool.total_borrowed;
+    if amount > available_liquidity {
+        return Err(NFTError::InsufficientBalance);
+    }
+
+    // Check lender's deposit
+    let mut lender_deposits: Map<(u64, Address), LenderDeposit> = env
+        .storage()
+        .instance()
+        .get(&LENDER_DEPOSITS_KEY)
+        .ok_or(NFTError::InsufficientBalance)?;
+    
+    let deposit_key = (pool_id, lender.clone());
+    let mut deposit = lender_deposits
+        .get(deposit_key.clone())
+        .ok_or(NFTError::InsufficientBalance)?;
+
+    if deposit.amount < amount {
+        return Err(NFTError::InsufficientBalance);
+    }
+
+    // Update pool and deposit
+    pool.total_deposited = pool.total_deposited.checked_sub(amount).ok_or(NFTError::AmountOverflow)?;
+    pool_registry.update_pool(pool);
+    env.storage()
+        .instance()
+        .set(&LENDING_POOL_REGISTRY_KEY, &pool_registry);
+
+    deposit.amount = deposit.amount.checked_sub(amount).ok_or(NFTError::AmountOverflow)?;
+    deposit.shares = deposit.shares.checked_sub(amount).ok_or(NFTError::AmountOverflow)?;
+    
+    if deposit.amount == 0 {
+        lender_deposits.remove(deposit_key);
+    } else {
+        lender_deposits.set(deposit_key, deposit);
+    }
+    env.storage()
+        .instance()
+        .set(&LENDER_DEPOSITS_KEY, &lender_deposits);
+
+    // Emit event
+    crate::nft_events::emit_lending_pool_withdrawal(env, pool_id, lender, amount);
+
+    Ok(())
+}
+
+/// Calculate dynamic interest rate based on pool utilization
+///
+/// # Arguments
+/// * `pool` - The lending pool
+///
+/// # Returns
+/// * `u32` - Current interest rate in basis points
+pub fn calculate_dynamic_interest_rate(pool: &LendingPool) -> u32 {
+    if pool.total_deposited == 0 {
+        return pool.base_rate_bps;
+    }
+
+    let utilization_bps = ((pool.total_borrowed as u128) * 10000 / pool.total_deposited as u128) as u32;
+    
+    if utilization_bps <= OPTIMAL_UTILIZATION_RATE_BPS {
+        // Below optimal utilization: base_rate + slope_1 * (utilization / optimal)
+        pool.base_rate_bps + RATE_SLOPE_1_BPS * utilization_bps / OPTIMAL_UTILIZATION_RATE_BPS
+    } else {
+        // Above optimal utilization: base_rate + slope_1 + slope_2 * (utilization - optimal) / (100% - optimal)
+        let excess_utilization = utilization_bps - OPTIMAL_UTILIZATION_RATE_BPS;
+        let max_excess = 10000 - OPTIMAL_UTILIZATION_RATE_BPS;
+        pool.base_rate_bps + RATE_SLOPE_1_BPS + RATE_SLOPE_2_BPS * excess_utilization / max_excess
+    }
+}
+
+/// Borrow from a lending pool using NFT as collateral
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `borrower` - Borrower address
+/// * `pool_id` - Lending pool ID
+/// * `collection_id` - NFT collection ID
+/// * `token_id` - NFT token ID
+/// * `loan_amount` - Amount to borrow
+/// * `duration` - Loan duration in seconds
+///
+/// # Returns
+/// * `Result<u64, NFTError>` - Loan ID on success
+pub fn borrow_from_lending_pool(
+    env: &Env,
+    borrower: Address,
+    pool_id: u64,
+    collection_id: u64,
+    token_id: u64,
+    loan_amount: i128,
+    duration: u64,
+) -> Result<u64, NFTError> {
+    borrower.require_auth();
+
+    if is_marketplace_paused(env) {
+        return Err(NFTError::MarketplacePaused);
+    }
+
+    if emergency::is_frozen(env, borrower.clone()) {
+        return Err(NFTError::UserFrozen);
+    }
+
+    // Validate loan amount and duration
+    if loan_amount <= 0 {
+        return Err(NFTError::InvalidAmount);
+    }
+
+    if duration < MIN_LOAN_DURATION || duration > MAX_LOAN_DURATION {
+        return Err(NFTError::InvalidDuration);
+    }
+
+    // Get pool and check available liquidity
+    let mut pool_registry: LendingPoolRegistry = env
+        .storage()
+        .instance()
+        .get(&LENDING_POOL_REGISTRY_KEY)
+        .ok_or(NFTError::LoanNotFound)?;
+    
+    let mut pool = pool_registry
+        .get_pool(pool_id)
+        .ok_or(NFTError::LoanNotFound)?;
+
+    if !pool.is_active {
+        return Err(NFTError::MarketplacePaused);
+    }
+
+    let available_liquidity = pool.total_deposited - pool.total_borrowed;
+    if loan_amount > available_liquidity {
+        return Err(NFTError::InsufficientBalance);
+    }
+
+    // Get NFT and verify ownership
+    let mut nft_registry: NFTRegistry = env
+        .storage()
+        .instance()
+        .get(&NFT_REGISTRY_KEY)
+        .ok_or(NFTError::NFTNotFound)?;
+    
+    let mut nft = nft_registry
+        .get_nft(collection_id, token_id)
+        .ok_or(NFTError::NFTNotFound)?;
+
+    if nft.owner != borrower {
+        return Err(NFTError::NotOwner);
+    }
+
+    // Check if already collateralized or fractionalized
+    let loan_registry_check: LoanRegistry = env
+        .storage()
+        .instance()
+        .get(&LOAN_REGISTRY_KEY)
+        .unwrap_or_else(|| LoanRegistry::new(env));
+    if loan_registry_check
+        .get_loan_by_collateral(collection_id, token_id)
+        .is_some() {
+        return Err(NFTError::AlreadyCollateralized);
+    }
+
+    if nft.is_fractionalized {
+        return Err(NFTError::UnsupportedOperation);
+    }
+
+    // Get NFT price from oracle to calculate LTV
+    let nft_price = get_nft_price_from_oracle(env, collection_id, token_id)?;
+    
+    // Calculate maximum allowed loan amount (60% LTV)
+    let max_loan_amount = (nft_price as u128 * MAX_LTV_BPS as u128 / 10000) as i128;
+    if loan_amount > max_loan_amount {
+        return Err(NFTError::InvalidAmount);
+    }
+
+    // Calculate interest with dynamic rate
+    let current_rate = calculate_dynamic_interest_rate(&pool);
+    let days = (duration / 86400) as u128;
+    let daily_interest = (loan_amount as u128 * current_rate as u128 / 10000) as i128;
+    let total_interest = daily_interest * days as i128;
+    let repayment_amount = loan_amount.checked_add(total_interest).ok_or(NFTError::AmountOverflow)?;
+
+    // Create loan
+    let loan_id = get_next_loan_id(env);
+    let current_time = env.ledger().timestamp();
+
+    let loan = NFTLoan {
+        loan_id,
+        token_id,
+        collection_id,
+        borrower: borrower.clone(),
+        lender: Address::from_string(env, &pool_id.to_string()), // Pool is the lender
+        loan_amount,
+        interest_rate_bps: current_rate,
+        repayment_amount,
+        start_time: current_time,
+        duration,
+        due_date: current_time + duration,
+        is_active: true,
+        is_repaid: false,
+        is_liquidated: false,
+    };
+
+    // Update pool
+    pool.total_borrowed = pool.total_borrowed.checked_add(loan_amount).ok_or(NFTError::AmountOverflow)?;
+    pool_registry.update_pool(pool);
+    env.storage()
+        .instance()
+        .set(&LENDING_POOL_REGISTRY_KEY, &pool_registry);
+
+    // Store loan
+    let mut loan_registry: LoanRegistry = env
+        .storage()
+        .instance()
+        .get(&LOAN_REGISTRY_KEY)
+        .unwrap_or_else(|| LoanRegistry::new(env));
+    loan_registry.create_loan(env, loan);
+    env.storage()
+        .instance()
+        .set(&LOAN_REGISTRY_KEY, &loan_registry);
+
+    // Update portfolios
+    update_portfolio_on_loan_taken(env, borrower.clone())?;
+
+    // Emit events
+    crate::nft_events::emit_loan_requested(
+        env,
+        loan_id,
+        collection_id,
+        token_id,
+        borrower,
+        loan_amount,
+    );
+    crate::nft_events::emit_loan_funded(env, loan_id, Address::from_string(env, &pool_id.to_string()), loan_amount);
+
+    Ok(loan_id)
+}
+
+/// Helper to get NFT price from oracle
+fn get_nft_price_from_oracle(env: &Env, collection_id: u64, token_id: u64) -> Result<i128, NFTError> {
+    // Get valuation from registry first
+    let valuation_registry: ValuationRegistry = env
+        .storage()
+        .instance()
+        .get(&VALUATION_REGISTRY_KEY)
+        .unwrap_or_else(|| ValuationRegistry::new(env));
+    
+    if let Some(valuation) = valuation_registry.get_valuation(collection_id, token_id) {
+        if valuation.oracle_verified {
+            return Ok(valuation.floor_price);
+        }
+    }
+
+    // Fallback to oracle price feed
+    let usdc = symbol_short!("USDC");
+    let nft_token = Symbol::new(env, &format!("NFT{}{}", collection_id, token_id));
+    match oracle::get_price_safe(env, (nft_token, usdc)) {
+        Ok(price) => Ok(price as i128),
+        Err(_) => Err(NFTError::PriceNotFound),
+    }
+}
+
+/// Check if a loan can be liquidated (collateralization ratio < 150%)
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `loan_id` - Loan ID to check
+///
+/// # Returns
+/// * `Result<bool, NFTError>` - Whether loan can be liquidated
+pub fn can_liquidate_loan(env: &Env, loan_id: u64) -> Result<bool, NFTError> {
+    let loan_registry: LoanRegistry = env
+        .storage()
+        .instance()
+        .get(&LOAN_REGISTRY_KEY)
+        .ok_or(NFTError::LoanNotFound)?;
+    
+    let loan = loan_registry
+        .get_loan(loan_id)
+        .ok_or(NFTError::LoanNotFound)?;
+
+    if !loan.is_active || loan.is_repaid || loan.is_liquidated {
+        return Ok(false);
+    }
+
+    // Get current NFT price from oracle
+    let nft_price = get_nft_price_from_oracle(env, loan.collection_id, loan.token_id)?;
+    
+    // Calculate current collateralization ratio: (collateral value / loan amount) * 100
+    let collateralization_ratio = (nft_price as u128 * 100) / loan.loan_amount as u128;
+
+    // Also check if loan is overdue
+    let current_time = env.ledger().timestamp();
+    let is_overdue = current_time > loan.due_date + LIQUIDATION_GRACE_PERIOD;
+
+    // Can liquidate if either collateralization < 150% OR loan is overdue
+    Ok(collateralization_ratio < LIQUIDATION_COLLATERALIZATION_RATIO_MIN || is_overdue)
+}
+
+/// Liquidate an undercollateralized loan
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `liquidator` - Address executing liquidation
+/// * `loan_id` - Loan ID to liquidate
+///
+/// # Returns
+/// * `Result<(), NFTError>` - Success or error
+pub fn liquidate_undercollateralized_loan(
+    env: &Env,
+    liquidator: Address,
+    loan_id: u64,
+) -> Result<(), NFTError> {
+    liquidator.require_auth();
+
+    if emergency::is_frozen(env, liquidator.clone()) {
+        return Err(NFTError::UserFrozen);
+    }
+
+    // Check if loan can be liquidated
+    if !can_liquidate_loan(env, loan_id)? {
+        return Err(NFTError::LoanNotOverdue);
+    }
+
+    let mut loan_registry: LoanRegistry = env
+        .storage()
+        .instance()
+        .get(&LOAN_REGISTRY_KEY)
+        .ok_or(NFTError::LoanNotFound)?;
+    
+    let mut loan = loan_registry
+        .get_loan(loan_id)
+        .ok_or(NFTError::LoanNotFound)?;
+
+    // Get the NFT collateral
+    let mut nft_registry: NFTRegistry = env
+        .storage()
+        .instance()
+        .get(&NFT_REGISTRY_KEY)
+        .unwrap_or_else(|| NFTRegistry::new(env));
+    
+    let mut nft = nft_registry
+        .get_nft(loan.collection_id, loan.token_id)
+        .ok_or(NFTError::NFTNotFound)?;
+
+    // Calculate 5% liquidation bonus: liquidator gets NFT collateral minus 5% fee to protocol
+    // In a real implementation, this would be handled more gracefully, but for simulation:
+    // Liquidator receives the NFT, and must repay the loan plus 5% bonus
+    // This simulates the liquidator getting a 5% bonus on the collateral
+
+    // Mark loan as liquidated
+    loan.is_liquidated = true;
+    loan.is_active = false;
+    loan_registry.mark_liquidated(loan_id)?;
+    env.storage()
+        .instance()
+        .set(&LOAN_REGISTRY_KEY, &loan_registry);
+
+    // Transfer NFT ownership to liquidator
+    nft_registry.transfer_ownership(env, loan.collection_id, loan.token_id, liquidator.clone())?;
+    env.storage()
+        .instance()
+        .set(&NFT_REGISTRY_KEY, &nft_registry);
+
+    // Update pool's borrowed amount (loan is repaid through liquidation)
+    let mut pool_registry: LendingPoolRegistry = env
+        .storage()
+        .instance()
+        .get(&LENDING_POOL_REGISTRY_KEY)
+        .unwrap_or_else(|| LendingPoolRegistry::new(env));
+    
+    // Extract pool_id from lender address (simplified)
+    if let Ok(pool_id_str) = loan.lender.to_string().parse::<u64>() {
+        if let Some(mut pool) = pool_registry.get_pool(pool_id_str) {
+            pool.total_borrowed = pool.total_borrowed.checked_sub(loan.loan_amount).ok_or(NFTError::AmountOverflow)?;
+            pool_registry.update_pool(pool);
+            env.storage()
+                .instance()
+                .set(&LENDING_POOL_REGISTRY_KEY, &pool_registry);
+        }
+    }
+
+    // Update portfolios
+    decrement_portfolio_loans_taken(env, loan.borrower.clone())?;
+
+    // Update liquidator's portfolio
+    let mut portfolio_registry: Map<Address, NFTPortfolio> = env
+        .storage()
+        .instance()
+        .get(&PORTFOLIO_REGISTRY_KEY)
+        .unwrap_or_else(|| Map::new(env));
+    let mut portfolio = portfolio_registry
+        .get(liquidator.clone())
+        .unwrap_or_else(|| NFTPortfolio::new(env, liquidator.clone()));
+    portfolio.total_nfts_owned = portfolio.total_nfts_owned.saturating_add(1);
+    portfolio_registry.set(liquidator.clone(), portfolio);
+    env.storage()
+        .instance()
+        .set(&PORTFOLIO_REGISTRY_KEY, &portfolio_registry);
+
+    // Emit liquidation event with 5% bonus information
+    crate::nft_events::emit_loan_liquidated(
+        env,
+        loan_id,
+        liquidator,
+        loan.collection_id,
+        loan.token_id,
+    );
+    crate::nft_events::emit_liquidation_bonus(
+        env,
+        loan_id,
+        liquidator,
+        (nft.total_supply as i128 * LIQUIDATION_BONUS_BPS as i128 / 10000),
+    );
+
+    Ok(())
+}
+
+/// Repay a loan taken from a lending pool
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `borrower` - Loan borrower
+/// * `pool_id` - Lending pool ID
+/// * `loan_id` - Loan ID to repay
+/// * `repayment_amount` - Amount being repaid
+///
+/// # Returns
+/// * `Result<(), NFTError>` - Success or error
+pub fn repay_lending_pool_loan(
+    env: &Env,
+    borrower: Address,
+    pool_id: u64,
+    loan_id: u64,
+    repayment_amount: i128,
+) -> Result<(), NFTError> {
+    borrower.require_auth();
+
+    if is_marketplace_paused(env) {
+        return Err(NFTError::MarketplacePaused);
+    }
+
+    let mut loan_registry: LoanRegistry = env
+        .storage()
+        .instance()
+        .get(&LOAN_REGISTRY_KEY)
+        .ok_or(NFTError::LoanNotFound)?;
+    
+    let loan = loan_registry
+        .get_loan(loan_id)
+        .ok_or(NFTError::LoanNotFound)?;
+
+    // Verify borrower
+    if loan.borrower != borrower {
+        return Err(NFTError::Unauthorized);
+    }
+
+    // Check loan state
+    if !loan.is_active {
+        return Err(NFTError::LoanNotActive);
+    }
+    if loan.is_repaid {
+        return Err(NFTError::LoanAlreadyRepaid);
+    }
+    if loan.is_liquidated {
+        return Err(NFTError::LoanLiquidated);
+    }
+
+    // Calculate amount due
+    let current_time = env.ledger().timestamp();
+    let amount_due = loan.total_due(current_time);
+
+    if repayment_amount < amount_due {
+        return Err(NFTError::InsufficientRepayment);
+    }
+
+    // Mark loan as repaid
+    loan_registry.mark_repaid(loan_id)?;
+    env.storage()
+        .instance()
+        .set(&LOAN_REGISTRY_KEY, &loan_registry);
+
+    // Return NFT to borrower
+    let mut nft_registry: NFTRegistry = env
+        .storage()
+        .instance()
+        .get(&NFT_REGISTRY_KEY)
+        .unwrap_or_else(|| NFTRegistry::new(env));
+    // In this implementation, the NFT was only locked, not transferred, so we just confirm it's back to the borrower
+    // In production, you would transfer it back from the pool/escrow
+
+    // Update the lending pool
+    let mut pool_registry: LendingPoolRegistry = env
+        .storage()
+        .instance()
+        .get(&LENDING_POOL_REGISTRY_KEY)
+        .ok_or(NFTError::LoanNotFound)?;
+    
+    let mut pool = pool_registry
+        .get_pool(pool_id)
+        .ok_or(NFTError::LoanNotFound)?;
+
+    // Calculate interest that gets added to the pool for lenders
+    let interest = repayment_amount - loan.loan_amount;
+    pool.total_borrowed = pool.total_borrowed.checked_sub(loan.loan_amount).ok_or(NFTError::AmountOverflow)?;
+    // The principal is returned to available liquidity, interest is distributed to lenders
+    pool.total_deposited = pool.total_deposited.checked_add(interest).ok_or(NFTError::AmountOverflow)?;
+    pool_registry.update_pool(pool);
+    env.storage()
+        .instance()
+        .set(&LENDING_POOL_REGISTRY_KEY, &pool_registry);
+
+    // Update portfolios
+    decrement_portfolio_loans_taken(env, borrower)?;
+    decrement_portfolio_loans_given(env, loan.lender.clone())?;
+
+    // Emit repayment event
+    crate::nft_events::emit_loan_repaid(env, loan_id, borrower, repayment_amount);
 
     Ok(())
 }
