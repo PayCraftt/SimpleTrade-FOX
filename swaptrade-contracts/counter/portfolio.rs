@@ -315,7 +315,13 @@ impl Portfolio {
     /// Check if a user has earned a specific badge.
     pub fn has_badge(&self, env: &Env, user: Address, badge: Badge) -> bool {
         let key = (user, badge);
-    self.badges.get(key).unwrap_or(false)
+        self.badges.get(key).unwrap_or(false)
+    }
+
+    #[cfg(feature = "nft")]
+    pub fn has_minted_achievement(&self, env: &Env, user: Address, achievement: super::nft::nft_types::Achievement) -> bool {
+        let key = (user, achievement);
+        self.minted_achievements.get(key).unwrap_or(false)
     }
 
     /// Get paginated transaction history for a user (most recent first up to `limit`).

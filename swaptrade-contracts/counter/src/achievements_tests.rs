@@ -527,6 +527,37 @@ mod badge_achievement_tests {
         let env = Env::default();
         let mut portfolio = Portfolio::new(&env);
         let user = Address::generate(&env);
+
+    #[test]
+    #[cfg(feature = "nft")]
+    fn test_nft_minting_on_badge_award() {
+        let env = Env::default();
+        let mut portfolio = Portfolio::new(&env);
+        let user = Address::generate(&env);
+
+        // Register the NFT contract and store its address
+        let nft_contract_id = env.register_contract(None, crate::nft::nft::NonFungibleToken);
+        env.storage().instance().set(&Symbol::short("nft_addr"), &nft_contract_id);
+
+        // Award a badge
+        portfolio.record_trade(&env, user.clone());
+
+        // Verify that the badge was awarded
+        assert!(portfolio.has_badge(&env, user.clone(), Badge::FirstTrade));
+
+        // Verify that the corresponding NFT was minted
+        assert!(portfolio.has_minted_achievement(&env, user.clone(), crate::nft::nft_types::Achievement::FirstTrade));
+
+        // Verify that the user has the NFT
+        let nft_client = crate::nft::nft::NonFungibleTokenClient::new(&env, &nft_contract_id);
+        assert_eq!(nft_client.balance_of(&user), 1);
+
+        // Award the same badge again
+        portfolio.record_trade(&env, user.clone());
+
+        // Verify that a duplicate NFT was not minted
+        assert_eq!(nft_client.balance_of(&user), 1);
+    }
         
         portfolio.mint(&env, Asset::XLM, user.clone(), 1000);
         portfolio.record_initial_balance(user.clone(), 1000);
