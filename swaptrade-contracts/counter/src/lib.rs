@@ -114,22 +114,8 @@ pub use emergency_override::{
 pub use fee_adjustment_manager::FeeAdjustmentManager;
 pub use staking_bonus::{DistributionRecord, StakeRecord, StakingBonusKey, StakingBonusManager};
 
-#[cfg(feature = "experimental")]
-mod nft_errors;
-#[cfg(feature = "experimental")]
-mod nft_events;
-#[cfg(feature = "experimental")]
-mod nft_fractional;
-#[cfg(feature = "experimental")]
-mod nft_lending;
-#[cfg(feature = "experimental")]
-mod nft_marketplace;
-#[cfg(feature = "experimental")]
-mod nft_minting;
-#[cfg(feature = "experimental")]
-mod nft_storage;
-#[cfg(feature = "experimental")]
-mod nft_types;
+#[cfg(feature = "nft")]
+pub mod nft;
 
 #[cfg(feature = "experimental")]
 mod private_transaction;

@@ -29,3 +29,4 @@ proptest = "1.4"
 # Off by default to avoid overhead in production.
 logging = []
 experimental = []
+nft = []
