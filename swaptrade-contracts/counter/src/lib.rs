@@ -1927,9 +1927,12 @@ impl CounterContract {
 
     pub fn calculate_effective_fee(env: Env, swap_amount: i128, user_tier: UserTier) -> i128 {
         tiers::calculate_effective_fee(&env, swap_amount, user_tier)
+    }
+
     // ────────────────────────────────────────────────────────────────────────
     // Faucet – simulated token drip for new users
     // ────────────────────────────────────────────────────────────────────────
+
 
     /// Claim simulated tokens from the faucet for a given asset.
     /// Enforces a per-user, per-asset cooldown set via `set_faucet_config`.
@@ -1951,7 +1954,10 @@ impl CounterContract {
     /// Get faucet configuration for an asset.
     pub fn get_faucet_config(env: Env, asset: Symbol) -> Result<faucet::FaucetConfig, SwapTradeError> {
         faucet::get_faucet_config(&env, asset)
+    }
+
     // ── Governance System ───────────────────────────────────────────────────
+
 
     /// Create a new governance proposal
     pub fn create_governance_proposal(
