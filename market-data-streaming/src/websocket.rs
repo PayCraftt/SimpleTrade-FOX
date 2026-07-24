@@ -13,8 +13,18 @@ use uuid::Uuid;
 use chrono::Utc;
 use tracing::{info, warn, error, debug};
 
+use tokio_tungstenite::WebSocketStream;
+use tokio::net::TcpStream;
+use futures_util::stream::SplitSink;
+use futures_util::SinkExt;
+use std::collections::HashMap;
+
+/// Stores actual WebSocket writer to send messages
+type WebSocketWriter = SplitSink<WebSocketStream<TcpStream>, Message>;
+
 pub struct WebSocketServer {
     connections: Arc<DashMap<Uuid, Arc<RwLock<ConnectionInfo>>>>,
+    ws_writers: Arc<DashMap<Uuid, Arc<RwLock<WebSocketWriter>>>>, // Store actual WebSocket writers
     compression_engine: Arc<CompressionEngine>,
     validator: Arc<DataValidator>,
     rate_limiter: Arc<RateLimiter>,
@@ -29,6 +39,7 @@ impl WebSocketServer {
     pub fn new() -> Self {
         Self {
             connections: Arc::new(DashMap::new()),
+            ws_writers: Arc::new(DashMap::new()),
             compression_engine: Arc::new(CompressionEngine::new()),
             validator: Arc::new(DataValidator::new()),
             rate_limiter: Arc::new(RateLimiter::new()),
@@ -75,7 +86,13 @@ impl WebSocketServer {
             None,
         ).await;
 
-        while let Some(msg) = ws_stream.next().await {
+        // Split the stream into writer and reader
+        let (ws_writer, mut ws_reader) = ws_stream.split();
+        
+        // Store the writer so we can send messages
+        self.ws_writers.insert(connection_id, Arc::new(RwLock::new(ws_writer)));
+
+        while let Some(msg) = ws_reader.next().await {
             match msg {
                 Ok(Message::Text(text)) => {
                     self.handle_text_message(connection_id, &text).await?;
@@ -100,7 +117,9 @@ impl WebSocketServer {
             }
         }
 
+        // Clean up connection resources
         self.connections.remove(&connection_id);
+        self.ws_writers.remove(&connection_id);
         Ok(())
     }
 
@@ -233,12 +252,31 @@ impl WebSocketServer {
     }
 
     async fn send_to_connection(&self, connection_id: Uuid, message: &WebSocketMessage) -> Result<()> {
-        // This would typically use the actual WebSocket connection
-        // For now, we'll update stats
+        // First update connection stats
         if let Some(conn) = self.connections.get(&connection_id) {
             let mut conn_info = conn.write();
             conn_info.bytes_sent += message.payload.len() as u64;
         }
+
+        // Actually send the message over WebSocket
+        if let Some(writer_arc) = self.ws_writers.get(&connection_id) {
+            let mut writer = writer_arc.write();
+            
+            let serialized = if message.compressed {
+                // Already compressed, send as binary
+                Message::Binary(message.payload.clone())
+            } else {
+                // Send as text for uncompressed messages
+                let json = serde_json::to_string(message)?;
+                Message::Text(json)
+            };
+
+            if let Err(e) = writer.send(serialized).await {
+                error!("Failed to send message to connection {}: {}", connection_id, e);
+                return Err(crate::error::MarketDataError::WebSocketError(e.to_string()));
+            }
+        }
+
         Ok(())
     }
 
@@ -285,6 +323,7 @@ impl Clone for WebSocketServer {
     fn clone(&self) -> Self {
         Self {
             connections: Arc::clone(&self.connections),
+            ws_writers: Arc::clone(&self.ws_writers),
             compression_engine: Arc::clone(&self.compression_engine),
             validator: Arc::clone(&self.validator),
             rate_limiter: Arc::clone(&self.rate_limiter),

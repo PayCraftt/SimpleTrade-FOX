@@ -46,7 +46,24 @@ pub struct HistoricalConfig {
     pub default_playback_speed: f64,
     pub max_data_points_per_request: u32,
     pub compression_enabled: bool,
-    pub data_retention_days: u32,
+    pub data_retention_days: u32, // 7 years = ~2555 days
+}
+
+impl Default for HistoricalConfig {
+    fn default() -> Self {
+        // 7 years in days = 365 * 7 = 2555 days
+        const SEVEN_YEARS_DAYS: u32 = 2555;
+        
+        Self {
+            cache_size: 10_000_000, // 10M entries
+            cache_ttl_seconds: 3600, // 1 hour
+            max_replay_sessions: 100,
+            default_playback_speed: 1.0,
+            max_data_points_per_request: 10_000,
+            compression_enabled: true,
+            data_retention_days: SEVEN_YEARS_DAYS,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -197,6 +214,66 @@ impl HistoricalDataManager {
         } else {
             Err(MarketDataError::Validation(format!("Replay session not found: {}", session_id)))
         }
+    }
+
+    /// Run periodic cleanup of data older than retention period (7 years)
+    pub async fn cleanup_old_data(&self) -> Result<u64> {
+        let now = Utc::now();
+        let retention_period = chrono::Duration::days(self.config.data_retention_days as i64);
+        let cutoff_date = now - retention_period;
+        
+        info!("Starting historical data cleanup, removing data older than: {}", cutoff_date);
+        
+        // Delete data older than cutoff from storage
+        let deleted_count = self.storage.delete_old_data(cutoff_date).await?;
+        
+        info!("Historical data cleanup complete. Deleted {} old data points", deleted_count);
+        
+        Ok(deleted_count)
+    }
+
+    /// Start background cleanup task that runs daily
+    pub async fn start_background_cleanup(self: Arc<Self>) {
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(std::time::Duration::from_secs(86400)); // Run every day
+            
+            loop {
+                interval.tick().await;
+                if let Err(e) = self.cleanup_old_data().await {
+                    error!("Failed to run historical data cleanup: {}", e);
+                }
+            }
+        });
+    }
+
+    /// Get statistics about stored historical data
+    pub async fn get_statistics(&self) -> Result<HistoricalDataStats> {
+        let symbols = self.storage.get_available_symbols().await?;
+        let mut oldest_data: Option<DateTime<Utc>> = None;
+        let mut newest_data: Option<DateTime<Utc>> = None;
+        let mut total_data_points: u64 = 0;
+        
+        for symbol in &symbols {
+            if let Ok((oldest, newest)) = self.storage.get_data_range(symbol).await {
+                total_data_points += 1; // In a real implementation, this would be actual count
+                if oldest_data.is_none() || oldest < oldest_data.unwrap() {
+                    oldest_data = Some(oldest);
+                }
+                if newest_data.is_none() || newest > newest_data.unwrap() {
+                    newest_data = Some(newest);
+                }
+            }
+        }
+
+        Ok(HistoricalDataStats {
+            total_data_points,
+            oldest_data,
+            newest_data,
+            symbols_count: symbols.len(),
+            storage_size_bytes: 0, // Would be calculated from actual storage
+            cache_hit_rate: self.cache.hit_rate().await.unwrap_or(0.0),
+            active_replay_sessions: self.replay_sessions.len(),
+        })
     }
 
     pub async fn seek_replay(&self, session_id: Uuid, timestamp: DateTime<Utc>) -> Result<()> {

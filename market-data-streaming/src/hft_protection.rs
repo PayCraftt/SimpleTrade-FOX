@@ -5,25 +5,39 @@ use crate::error::Result;
 
 /// HFT Protection Mechanisms
 pub struct HFTProtection {
-    /// Order submission rate limits (orders per second per trader)
-    order_rate_limits: HashMap<String, RateLimit>,
+    /// Order submission rate limits (orders per minute per trader - max 100)
+    order_rate_limits: HashMap<String, PerMinuteRateLimit>,
     /// Quote stuffing detection
     quote_stuffing_detector: QuoteStuffingDetector,
     /// Layering and spoofing detection
-    spoofing_detector: SpoofinDetector,
+    spoofing_detector: SpoofingDetector,
     /// Flash crash prevention
     circuit_breaker: CircuitBreaker,
     /// Message rates
-    message_rate_limiter: RateLimiter,
+    message_rate_limiter: MessageRateLimiter,
+    /// Suspended traders (those who exceeded limits)
+    suspended_traders: HashMap<String, DateTime<Utc>>,
+    /// Suspension duration (5 minutes)
+    suspension_duration: Duration,
 }
 
 #[derive(Debug, Clone)]
-struct RateLimit {
+struct PerMinuteRateLimit {
     trader_id: String,
-    max_orders_per_sec: u32,
-    current_orders: u32,
-    last_reset: DateTime<Utc>,
+    max_orders_per_minute: u32,
+    order_timestamps: Vec<DateTime<Utc>>,
     violations: u32,
+    is_suspended: bool,
+    suspension_until: Option<DateTime<Utc>>,
+}
+
+// Fix typo in SpoofingDetector name
+#[derive(Debug, Default)]
+pub struct SpoofingDetector {
+    /// Track orders that don't result in trades
+    unmatched_orders: HashMap<String, Vec<Order>>,
+    /// Watch for repeated placement and cancellation patterns
+    patterns: HashMap<String, CancellationPattern>,
 }
 
 #[derive(Debug, Default)]
@@ -63,13 +77,13 @@ pub struct CircuitBreaker {
 }
 
 #[derive(Debug)]
-struct RateLimiter {
+struct MessageRateLimiter {
     max_messages_per_sec: u32,
     window_duration: Duration,
     submission_times: Vec<DateTime<Utc>>,
 }
 
-impl RateLimiter {
+impl MessageRateLimiter {
     fn new(max_messages_per_sec: u32) -> Self {
         Self {
             max_messages_per_sec,
@@ -129,44 +143,99 @@ impl HFTProtection {
                 cancellation_ratio_threshold: 0.95,
                 max_window_seconds: 60,
             },
-            spoofing_detector: SpoofinDetector::default(),
+            spoofing_detector: SpoofingDetector::default(),
             circuit_breaker: CircuitBreaker {
                 price_move_threshold: 0.07,
                 volume_threshold: 0.5,
                 halted_symbols: HashMap::new(),
-                halt_duration: 5,
+                halt_duration: 300, // 5 minutes halt duration
             },
-            message_rate_limiter: RateLimiter::new(1000),
+            message_rate_limiter: MessageRateLimiter::new(1000),
+            suspended_traders: HashMap::new(),
+            suspension_duration: Duration::minutes(5), // 5 minute suspension for violators
         }
     }
 
-    /// Check if trader can submit order
-    pub fn can_submit_order(&mut self, trader_id: &str, max_rate: u32) -> Result<()> {
+    /// Check if trader is currently suspended
+    pub fn is_trader_suspended(&mut self, trader_id: &str) -> bool {
         let now = Utc::now();
-        let limit = self.order_rate_limits
-            .entry(trader_id.to_string())
-            .or_insert_with(|| RateLimit {
-                trader_id: trader_id.to_string(),
-                max_orders_per_sec: max_rate,
-                current_orders: 0,
-                last_reset: now,
-                violations: 0,
-            });
-
-        // Reset counter every second
-        if (now - limit.last_reset).num_seconds() >= 1 {
-            limit.current_orders = 0;
-            limit.last_reset = now;
+        
+        // Check if suspension has expired
+        if let Some(suspension_end) = self.suspended_traders.get(trader_id) {
+            if now > *suspension_end {
+                self.suspended_traders.remove(trader_id);
+                if let Some(limit) = self.order_rate_limits.get_mut(trader_id) {
+                    limit.is_suspended = false;
+                    limit.suspension_until = None;
+                }
+                return false;
+            }
+            return true;
         }
+        
+        // Also check in order_rate_limits
+        if let Some(limit) = self.order_rate_limits.get_mut(trader_id) {
+            if limit.is_suspended {
+                if let Some(until) = limit.suspension_until {
+                    if now > until {
+                        limit.is_suspended = false;
+                        limit.suspension_until = None;
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        
+        false
+    }
 
-        if limit.current_orders >= limit.max_orders_per_sec {
-            limit.violations += 1;
+    /// Check if trader can submit order - enforces max 100 orders per minute
+    pub fn can_submit_order(&mut self, trader_id: &str) -> Result<()> {
+        // First check if trader is suspended
+        if self.is_trader_suspended(trader_id) {
             return Err(crate::error::MarketDataError::HFTViolation(
                 HFTViolation::ExcessiveOrderRate,
             ));
         }
 
-        limit.current_orders += 1;
+        let now = Utc::now();
+        const MAX_ORDERS_PER_MINUTE: u32 = 100;
+        
+        let limit = self.order_rate_limits
+            .entry(trader_id.to_string())
+            .or_insert_with(|| PerMinuteRateLimit {
+                trader_id: trader_id.to_string(),
+                max_orders_per_minute: MAX_ORDERS_PER_MINUTE,
+                order_timestamps: Vec::new(),
+                violations: 0,
+                is_suspended: false,
+                suspension_until: None,
+            });
+
+        // Remove timestamps older than 1 minute
+        let one_minute_ago = now - Duration::minutes(1);
+        limit.order_timestamps.retain(|&time| time > one_minute_ago);
+
+        // Check if they've exceeded the limit
+        if limit.order_timestamps.len() as u32 >= limit.max_orders_per_minute {
+            limit.violations += 1;
+            
+            // If they have multiple violations, suspend them
+            if limit.violations >= 3 {
+                let suspension_end = now + self.suspension_duration;
+                limit.is_suspended = true;
+                limit.suspension_until = Some(suspension_end);
+                self.suspended_traders.insert(trader_id.to_string(), suspension_end);
+                tracing::warn!("Trader {} suspended for 5 minutes due to excessive order rate", trader_id);
+            }
+            
+            return Err(crate::error::MarketDataError::HFTViolation(
+                HFTViolation::ExcessiveOrderRate,
+            ));
+        }
+
+        limit.order_timestamps.push(now);
         Ok(())
     }
 
