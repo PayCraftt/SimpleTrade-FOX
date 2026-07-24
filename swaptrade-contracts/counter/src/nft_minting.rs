@@ -1,9 +1,9 @@
 
 #![cfg(feature = "nft")]
 
-use soroban_sdk::{contract, contractimpl, Address, Env, Symbol};
+use soroban_sdk::{contract, contractimpl, Address, Env, Symbol, String};
 use crate::nft_types::{Achievement, get_nft_metadata};
-use soroban_nft::minting::{self, NonFungibleTokenMinting};
+use crate::nft::NonFungibleTokenClient;
 
 #[contract]
 pub struct NftMintingContract;
@@ -21,8 +21,8 @@ impl NftMintingContract {
 
         // Mint the NFT
         let nft_address = env.storage().instance().get(&Symbol::short("nft_addr")).unwrap();
-        let nft_client = soroban_nft::Client::new(&env, &nft_address);
-        nft_client.mint(&to, &metadata.uri);
+        let nft_client = NonFungibleTokenClient::new(&env, &nft_address);
+        nft_client.mint(&to, &String::from_str(&env, &metadata.uri.to_string()));
 
         // Mark the achievement as minted for the user
         portfolio.minted_achievements.set((to, achievement), true);

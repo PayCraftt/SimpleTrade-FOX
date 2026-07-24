@@ -536,7 +536,7 @@ mod badge_achievement_tests {
         let user = Address::generate(&env);
 
         // Register the NFT contract and store its address
-        let nft_contract_id = env.register_contract(None, crate::nft::nft_minting::NftMintingContract);
+        let nft_contract_id = env.register_contract(None, crate::nft::nft::NonFungibleToken);
         env.storage().instance().set(&Symbol::short("nft_addr"), &nft_contract_id);
 
         // Award a badge
@@ -549,7 +549,7 @@ mod badge_achievement_tests {
         assert!(portfolio.has_minted_achievement(&env, user.clone(), crate::nft::nft_types::Achievement::FirstTrade));
 
         // Verify that the user has the NFT
-        let nft_client = soroban_nft::Client::new(&env, &nft_contract_id);
+        let nft_client = crate::nft::nft::NonFungibleTokenClient::new(&env, &nft_contract_id);
         assert_eq!(nft_client.balance_of(&user), 1);
 
         // Award the same badge again
