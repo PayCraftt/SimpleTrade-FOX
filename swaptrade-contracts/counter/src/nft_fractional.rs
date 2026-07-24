@@ -699,6 +699,506 @@ pub fn get_ownership_percentage(
         fractional_registry.get_shares(collection_id, token_id, shareholder),
         nft_registry.get_nft(collection_id, token_id),
     ) {
+        if nft.total_supply == 0 {
+            return 0;
+        }
+        // Calculate ownership percentage in basis points
+        (share.shares as u128 * 10000 / nft.total_supply as u128) as u32
+    } else {
+        0
+    }
+}
+
+// =============================================================================
+// ERC4626 FRACTIONAL VAULT IMPLEMENTATION
+// =============================================================================
+
+/// Create an ERC4626-compliant fractional vault for an NFT
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `owner` - NFT owner
+/// * `collection_id` - NFT collection ID
+/// * `token_id` - NFT token ID
+/// * `total_shares` - Total shares to mint
+/// * `share_symbol` - Symbol for vault shares
+///
+/// # Returns
+/// * `Result<u64, NFTError>` - Vault ID on success
+pub fn create_fractional_vault(
+    env: &Env,
+    owner: Address,
+    collection_id: u64,
+    token_id: u64,
+    total_shares: u64,
+    share_symbol: Symbol,
+) -> Result<u64, NFTError> {
+    owner.require_auth();
+
+    if is_marketplace_paused(env) {
+        return Err(NFTError::MarketplacePaused);
+    }
+
+    if emergency::is_frozen(env, owner.clone()) {
+        return Err(NFTError::UserFrozen);
+    }
+
+    // Validate share count
+    if total_shares < MIN_SHARES || total_shares > MAX_SHARES {
+        return Err(NFTError::FractionalizationLimit);
+    }
+
+    // Get NFT and verify ownership
+    let mut nft_registry: NFTRegistry = env
+        .storage()
+        .instance()
+        .get(&NFT_REGISTRY_KEY)
+        .ok_or(NFTError::NFTNotFound)?;
+    
+    let mut nft = nft_registry
+        .get_nft(collection_id, token_id)
+        .ok_or(NFTError::NFTNotFound)?;
+
+    if nft.owner != owner {
+        return Err(NFTError::NotOwner);
+    }
+
+    if nft.is_fractionalized {
+        return Err(NFTError::AlreadyFractionalized);
+    }
+
+    // Check if NFT is already in a vault
+    let vault_registry_check: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .unwrap_or_else(|| FractionalVaultRegistry::new(env));
+    
+    // Verify NFT isn't already collateralized
+    let loan_registry_check: LoanRegistry = env
+        .storage()
+        .instance()
+        .get(&LOAN_REGISTRY_KEY)
+        .unwrap_or_else(|| LoanRegistry::new(env));
+    if loan_registry_check.get_loan_by_collateral(collection_id, token_id).is_some() {
+        return Err(NFTError::AlreadyCollateralized);
+    }
+
+    // Create vault
+    let vault_id = get_next_vault_id(env);
+    let current_time = env.ledger().timestamp();
+
+    // Get NFT price from oracle to set total_assets
+    let nft_price = crate::nft_lending::get_nft_price_from_oracle(env, collection_id, token_id)?;
+
+    let vault = FractionalVault {
+        vault_id,
+        collection_id,
+        token_id,
+        asset: Symbol::new(env, &format!("NFT{}{}", collection_id, token_id)),
+        share_symbol,
+        total_shares,
+        total_assets: nft_price,
+        share_supply: 0,
+        created_at: current_time,
+        owner: owner.clone(),
+        is_active: true,
+    };
+
+    // Store vault
+    let mut vault_registry: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .unwrap_or_else(|| FractionalVaultRegistry::new(env));
+    
+    vault_registry.create_vault(env, vault);
+    env.storage()
+        .instance()
+        .set(&FRACTIONAL_VAULT_REGISTRY_KEY, &vault_registry);
+
+    // Mark NFT as fractionalized and lock it in the vault
+    nft.is_fractionalized = true;
+    nft.total_supply = total_shares;
+    nft.circulating_supply = 0;
+    nft_registry.update_nft(nft);
+    env.storage()
+        .instance()
+        .set(&NFT_REGISTRY_KEY, &nft_registry);
+
+    // Mint initial shares to the vault owner
+    mint_vault_shares(env, owner.clone(), vault_id, total_shares)?;
+
+    // Emit events
+    crate::nft_events::emit_fractional_vault_created(env, vault_id, collection_id, token_id, share_symbol);
+
+    Ok(vault_id)
+}
+
+/// ERC4626: Mint vault shares by depositing assets (or in this case, buying fractional shares)
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `recipient` - Address to mint shares to
+/// * `vault_id` - Vault ID
+/// * `shares` - Number of shares to mint
+///
+/// # Returns
+/// * `Result<(), NFTError>` - Success or error
+pub fn mint_vault_shares(
+    env: &Env,
+    recipient: Address,
+    vault_id: u64,
+    shares: u64,
+) -> Result<(), NFTError> {
+    if shares < MIN_VAULT_MINT_AMOUNT {
+        return Err(NFTError::InvalidAmount);
+    }
+
+    // Get vault
+    let mut vault_registry: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .ok_or(NFTError::VaultNotFound)?;
+    
+    let mut vault = vault_registry
+        .get_vault(vault_id)
+        .ok_or(NFTError::VaultNotFound)?;
+
+    if !vault.is_active {
+        return Err(NFTError::MarketplacePaused);
+    }
+
+    // Check we don't mint more than total shares
+    if vault.share_supply + shares > vault.total_shares {
+        return Err(NFTError::InsufficientShares);
+    }
+
+    // Update vault share supply
+    vault.share_supply += shares;
+    vault_registry.update_vault(vault);
+    env.storage()
+        .instance()
+        .set(&FRACTIONAL_VAULT_REGISTRY_KEY, &vault_registry);
+
+    // Record shares for the recipient
+    let mut vault_shares: Map<(u64, Address), VaultShare> = env
+        .storage()
+        .instance()
+        .get(&VAULT_SHARES_KEY)
+        .unwrap_or_else(|| Map::new(env));
+    
+    let share_key = (vault_id, recipient.clone());
+    let mut share = vault_shares
+        .get(share_key.clone())
+        .unwrap_or_else(|| VaultShare {
+            vault_id,
+            owner: recipient.clone(),
+            shares: 0,
+            last_deposit: env.ledger().timestamp(),
+        });
+    
+    share.shares += shares;
+    share.last_deposit = env.ledger().timestamp();
+    
+    vault_shares.set(share_key, share);
+    env.storage()
+        .instance()
+        .set(&VAULT_SHARES_KEY, &vault_shares);
+
+    // Update NFT circulating supply
+    let mut nft_registry: NFTRegistry = env
+        .storage()
+        .instance()
+        .get(&NFT_REGISTRY_KEY)
+        .unwrap_or_else(|| NFTRegistry::new(env));
+    
+    let mut nft = nft_registry
+        .get_nft(vault.collection_id, vault.token_id)
+        .ok_or(NFTError::NFTNotFound)?;
+    nft.circulating_supply += shares;
+    nft_registry.update_nft(nft);
+    env.storage()
+        .instance()
+        .set(&NFT_REGISTRY_KEY, &nft_registry);
+
+    // Update recipient's portfolio
+    let mut portfolio_registry: Map<Address, NFTPortfolio> = env
+        .storage()
+        .instance()
+        .get(&PORTFOLIO_REGISTRY_KEY)
+        .unwrap_or_else(|| Map::new(env));
+    
+    let mut portfolio = portfolio_registry
+        .get(recipient.clone())
+        .unwrap_or_else(|| NFTPortfolio::new(env, recipient.clone()));
+    portfolio.total_fractional_shares += shares;
+    portfolio_registry.set(recipient.clone(), portfolio);
+    env.storage()
+        .instance()
+        .set(&PORTFOLIO_REGISTRY_KEY, &portfolio_registry);
+
+    // Emit mint event
+    crate::nft_events::emit_vault_shares_minted(env, vault_id, recipient, shares);
+
+    Ok(())
+}
+
+/// ERC4626: Withdraw assets from the vault by burning shares
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `owner` - Share owner withdrawing
+/// * `vault_id` - Vault ID
+/// * `shares` - Number of shares to burn/withdraw
+///
+/// # Returns
+/// * `Result<(), NFTError>` - Success or error
+pub fn withdraw_vault_shares(
+    env: &Env,
+    owner: Address,
+    vault_id: u64,
+    shares: u64,
+) -> Result<(), NFTError> {
+    owner.require_auth();
+
+    if shares == 0 {
+        return Err(NFTError::InvalidAmount);
+    }
+
+    // Check withdrawal delay
+    let mut vault_shares_map: Map<(u64, Address), VaultShare> = env
+        .storage()
+        .instance()
+        .get(&VAULT_SHARES_KEY)
+        .ok_or(NFTError::InsufficientBalance)?;
+    
+    let share_key = (vault_id, owner.clone());
+    let mut vault_share = vault_shares_map
+        .get(share_key.clone())
+        .ok_or(NFTError::InsufficientBalance)?;
+
+    if vault_share.shares < shares {
+        return Err(NFTError::InsufficientBalance);
+    }
+
+    if WITHDRAWAL_DELAY > 0 && env.ledger().timestamp() < vault_share.last_deposit + WITHDRAWAL_DELAY {
+        return Err(NFTError::WithdrawalTooEarly);
+    }
+
+    // Get vault
+    let mut vault_registry: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .ok_or(NFTError::VaultNotFound)?;
+    
+    let mut vault = vault_registry
+        .get_vault(vault_id)
+        .ok_or(NFTError::VaultNotFound)?;
+
+    // Calculate withdrawal fee (max 0.5%)
+    let fee_amount = (shares as u128 * MAX_WITHDRAWAL_FEE_BPS as u128 / 10000) as u64;
+    let actual_withdrawal = shares - fee_amount;
+
+    // Burn shares
+    vault.share_supply -= shares;
+    vault_registry.update_vault(vault);
+    env.storage()
+        .instance()
+        .set(&FRACTIONAL_VAULT_REGISTRY_KEY, &vault_registry);
+
+    // Update user's shares
+    vault_share.shares -= shares;
+    if vault_share.shares == 0 {
+        vault_shares_map.remove(share_key);
+    } else {
+        vault_shares_map.set(share_key, vault_share);
+    }
+    env.storage()
+        .instance()
+        .set(&VAULT_SHARES_KEY, &vault_shares_map);
+
+    // If user owns all remaining shares, they can defractionalize
+    if vault.share_supply == 0 && vault.owner == owner {
+        // Defractionalize the NFT
+        let mut nft_registry: NFTRegistry = env
+            .storage()
+            .instance()
+            .get(&NFT_REGISTRY_KEY)
+            .unwrap();
+        let mut nft = nft_registry.get_nft(vault.collection_id, vault.token_id).unwrap();
+        nft.is_fractionalized = false;
+        nft.total_supply = 1;
+        nft.circulating_supply = 1;
+        nft.owner = owner.clone();
+        nft_registry.update_nft(nft);
+        env.storage()
+            .instance()
+            .set(&NFT_REGISTRY_KEY, &nft_registry);
+        
+        // Deactivate the vault
+        let mut updated_vault = vault;
+        updated_vault.is_active = false;
+        vault_registry.update_vault(updated_vault);
+        env.storage()
+            .instance()
+            .set(&FRACTIONAL_VAULT_REGISTRY_KEY, &vault_registry);
+    }
+
+    // Update NFT circulating supply
+    let mut nft_registry: NFTRegistry = env
+        .storage()
+        .instance()
+        .get(&NFT_REGISTRY_KEY)
+        .unwrap();
+    let mut nft = nft_registry.get_nft(vault.collection_id, vault.token_id).unwrap();
+    nft.circulating_supply -= actual_withdrawal;
+    nft_registry.update_nft(nft);
+    env.storage()
+        .instance()
+        .set(&NFT_REGISTRY_KEY, &nft_registry);
+
+    // Update portfolio
+    let mut portfolio_registry: Map<Address, NFTPortfolio> = env
+        .storage()
+        .instance()
+        .get(&PORTFOLIO_REGISTRY_KEY)
+        .unwrap();
+    let mut portfolio = portfolio_registry.get(owner.clone()).unwrap();
+    portfolio.total_fractional_shares -= shares;
+    portfolio_registry.set(owner.clone(), portfolio);
+    env.storage()
+        .instance()
+        .set(&PORTFOLIO_REGISTRY_KEY, &portfolio_registry);
+
+    // Emit withdrawal event
+    crate::nft_events::emit_vault_shares_withdrawn(env, vault_id, owner, actual_withdrawal, fee_amount);
+
+    Ok(())
+}
+
+/// ERC4626: Convert shares to assets (get the underlying value of shares)
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `vault_id` - Vault ID
+/// * `shares` - Number of shares
+///
+/// # Returns
+/// * `Result<i128, NFTError>` - Asset value in the vault's denomination
+pub fn convert_to_assets(env: &Env, vault_id: u64, shares: u64) -> Result<i128, NFTError> {
+    let vault_registry: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .ok_or(NFTError::VaultNotFound)?;
+    
+    let vault = vault_registry
+        .get_vault(vault_id)
+        .ok_or(NFTError::VaultNotFound)?;
+
+    if vault.total_shares == 0 {
+        return Ok(0);
+    }
+
+    // Calculate proportional asset value
+    Ok((vault.total_assets as u128 * shares as u128 / vault.total_shares as u128) as i128)
+}
+
+/// ERC4626: Convert assets to shares
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `vault_id` - Vault ID
+/// * `assets` - Amount of assets
+///
+/// # Returns
+/// * `Result<u64, NFTError>` - Number of shares the assets represent
+pub fn convert_to_shares(env: &Env, vault_id: u64, assets: i128) -> Result<u64, NFTError> {
+    let vault_registry: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .ok_or(NFTError::VaultNotFound)?;
+    
+    let vault = vault_registry
+        .get_vault(vault_id)
+        .ok_or(NFTError::VaultNotFound)?;
+
+    if vault.total_assets == 0 {
+        return Ok(0);
+    }
+
+    // Calculate proportional share amount
+    Ok((vault.total_shares as u128 * assets as u128 / vault.total_assets as u128) as u64)
+}
+
+/// Get vault share balance for an owner
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `vault_id` - Vault ID
+/// * `owner` - Share owner address
+///
+/// # Returns
+/// * `u64` - Number of shares owned
+pub fn balance_of(env: &Env, vault_id: u64, owner: Address) -> u64 {
+    let vault_shares: Map<(u64, Address), VaultShare> = env
+        .storage()
+        .instance()
+        .get(&VAULT_SHARES_KEY)
+        .unwrap_or_else(|| Map::new(env));
+    
+    if let Some(share) = vault_shares.get((vault_id, owner)) {
+        share.shares
+    } else {
+        0
+    }
+}
+
+/// Get total vault share supply
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `vault_id` - Vault ID
+///
+/// * `Result<u64, NFTError>` - Total shares in circulation
+pub fn total_supply(env: &Env, vault_id: u64) -> Result<u64, NFTError> {
+    let vault_registry: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .ok_or(NFTError::VaultNotFound)?;
+    
+    let vault = vault_registry
+        .get_vault(vault_id)
+        .ok_or(NFTError::VaultNotFound)?;
+    
+    Ok(vault.share_supply)
+}
+
+/// Get vault by NFT collection and token ID
+///
+/// # Arguments
+/// * `env` - The Soroban environment
+/// * `collection_id` - NFT collection ID
+/// * `token_id` - NFT token ID
+///
+/// * `Option<FractionalVault>` - The vault if it exists
+pub fn get_vault_by_nft(env: &Env, collection_id: u64, token_id: u64) -> Option<FractionalVault> {
+    let vault_registry: FractionalVaultRegistry = env
+        .storage()
+        .instance()
+        .get(&FRACTIONAL_VAULT_REGISTRY_KEY)
+        .unwrap_or_else(|| FractionalVaultRegistry::new(env));
+    
+    // Use O(1) reverse mapping lookup from registry
+    vault_registry.get_vault_by_nft(collection_id, token_id)
+}
+        nft_registry.get_nft(collection_id, token_id),
+    ) {
         if nft.total_supply > 0 {
             ((share.shares as u128 * 10000) / nft.total_supply as u128) as u32
         } else {

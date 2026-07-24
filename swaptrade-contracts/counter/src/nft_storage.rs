@@ -26,6 +26,186 @@ pub const FEE_RECIPIENT_KEY: Symbol = symbol_short!("fee_recv");
 pub const LIQUIDATION_QUEUE_KEY: Symbol = symbol_short!("liq_queue");
 pub const LIQUIDATION_BID_REGISTRY_KEY: Symbol = symbol_short!("liq_bid");
 
+// Lending pool storage keys
+pub const LENDING_POOL_REGISTRY_KEY: Symbol = symbol_short!("lpool_reg");
+pub const LENDER_DEPOSITS_KEY: Symbol = symbol_short!("lend_deps");
+
+/// Lending Pool Registry - stores all lending pools
+#[derive(Clone, Debug)]
+#[contracttype]
+pub struct LendingPoolRegistry {
+    /// Map of pool_id -> LendingPool
+    pub pools: Map<u64, LendingPool>,
+    /// Total pools created
+    pub total_pools: u64,
+}
+
+/// Individual Lending Pool
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct LendingPool {
+    pub pool_id: u64,
+    pub asset: Symbol, // The asset supplied to the pool (e.g., USDC)
+    pub total_deposited: i128,
+    pub total_borrowed: i128,
+    pub reserve_factor_bps: u32, // Protocol reserve fee
+    pub base_rate_bps: u32,      // Base interest rate
+    pub is_active: bool,
+    pub created_at: u64,
+}
+
+/// Lender Deposit - tracks individual lender deposits
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct LenderDeposit {
+    pub pool_id: u64,
+    pub lender: Address,
+    pub amount: i128,
+    pub shares: i128, // pTokens representing deposit shares
+    pub deposited_at: u64,
+}
+
+impl LendingPoolRegistry {
+    pub fn new(env: &Env) -> Self {
+        Self {
+            pools: Map::new(env),
+            total_pools: 0,
+        }
+    }
+
+    /// Get a pool by ID
+    pub fn get_pool(&self, pool_id: u64) -> Option<LendingPool> {
+        self.pools.get(pool_id)
+    }
+
+    /// Create a new pool
+    pub fn create_pool(&mut self, env: &Env, pool: LendingPool) -> u64 {
+        let pool_id = pool.pool_id;
+        self.pools.set(pool_id, pool);
+        self.total_pools = self.total_pools.saturating_add(1);
+        pool_id
+    }
+
+    /// Update a pool
+    pub fn update_pool(&mut self, pool: LendingPool) {
+        self.pools.set(pool.pool_id, pool);
+    }
+}
+
+/// Next pool ID generator
+pub fn get_next_pool_id(env: &Env) -> u64 {
+    let current: u64 = env
+        .storage()
+        .instance()
+        .get(&Symbol::new(env, "next_pool"))
+        .unwrap_or(1);
+    env.storage()
+        .instance()
+        .set(&Symbol::new(env, "next_pool"), &(current + 1));
+    current
+}
+
+// ERC4626 Fractional Vault storage keys
+pub const FRACTIONAL_VAULT_REGISTRY_KEY: Symbol = symbol_short!("fv_reg");
+pub const VAULT_SHARES_KEY: Symbol = symbol_short!("v_shares");
+
+/// Fractional Vault Registry - stores all ERC4626-compliant vaults
+#[derive(Clone, Debug)]
+#[contracttype]
+pub struct FractionalVaultRegistry {
+    /// Map of vault_id -> FractionalVault
+    pub vaults: Map<u64, FractionalVault>,
+    /// Reverse map of (collection_id, token_id) -> vault_id for O(1) vault lookups by NFT
+    pub nft_to_vault: Map<(u64, u64), u64>,
+    /// Total vaults created
+    pub total_vaults: u64,
+}
+
+/// Individual Fractional Vault (ERC4626 compliant)
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct FractionalVault {
+    pub vault_id: u64,
+    pub collection_id: u64,
+    pub token_id: u64,
+    pub asset: Symbol, // The underlying asset (the NFT)
+    pub share_symbol: Symbol, // Vault share token symbol (fNFT)
+    pub total_shares: u64,
+    pub total_assets: i128, // Total value of assets in the vault
+    pub share_supply: u64,
+    pub created_at: u64,
+    pub owner: Address,
+    pub is_active: bool,
+}
+
+/// Vault Share - tracks individual share holdings
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct VaultShare {
+    pub vault_id: u64,
+    pub owner: Address,
+    pub shares: u64,
+    pub last_deposit: u64,
+}
+
+impl FractionalVaultRegistry {
+    pub fn new(env: &Env) -> Self {
+        Self {
+            vaults: Map::new(env),
+            nft_to_vault: Map::new(env),
+            total_vaults: 0,
+        }
+    }
+
+    /// Get a vault by ID
+    pub fn get_vault(&self, vault_id: u64) -> Option<FractionalVault> {
+        self.vaults.get(vault_id)
+    }
+
+    /// Get a vault by its NFT collection_id and token_id (O(1) lookup)
+    pub fn get_vault_by_nft(&self, collection_id: u64, token_id: u64) -> Option<FractionalVault> {
+        let nft_key = (collection_id, token_id);
+        let vault_id = self.nft_to_vault.get(nft_key)?;
+        self.vaults.get(vault_id)
+    }
+
+    /// Create a new vault
+    pub fn create_vault(&mut self, env: &Env, vault: FractionalVault) -> u64 {
+        let vault_id = vault.vault_id;
+        let nft_key = (vault.collection_id, vault.token_id);
+        self.vaults.set(vault_id, vault);
+        self.nft_to_vault.set(nft_key, vault_id);
+        self.total_vaults = self.total_vaults.saturating_add(1);
+        vault_id
+    }
+
+    /// Update a vault
+    pub fn update_vault(&mut self, vault: FractionalVault) {
+        self.vaults.set(vault.vault_id, vault);
+    }
+
+    /// Remove a vault from the registry (cleans up both maps)
+    pub fn remove_vault(&mut self, vault_id: u64, collection_id: u64, token_id: u64) {
+        self.vaults.remove(vault_id);
+        let nft_key = (collection_id, token_id);
+        self.nft_to_vault.remove(nft_key);
+        self.total_vaults = self.total_vaults.saturating_sub(1);
+    }
+}
+
+/// Next vault ID generator
+pub fn get_next_vault_id(env: &Env) -> u64 {
+    let current: u64 = env
+        .storage()
+        .instance()
+        .get(&Symbol::new(env, "next_vault"))
+        .unwrap_or(1);
+    env.storage()
+        .instance()
+        .set(&Symbol::new(env, "next_vault"), &(current + 1));
+    current
+}
+
 /// Default platform fee in basis points (2.5%)
 pub const DEFAULT_PLATFORM_FEE_BPS: u32 = 250;
 
