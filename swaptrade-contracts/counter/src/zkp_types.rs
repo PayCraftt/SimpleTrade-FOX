@@ -92,7 +92,7 @@ pub struct PrivateTransaction {
     /// Commitment to sender's balance after transaction
     pub sender_new_balance_commitment: Bytes,
     /// Commitment to receiver's balance after transaction
-    pub receiver_new_balance_commit: Bytes,
+    pub receiver_new_balance_commitment: Bytes,
     /// Proof that the transaction is valid
     pub validity_proof: ZKProof,
     /// Range proof for the amount
@@ -125,6 +125,19 @@ pub struct CircuitParameters {
     pub generator_h: Bytes,
     /// Hash function identifier
     pub hash_function: u32,
+}
+
+impl Default for CircuitParameters {
+    fn default() -> Self {
+        use soroban_sdk::{Bytes, Env};
+        let env = Env::default();
+        CircuitParameters {
+            domain: Bytes::from_array(&env, b"swaptrade_zkp_v1"),
+            generator_g: Bytes::from_array(&env, &[0u8; 32]),
+            generator_h: Bytes::from_array(&env, &[1u8; 32]),
+            hash_function: 0, // 0 = SHA-256
+        }
+    }
 }
 
 /// Audit Log Entry for compliance and transparency

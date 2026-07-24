@@ -93,6 +93,17 @@ mod farming;
 #[cfg(test)]
 mod farming_tests;
 
+// Zero-Knowledge Privacy Transaction Modules
+mod private_transaction;
+mod zkp_circuits;
+mod zkp_types;
+mod zkp_verification;
+#[cfg(test)]
+mod zkp_tests;
+
+// Main swap implementation (with private swap support)
+mod swap;
+
 // Re-export fee adjustment types
 #[cfg(feature = "experimental")]
 pub use dynamic_fee_adjustment::{
